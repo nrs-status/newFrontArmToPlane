@@ -1,0 +1,11 @@
+[
+  "./keymapsCore.nix"
+  "opts.nix"
+  "etc.nix"
+  "./extraConfigLua"
+  "./plugins/cmp.nix"
+  "./plugins/conform.nix"
+  "./plugins/generalCore.nix"
+  "./plugins/hop.nix"
+  "./plugins/lspCore.nix"
+]
