@@ -24,5 +24,35 @@
     #   '';
     # };
 
+    #helps avoiding repeated keypresses
+    hardtime.enable = true;
+
+    #enabled but I need to take the time to actually figure out how to use it properly
+    multicursors.enable = true;
+
+    #markdown, Typst, latex, etc. previewer
+    markview.enable = true;
+
+    #vscode-like code diff
+    codediff.enable = true;
+
+    #help remember key bindings
+    which-key.enable = true;
+
+    #renders lsp responses as lines on top of code
+    lsp-lines.enable = true;
+
+    #simple navigation popup
+    navbuddy.enable = true;
+
+    #adds a tiny visual indicator to yank operators
+    tiny-glimmer.enable = true;
+
+    #indicates motions
+    precognition.enable = true;
+
+    #diagnostics interface
+    trouble.enable = true;
+
   };
 }

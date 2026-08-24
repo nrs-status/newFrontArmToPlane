@@ -4,6 +4,10 @@ let
     url = "https://addons.mozilla.org/firefox/downloads/file/4940584/ublock_origin-1.73.0.xpi";
     hash = "sha256:0skqcj7y7wm9iycinf7jkyvkhwpbzmxjrmhzdspz82hmffkm3k5w";
   };
+  vimium = pkgs.fetchurl {
+    url = "https://addons.mozilla.org/firefox/downloads/file/4717567/vimium_ff-2.4.2.xpi";
+    hash = "sha256:15nixab67dxah8kzqhdl8yn9yh31kqaq35xib89fjyhfb1kjl7hk";
+  };
 in
 pkgs.firefox.override {
   extraPolicies = {
@@ -16,6 +20,11 @@ pkgs.firefox.override {
         installation_mode = "force_installed";
         install_url = "file://${ublock-origin}";
       };
+      "{d7742d87-e61d-4b78-b8a1-b469842139fa}" = {
+        installation_mode = "force_installed";
+        install_url = "file://${vimium}";
+      };
+
     };
   };
 }
