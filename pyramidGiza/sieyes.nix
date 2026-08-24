@@ -10,7 +10,6 @@ pkgs.mkShell {
     unrar
     bottles # games launcher
     google-chrome
-    firefox
     kitty # terminal emulator
     wofi # launcher/menu
     btop # system monitor
@@ -18,7 +17,8 @@ pkgs.mkShell {
     vlc
     pi-coding-agent
   ] ++ (with localPkgs; [
-      montezumaCirclesScroll.full #nivim `full` profile
+      montezumaCirclesScroll.full #nixvim `full` profile
+      firefox
     ]);
 
   shellHook = ''

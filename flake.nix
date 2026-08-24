@@ -19,7 +19,7 @@
       };
     in {
       packages."x86_64-linux" =
-        import ./templeArtemisEphesus { inherit localLib baseLib; };
+        import ./templeArtemisEphesus { inherit localLib baseLib pkgs; };
       devShells."x86_64-linux" = import ./pyramidGiza {
         localPkgs = inputs.self.packages."x86_64-linux";
         inherit baseLib pkgs;
