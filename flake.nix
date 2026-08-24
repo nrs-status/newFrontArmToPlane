@@ -9,7 +9,7 @@
     let
       pkgs = import inputs.nixpkgs2605 { system = "x86_64-linux"; };
       baseLib = inputs.peachRampSkateboard.baseLib;
-      localLib = import ./sandyFireWorksBus {
+      localLib = import ./sandyFireworksBus {
         nixvimFlake = inputs.nixvimFlake;
         pkgsLib = pkgs.lib;
         inherit baseLib;
