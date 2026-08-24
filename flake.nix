@@ -7,7 +7,10 @@
 
   outputs = inputs:
     let
-      pkgs = import inputs.nixpkgs2605 { system = "x86_64-linux"; };
+      pkgs = import inputs.nixpkgs2605 {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
       baseLib = inputs.peachRampSkateboard.baseLib;
       localLib = import ./sandyFireworksBus {
         nixvimFlake = inputs.nixvimFlake;
@@ -17,5 +20,9 @@
     in {
       packages."x86_64-linux" =
         import ./templeArtemisEphesus { inherit localLib baseLib; };
+      devShells."x86_64-linux" = import ./pyramidGiza {
+        localPkgs = inputs.self.packages."x86_64-linux";
+        inherit baseLib pkgs;
+      };
     };
 }

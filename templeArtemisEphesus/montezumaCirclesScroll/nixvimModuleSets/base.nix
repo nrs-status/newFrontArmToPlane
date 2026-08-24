@@ -1,7 +1,7 @@
 [
   "./keymapsCore.nix"
-  "opts.nix"
-  "etc.nix"
+  "./opts.nix"
+  "./etc.nix"
   "./extraConfigLua"
   "./plugins/cmp.nix"
   "./plugins/conform.nix"
