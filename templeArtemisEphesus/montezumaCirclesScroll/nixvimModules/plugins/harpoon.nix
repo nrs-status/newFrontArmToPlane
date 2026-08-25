@@ -10,5 +10,15 @@
         end
       '';
     }
+
+    {
+      key = "<C-e>";
+      mode = [ "n" ];
+      action.__raw = ''
+        function()
+          require("harpoon").ui:toggle_quick_menu(harpoon:list())
+        end
+      '';
+    }
   ];
 }
