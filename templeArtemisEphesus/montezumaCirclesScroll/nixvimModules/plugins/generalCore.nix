@@ -13,7 +13,8 @@
     #commands to add/remove/replace brackets, parenthesis, etc. in combination with motion commands
     vim-surround.enable = false;
 
-    auto-save.enable = true;
+    #commented while debugging harpoon
+    #auto-save.enable = true;
 
 
     # git integrations
