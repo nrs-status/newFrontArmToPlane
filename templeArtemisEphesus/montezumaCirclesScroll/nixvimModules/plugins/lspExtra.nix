@@ -46,6 +46,8 @@
 
       jsonls = { enable = true; };
 
+      yamlls = { enable = true; };
+
 
 
   };
