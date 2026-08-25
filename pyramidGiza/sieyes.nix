@@ -24,7 +24,6 @@ pkgs.mkShell {
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
       navi # personal commandline cheatsheet manager
-      lazygit # git interface
       sesh # terminal session manager
       nix-index # provides nix-locate, which can find which package provides a given command
     ]
