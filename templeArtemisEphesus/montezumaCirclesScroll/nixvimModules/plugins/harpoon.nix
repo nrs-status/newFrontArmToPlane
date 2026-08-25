@@ -6,7 +6,7 @@
       mode = [ "n" ];
       action.__raw = ''
         function()
-          require("harpoon"):list():select(1)
+          require("harpoon"):list():add()
         end
       '';
     }
