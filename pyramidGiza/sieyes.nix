@@ -24,6 +24,8 @@ pkgs.mkShell {
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
       navi # personal commandline cheatsheet manager
+      lazygit # git interface
+      sesh # terminal session manager
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
