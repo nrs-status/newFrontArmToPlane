@@ -49,7 +49,14 @@
     tiny-glimmer.enable = true;
 
     #indicates motions
-    precognition.enable = true;
+    precognition = {
+      enable = true;
+      settings = {
+        hints = {
+          F = { prio = 0; };
+        };
+      };
+    };
 
     #diagnostics interface
     trouble.enable = true;
@@ -73,6 +80,7 @@
     #regex pattern viewer
     patterns.enable = true;
 
+    fzf-lua.enable = true;
 
   };
 }
