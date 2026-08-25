@@ -1,5 +1,6 @@
 {
   plugins.harpoon.enable = true;
+  extraConfigLua = ''require("harpoon"):setup()'';
   keymaps = [
     {
       key = "<Leader>a";
