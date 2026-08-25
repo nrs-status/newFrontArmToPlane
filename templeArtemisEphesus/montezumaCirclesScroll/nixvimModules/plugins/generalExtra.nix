@@ -54,5 +54,22 @@
     #diagnostics interface
     trouble.enable = true;
 
+    #session manage
+    auto-session.enable = true;
+
+    #run code in-editor
+    sniprun.enable = true;
+
+    #llm integration
+    parrot.enable = true;
+
+    #llm integration, test after parrot
+    #codecompanion.enable = true;
+
+    #llm integration emulating cursor
+    avante.enable = true;
+
+
+
   };
 }
