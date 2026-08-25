@@ -48,19 +48,6 @@
     #adds a tiny visual indicator to yank operators
     tiny-glimmer.enable = true;
 
-    #indicates motions
-    precognition = {
-      enable = true;
-      settings = {
-        hints = {
-          F = { text = "F"; prio = 0; };
-          T = { text = "T"; prio = 0; };
-          t = { prio = 0; };
-          f = { prio = 0; };
-        };
-      };
-    };
-
     #diagnostics interface
     trouble.enable = true;
 
