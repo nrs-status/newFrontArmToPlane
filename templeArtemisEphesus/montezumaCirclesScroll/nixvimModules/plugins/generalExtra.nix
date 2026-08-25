@@ -53,8 +53,8 @@
       enable = true;
       settings = {
         hints = {
-          F = { prio = 0; };
-          T = { prio = 0; };
+          F = { text = "F"; prio = 0; };
+          T = { text = "T"; prio = 0; };
           t = { prio = 0; };
           f = { prio = 0; };
         };
