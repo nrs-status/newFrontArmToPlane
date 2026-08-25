@@ -12,10 +12,18 @@
 
     #commands to add/remove/replace brackets, parenthesis, etc. in combination with motion commands
     vim-surround.enable = false;
-
-    #commented while debugging harpoon
-    #auto-save.enable = true;
-
+    auto-save = {
+      enable = true;
+      settings = {
+        condition = ''
+          condition = function(buf)
+            if vim.bo[buf].filetype == "harpoon" then
+              return false
+            end
+          end
+        '';
+      };
+    };
 
     # git integrations
     gitsigns.enable = true;
@@ -43,13 +51,13 @@
     #add context at the top of the window, wherever you are
     treesitter-context = {
       enable = false;
-      settings = { max_lines = 5; };
+      settings = {
+        max_lines = 5;
+      };
     };
-
 
     #lsp improvements and prettification
     lspsaga.enable = true;
-
 
   };
 }
