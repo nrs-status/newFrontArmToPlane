@@ -16,7 +16,7 @@
       enable = true;
       settings = {
         condition = ''
-          condition = function(buf)
+          function(buf)
             if vim.bo[buf].filetype == "harpoon" then
               return false
             end
