@@ -1,6 +1,9 @@
 {
   plugins = {
 
+    #navigate between files
+    harpoon.enable = true;
+
     #colored brackets, parentheses, etc.
     rainbow-delimiters.enable = true;
 
