@@ -60,8 +60,9 @@
     #run code in-editor
     sniprun.enable = true;
 
+    #FAILS
     #llm integration
-    parrot.enable = true;
+    #parrot.enable = true;
 
     #llm integration, test after parrot
     #codecompanion.enable = true;
@@ -69,6 +70,8 @@
     #llm integration emulating cursor
     avante.enable = true;
 
+    #regex pattern viewer
+    patterns.enable = true;
 
 
   };
