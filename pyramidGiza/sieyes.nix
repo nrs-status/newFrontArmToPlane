@@ -26,6 +26,7 @@ pkgs.mkShell {
       navi # personal commandline cheatsheet manager
       lazygit # git interface
       sesh # terminal session manager
+      nix-index # provides nix-locate, which can find which package provides a given command
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
