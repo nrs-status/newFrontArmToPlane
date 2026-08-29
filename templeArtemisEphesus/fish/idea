@@ -1,0 +1,5 @@
+to associate a shell with a service-flake:
+shellHook starts service specified by service-flake, the awaits for service-flake to be up and running. when service-flake is up and running, send shell/terminal info. the service-flake's coordination service must check that the config is always adequate. it closes when the shell closes
+
+
+(later): the above is a good idea for associating shells to services in general, but for specifically the fish usecase: you can just write a wrapper script that sets the $XDG_HOMEDIR (or something like that) of a fish call in order for it to obtain the config

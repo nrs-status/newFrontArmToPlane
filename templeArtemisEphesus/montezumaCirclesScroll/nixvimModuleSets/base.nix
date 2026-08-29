@@ -9,4 +9,5 @@
   "./plugins/hop.nix"
   "./plugins/lspCore.nix"
   "./plugins/harpoon.nix"
+  "./luaSnip"
 ]
