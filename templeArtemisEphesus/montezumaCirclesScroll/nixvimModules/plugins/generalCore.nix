@@ -59,5 +59,12 @@
     #lsp improvements and prettification
     lspsaga.enable = true;
 
+    #collection of snippets
+    friendly-snippets.enable = true;
+
+    #lua snippet engine
+    luasnip.enable = true;
+
+    
   };
 }
