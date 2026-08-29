@@ -10,6 +10,7 @@ let
   };
 in
 pkgs.firefox.override {
+  extraAutoConfig = import ./bookmark-remap.js;
   extraPolicies = {
     ExtensionSettings = {
       # Block (and remove, if present) every extension not explicitly listed.
