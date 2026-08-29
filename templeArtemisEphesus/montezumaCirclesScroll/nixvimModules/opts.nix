@@ -1,5 +1,5 @@
 {
-  options = {
+  opts = {
     number = true; # show line numbers
     relativenumber = false; # show relative line numbers
 
