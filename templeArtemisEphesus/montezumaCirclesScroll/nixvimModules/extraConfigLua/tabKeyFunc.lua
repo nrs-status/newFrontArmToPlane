@@ -25,12 +25,6 @@ local function check_and_insert_space()
 		feedkeys_int("<Tab>")
 		return
 	end
-	local ls = require("luasnip")
-	if ls.expand_or_jumpable() then
-		feedkeys_int("<Plug>luasnip-expand-or-jump")
-		return
-	end
-
 	feedkeys_int("<Esc>la")
 end
 vim.keymap.set('i', '<Tab>', check_and_insert_space, {remap = true})
