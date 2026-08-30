@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let fishConfigProper = pkgs.writeText {
   name = "fishConfigMainFile";
-  text = import ./fishConfig.nix;
+  text = import ./fishConfig.nix {};
 }; in pkgs.stdenv.mkDerivation {
     name = "fishConfig";
     src = ./fishDefaultConfigFiles;
