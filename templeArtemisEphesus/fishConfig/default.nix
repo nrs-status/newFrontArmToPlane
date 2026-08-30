@@ -8,6 +8,7 @@ baseLib.withDebug rec {
     installPhase = ''
       runHook preInstall
 
+      mkdir $out
       cp -r $src/* $out
 
       install -Dm644 ${fishConfigProper} $out
