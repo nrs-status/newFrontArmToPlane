@@ -30,3 +30,6 @@ creationDate: Sat Aug 29 10:11:25 PM GMT 2026
 body:
 `git commit -m <msg> <potentially many filepaths, directories, or globs>`
 --
+title: unstage a file
+creationDate: 2026-08-30 02:15
+body: `git restore --staged <path to file>`
