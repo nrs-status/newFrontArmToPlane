@@ -5,14 +5,13 @@
   localPkgs,
   ...
 }:
-#localLib.mkPrependWEnvVarsScript
 let
   keyReader = localLib.mkKeyReader {
     envVarName = "AGE_SOPS_KEY";
     keyPath = "/etc/keys.yaml";
   };
 in
-{
+localLib.mkPrependWEnvVarsScript {
   scriptName = "pi";
   packageToWrap = [ pkgs.pi-coding-agent ];
   runtimeInputs = [ keyReader localPkgs.scripts.decryptSecret ];
