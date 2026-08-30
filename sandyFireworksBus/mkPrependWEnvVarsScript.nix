@@ -11,7 +11,7 @@ pkgs.writeShellApplication {
   text = ''
     ${pkgsLib.concatStringsSep "\n" (
       pkgsLib.mapAttrsToList (
-        name: value: "export ${name}=${pkgsLib.escapeShellArg value}"
+        name: value: "export ${name}=${value}"
       ) envVars
     )}
     exec ${pkgsLib.getExe packageToWrap} "$@"
