@@ -22,7 +22,7 @@ Once you are done:
 
       ]],
       { i(1) },
-      { delimiters = "<>" },
+      { delimiters = "<>" }
     )
   ),
 }
