@@ -10,7 +10,7 @@ let
   };
 in
 pkgs.firefox.override {
-  extraPrefsFiles = [ "./bookmark-remap.js" ]; #remap Ctrl+D to Ctrl+B
+  extraPrefsFiles = [ "${./bookmark-remap.js}" ]; #remap Ctrl+D to Ctrl+B
   extraPolicies = {
     ExtensionSettings = {
       # Block (and remove, if present) every extension not explicitly listed.
