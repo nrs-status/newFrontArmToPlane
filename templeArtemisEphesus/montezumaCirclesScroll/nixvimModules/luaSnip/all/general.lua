@@ -11,8 +11,7 @@ return {
       trig = "agentBasic",
       name = "agent basic prompt",
     }, fmt(
-      [[ 
-      You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
+      [[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
 
       <>
 
