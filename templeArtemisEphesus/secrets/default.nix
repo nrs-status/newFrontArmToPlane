@@ -2,7 +2,7 @@
 pkgs.symlinkJoin {
   name = "secrets";
   paths = [
-    (pkgs.writeTextFile ".sops.yaml" (builtins.readFile ./.sops.yaml))
-    (pkgs.writeTextFile "secrets.yaml" (builtins.readFile ./secrets.yaml))
+    (pkgs.writeText ".sops.yaml" (builtins.readFile ./.sops.yaml))
+    (pkgs.writeText "secrets.yaml" (builtins.readFile ./secrets.yaml))
   ];
 }
