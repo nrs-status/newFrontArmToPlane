@@ -17,9 +17,12 @@
         pkgsLib = pkgs.lib;
         inherit baseLib;
       };
+      localPkgs = pkgs.lib.fix (self: import ./templeArtemisEphesus {
+        inherit localLib baseLib pkgs;
+        localPkgs = self;
+      });
     in {
-      packages."x86_64-linux" =
-        import ./templeArtemisEphesus { inherit localLib baseLib pkgs; };
+      packages."x86_64-linux" = localPkgs;
       devShells."x86_64-linux" = import ./pyramidGiza {
         localPkgs = inputs.self.packages."x86_64-linux";
         inherit baseLib pkgs;
