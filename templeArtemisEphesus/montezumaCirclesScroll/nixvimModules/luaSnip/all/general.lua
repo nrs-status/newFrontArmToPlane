@@ -29,6 +29,7 @@ totalCost: total API cost
 inputCost: API cost for input tokens
 outputCost: API cost for output tokens
 - For some of the information required by SIGNATURE.json, you will need to rely on the `pi` agent harness's report about the current session.
+- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task.
       ]],
       { i(1) },
       { delimiters = "<>" }
