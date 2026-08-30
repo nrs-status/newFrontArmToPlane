@@ -27,6 +27,7 @@ pkgs.mkShell {
       sesh # terminal session manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
+      tmux #terminal multiplexer
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
