@@ -33,3 +33,7 @@ body:
 title: unstage a file
 creationDate: 2026-08-30 02:15
 body: `git restore --staged <path to file>`
+--
+title: delete a branch
+creationDate: 2026-08-30 21:20
+body: `git branch -D <branch name>`
