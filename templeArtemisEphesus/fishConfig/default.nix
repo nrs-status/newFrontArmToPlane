@@ -5,11 +5,11 @@ pkgs.stdenv.mkDerivation {
     installPhase = ''
       runHook preInstall
 
-      mkdir $out
-      mkdir $out/functions
-      mkdir $out/completions
+      mkdir -p $out/fish
+      mkdir $out/fish/functions
+      mkdir $out/fish/completions
 
-      cp -r $src/* $out
+      cp -r $src/* $out/fish
 
       runHook postInstall
     '';
