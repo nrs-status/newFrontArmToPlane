@@ -20,8 +20,17 @@
           })
         '';
       };
-      sources =
-        [ { name = "cmdline"; } { name = "kitty"; } { name = "path"; } ];
+      sources = [
+        { name = "nvim_lsp"; } # LSP completion (nix, lean4, js/ts, clojure, scheme, python, haskell, ocaml, lua, C, ...)
+        { name = "luasnip"; } # snippets from LuaSnip / friendly-snippets
+        { name = "buffer"; } # words from open buffers
+        { name = "path"; }
+        { name = "cmdline"; }
+        { name = "kitty"; }
+      ];
+      # show a completion menu even when it's the only candidate,
+      # so the <Tab> confirm function in tabKeyFunc.lua can trigger
+      completion.completeopt = "menu,menuone,noselect";
     };
   };
 }
