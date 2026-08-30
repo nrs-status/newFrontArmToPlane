@@ -1,10 +1,7 @@
-{ baseLib, pkgs, ... }:
-baseLib.withDebug rec {
-  fishConfigProper = pkgs.writeText "fishConfigMainFile" (import ./fishConfig.nix);
-  __activateDebug = false;
-  __output = pkgs.stdenv.mkDerivation {
+{ pkgs, ... }:
+pkgs.stdenv.mkDerivation {
     name = "fishConfig";
-    src = ./fishDefaultConfigFiles;
+    src = ./resources;
     installPhase = ''
       runHook preInstall
 
@@ -14,9 +11,6 @@ baseLib.withDebug rec {
 
       cp -r $src/* $out
 
-      install -Dm644 ${fishConfigProper} $out/fish.config
-
       runHook postInstall
     '';
-  };
 }
