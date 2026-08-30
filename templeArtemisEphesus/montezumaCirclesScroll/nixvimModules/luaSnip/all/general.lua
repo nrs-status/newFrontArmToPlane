@@ -18,8 +18,17 @@ return {
 
 Once you are done: 
 - Provide a step-by-step summary of all steps you have undertaken.
-- Create a file called SIGNATURE.md containing the current date, the name of the model that ran these instructions, the total API token usage and the total total API costs. In order to obtain the API costs, rely on the pi coding agent's report about the current session.
-
+- Create a file called SIGNATURE.json. Fill out the keys of this json file using the following description:
+startDatetime: the datetime at the very beginning of this agent session. 
+endDatetime: the datetime at the very end of this agent session. 
+model: The model that ran these instructions
+totalTokens: total API token usage
+inputTokens: number of API input tokens used in this session
+outputTokens: number of API output tokens used in this session
+totalCost: total API cost
+inputCost: API cost for input tokens
+outputCost: API cost for output tokens
+- For some of the information required by SIGNATURE.json, you will need to rely on the `pi` agent harness's report about the current session.
       ]],
       { i(1) },
       { delimiters = "<>" }
