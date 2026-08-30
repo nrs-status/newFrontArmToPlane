@@ -18,7 +18,7 @@
         inherit baseLib pkgsLib pkgs;
       };
       localPkgs = pkgs.lib.fix (self: import ./templeArtemisEphesus {
-        inherit localLib baseLib pkgs;
+        inherit localLib baseLib pkgs pkgsLib;
         localPkgs = self;
       });
     in {
