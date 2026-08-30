@@ -10,7 +10,7 @@ let fishConfigProper = pkgs.writeText {
 
       cp -r $src/* $out
 
-      install -Dm644 ${pkgs.writeText "config.fish" fishConfigProper} $out
+      install -Dm644 ${fishConfigProper} $out
 
       runHook postInstall
       '';
