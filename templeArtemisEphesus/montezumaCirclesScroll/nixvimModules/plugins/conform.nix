@@ -28,4 +28,7 @@
   __depPackages.nixfmt.default = "nixfmt";
   dependencies.nixfmt.enable = true;
 
+  __depPackages.stylua.default = "stylua";
+  dependencies.stylua.enable = true;
+
 }
