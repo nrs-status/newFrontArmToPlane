@@ -1,8 +1,19 @@
 { pkgs, ... }:
-#currently, everything except `./fishConfig.nix` and its imports are part of the default fish config
-pkgs.writeTextFile {
-  name = "fish config";
+let fishConfigProper = pkgs.writeTextFile {
+  name = "fishConfigMainFile";
   text = import ./fishConfig.nix;
-}
+}; in pkgs.stdenv.mkDerivation {
+    name = "fishConfig";
+    src = ./fishDefaultConfigFiles;
+    installPhase = ''
+      runHook preInstall
+
+      cp -r $src/* $out
+
+      install -Dm644 ${pkgs.writeText "config.fish" fishConfigProper} $out
+
+      runHook postInstall
+      '';
+  }
 
 
