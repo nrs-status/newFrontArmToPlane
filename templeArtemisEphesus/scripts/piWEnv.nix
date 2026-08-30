@@ -7,7 +7,7 @@
 }:
 let
   keyReader = localLib.mkKeyReader {
-    envVarName = "AGE_SOPS_KEY";
+    envVarName = "SOPS_AGE_KEY";
     keyPath = "/etc/keys.yaml";
   };
 in
