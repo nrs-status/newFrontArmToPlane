@@ -1,6 +1,6 @@
 { baseLib, pkgs, ... }:
 baseLib.withDebug rec {
-  fishConfigProper = pkgs.writeText "fishConfigMainFile" (import ./fishConfig.nix);
+  fishConfigProper = pkgs.writeText "fishConfigMainFile.fish" (import ./fishConfig.nix);
   __activateDebug = false;
   __output = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
