@@ -1,0 +1,5 @@
+if status is-interactive
+  set DEBUGVAR 999
+  source ./workTrunkConfig.fish
+  source ./zoxideConfig.fish
+end
