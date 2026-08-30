@@ -1,9 +1,23 @@
-{ pkgs, pkgsLib, localLib, localPkgs, ... }:
-localLib.mkPrependWEnvVarsScript {
+{
+  pkgs,
+  pkgsLib,
+  localLib,
+  localPkgs,
+  ...
+}:
+#localLib.mkPrependWEnvVarsScript
+let
+  keyReader = localLib.mkKeyReader {
+    envVarName = "AGE_SOPS_KEY";
+    keyPath = "/etc/keys.yaml";
+  };
+in
+{
   scriptName = "pi";
   packageToWrap = [ pkgs.pi-coding-agent ];
+  runtimeInputs = [ keyReader localPkgs.scripts.decryptSecret ];
   envVars = {
-    AGE_SOPS_KEY = "$(${pkgsLib.getExe (localLib.mkKeyReader { envVarName = "AGE_SOPS_KEY"; keyPath = "/etc/keys.yaml";})})";  
+    AGE_SOPS_KEY = "$(${pkgsLib.getExe} ${keyReader})";
     OPENROUTER_API_KEY = "$(${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets} OPENROUTER_API_KEY)";
   };
 
