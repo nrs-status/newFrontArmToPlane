@@ -13,7 +13,7 @@ let
 in
 localLib.mkPrependWEnvVarsScript {
   scriptName = "pi";
-  packageToWrap = [ pkgs.pi-coding-agent ];
+  packageToWrap = pkgs.pi-coding-agent;
   runtimeInputs = [ keyReader localPkgs.scripts.decryptSecret ];
   envVars = {
     AGE_SOPS_KEY = "$(${pkgsLib.getExe keyReader})";
