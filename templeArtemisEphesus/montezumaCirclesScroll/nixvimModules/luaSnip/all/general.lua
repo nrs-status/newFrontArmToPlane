@@ -1,10 +1,21 @@
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
 return {
-  require("luasnip").s(
-    { trig = "mytesting", name = "testing", desc = "Snippet with fixed top, user input middle, fixed bottom" },
-    require("luasnip").sn(nil, {
-      require("luasnip").t({ "Top of the lua snippet", "" }),
-      require("luasnip").i(1),
-      require("luasnip").t({ "", "The bottom of the snippet" }),
-    })
+  -- "top": top line is static text, middle waits for user input (insert node),
+  -- bottom line is static text.
+  s(
+    {
+      trig = "top",
+      name = "top-bottom",
+      desc = "Top line, user input, bottom line",
+    },
+    {
+      t({ "This is the top", "" }),
+      i(1),
+      t({ "", "This is the bottom" }),
+    }
   ),
 }
