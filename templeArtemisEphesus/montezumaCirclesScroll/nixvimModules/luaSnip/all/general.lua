@@ -13,7 +13,7 @@ return {
     }, fmt(
       [[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
 
-      <>
+<>
 
 Once you are done: 
 - Provide a step-by-step summary of all steps you have undertaken.
