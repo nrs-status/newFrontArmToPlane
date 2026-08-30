@@ -11,8 +11,8 @@ pkgs.stdenv.mkDerivation {
 
       cp -r $src/* $out/fish
 
-      install -Dm644 ${pkgs.writeText "workTrunkConfig.fish" (import ./workTrunkConfig.fish)} $out/fish/workTrunkConfig.fish
-      install -Dm644 ${pkgs.writeText "zoxideConfig.fish" (import ./zoxideConfig.fish)} $out/fish/zoxideConfig.fish
+      install -Dm644 ${pkgs.writeText "workTrunkConfig.fish" (builtins.readFile ./workTrunkConfig.fish)} $out/fish/workTrunkConfig.fish
+      install -Dm644 ${pkgs.writeText "zoxideConfig.fish" (builtins.readFile ./zoxideConfig.fish)} $out/fish/zoxideConfig.fish
 
       cat > $out/fish/config.fish <<EOF
       if status is-interactive
