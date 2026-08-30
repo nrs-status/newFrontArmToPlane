@@ -11,11 +11,11 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+      pkgsLib = pkgs.lib;
       baseLib = inputs.peachRampSkateboard.baseLib;
       localLib = import ./sandyFireworksBus {
         nixvimFlake = inputs.nixvimFlake;
-        pkgsLib = pkgs.lib;
-        inherit baseLib;
+        inherit baseLib pkgsLib;
       };
       localPkgs = pkgs.lib.fix (self: import ./templeArtemisEphesus {
         inherit localLib baseLib pkgs;
@@ -25,7 +25,7 @@
       packages."x86_64-linux" = localPkgs;
       devShells."x86_64-linux" = import ./pyramidGiza {
         localPkgs = inputs.self.packages."x86_64-linux";
-        inherit baseLib pkgs;
+        inherit baseLib pkgs pkgsLib;
       };
     };
 }

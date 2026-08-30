@@ -1,4 +1,4 @@
-{ pkgs, localPkgs, ... }:
+{ pkgs, localPkgs, pkgsLib, ... }:
 
 pkgs.mkShell {
   name = "sieyesShell";
@@ -36,7 +36,7 @@ pkgs.mkShell {
     ]);
 
   shellHook = ''
-    exec ${localPkgs.scripts.fishWConfig}
+    exec ${pkgsLib.getExe localPkgs.scripts.fishWConfig}
     echo "sieyes shell loaded"
   '';
 }
