@@ -11,6 +11,13 @@ pkgs.stdenv.mkDerivation {
 
       cp -r $src/* $out/fish
 
+      cat > $out/fish/config.fish <<EOF
+      if status is-interactive
+        source $out/fish/workTrunkConfig.fish
+        source $out/fish/zoxideConfig.fish
+      end
+      EOF
+
       runHook postInstall
     '';
 }
