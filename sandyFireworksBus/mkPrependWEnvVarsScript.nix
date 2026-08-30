@@ -1,6 +1,7 @@
 { pkgs, pkgsLib, ... }:
 { scriptName, packageToWrap, envVars, runtimeInputs ? [] }:
-pkgs.writeShellApplication {
+#pkgs.writeShellApplication 
+{
   name = scriptName;
   inherit runtimeInputs;
   text = ''
