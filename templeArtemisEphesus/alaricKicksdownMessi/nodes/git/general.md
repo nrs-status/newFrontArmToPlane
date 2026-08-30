@@ -19,3 +19,14 @@ Switch to a particular branch
 `git switch feature/my-feature`
 Create and switch to a particular branch
 `git switch -c feature/my-feature`
+--
+title: Create a new worktree and a new branch for it at the same time
+creationDate: Sat Aug 29 08:46:18 PM GMT 2026
+body:
+`git worktree add -b <new branch name> <new directory>`
+--
+title: Specify which files to commit along with a commit message
+creationDate: Sat Aug 29 10:11:25 PM GMT 2026
+body:
+`git commit -m <msg> <potentially many filepaths, directories, or globs>`
+--

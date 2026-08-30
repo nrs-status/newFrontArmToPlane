@@ -1,12 +1,11 @@
-local ls = require("luasnip")
-
 return {
-  ls.s(
+  require("luasnip").s( { trig = "foo" }, { require("luasnip").t("hello world!")} ),
+  require("luasnip").s(
     { trig = "example", desc = "Snippet with fixed top, user input middle, fixed bottom" },
-    ls.snippet_node(nil, {
-      ls.t({ "Top of the lua snippet", "" }),
-      ls.i(1, "your input here"),
-      ls.t({ "", "The bottom of the snippet" }),
+    require("luasnip").sn(nil, {
+      require("luasnip").t({ "Top of the lua snippet", "" }),
+      require("luasnip").i(1, "your input here"),
+      require("luasnip").t({ "", "The bottom of the snippet" }),
     })
   ),
 }
