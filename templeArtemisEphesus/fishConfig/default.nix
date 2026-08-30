@@ -14,7 +14,7 @@ baseLib.withDebug rec {
 
       cp -r $src/* $out
 
-      install -Dm644 ${fishConfigProper} $out
+      install -Dm644 ${fishConfigProper} $out/fish.config
 
       runHook postInstall
     '';
