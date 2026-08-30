@@ -17,7 +17,7 @@ localLib.mkPrependWEnvVarsScript {
   runtimeInputs = [ keyReader localPkgs.secrets localPkgs.scripts.decryptSecret ];
   envVars = {
     AGE_SOPS_KEY = "$(${pkgsLib.getExe keyReader})";
-    OPENROUTER_API_KEY = "$(${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets} OPENROUTER_API_KEY)";
+    OPENROUTER_API_KEY = "$(${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)";
   };
 
 }
