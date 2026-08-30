@@ -1,8 +1,8 @@
-{ pkgs, ... }:
-let fishConfigProper = pkgs.writeText {
-  name = "fishConfigMainFile";
-  text = import ./fishConfig.nix {};
-}; in pkgs.stdenv.mkDerivation {
+{ baseLib, pkgs, ... }:
+baseLib.withDebug rec {
+  fishConfigProper = pkgs.writeText "fishConfigMainFile" (import ./fishConfig.nix { });
+  __activateDebug = false;
+  __output = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
     src = ./fishDefaultConfigFiles;
     installPhase = ''
@@ -13,7 +13,6 @@ let fishConfigProper = pkgs.writeText {
       install -Dm644 ${fishConfigProper} $out
 
       runHook postInstall
-      '';
-  }
-
-
+    '';
+  };
+}
