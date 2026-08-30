@@ -1,8 +1,5 @@
 { pkgs, ... }:
-let fishConfigProper = pkgs.writeTextFile {
-  name = "fishConfigMainFile";
-  text = import ./fishConfig.nix;
-}; in pkgs.stdenv.mkDerivation {
+pkgs.stdenv.mkDerivation {
     name = "fishConfig";
     src = ./fishDefaultConfigFiles;
     installPhase = ''
@@ -10,7 +7,7 @@ let fishConfigProper = pkgs.writeTextFile {
 
       cp -r $src/* $out
 
-      install -Dm644 ${pkgs.writeText "config.fish" fishConfigProper} $out
+      install -Dm644 ${pkgs.writeText "config.fish" (import ./fishConfig.nix)} $out
 
       runHook postInstall
       '';
