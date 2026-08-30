@@ -17,7 +17,7 @@ return {
 <>
 
 Once you are done: 
-- Provide a step-by-step summary of all steps you have undertaken.
+- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
 - Create a file called SIGNATURE.json. Fill out the keys of this json file using the following description:
 startDatetime: the datetime at the very beginning of this agent session. 
 endDatetime: the datetime at the very end of this agent session. 
