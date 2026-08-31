@@ -44,6 +44,6 @@ fi
 
 #main
 
-sops -d "$file" | yq --exit-status ".${key}" -
+sops -d "$file" | yq --exit-status ".${key}" - | tr -d '"'
 
 sudo -k
