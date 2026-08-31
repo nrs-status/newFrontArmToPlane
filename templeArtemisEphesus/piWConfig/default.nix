@@ -22,7 +22,7 @@ in
   pkgs.stdenv.mkDerivation {
     name = "pi";
     phases = [ "installPhase" ];
-    nativeBuildInputs = [ jsonFile pkgs.makeWrapper ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
       runHook preInstall
 
