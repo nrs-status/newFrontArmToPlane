@@ -20,7 +20,7 @@ let
       dash == "-" || dash == "--"
     ) "mkOptionsFeederScript: the argument `dash` must be either \"-\" or \"--\"";
     if val == null then flag else flag + " " + val;
-  renderedOpts = pkgsLib.concatMapStringSep " " renderOpt opts;
+  renderedOpts = pkgsLib.concatMapStringsSep " " renderOpt opts;
   renderedEnvVarDecls = pkgsLib.concatStringsSep "\n" (
     pkgsLib.concatMap (entry: [
       "${entry.key}=${entry.value}"
