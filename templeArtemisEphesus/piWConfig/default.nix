@@ -47,7 +47,7 @@ localLib.mkOptsAndEnvWrapperScript {
     {
       dash = "--";
       optName = "api-key";
-      val = "$(SOPS_AGE_KEY=$(${pkgsLib.getExe keyReader}) ${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)";
+      val = "\"$(SOPS_AGE_KEY=$(${pkgsLib.getExe keyReader}) ${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)\"";
     }
     {
       dash = "--";
