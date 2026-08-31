@@ -21,7 +21,7 @@ let
     ) "mkOptionsFeederScript: the argument `dash` must be either \"-\" or \"--\"";
     if val == null then flag else flag + " " + val;
   renderedOpts = pkgsLib.concatMapStringSep " " renderOpt opts;
-  renderedEnvVarDecls = pkgsLib.concatStringSep "\n" (
+  renderedEnvVarDecls = pkgsLib.concatStringsSep "\n" (
     pkgsLib.concatMap (entry: [
       "${entry.key}=${entry.value}"
       "export ${entry.key}"
