@@ -20,6 +20,7 @@ let
 in
   pkgs.stdenv.mkDerivation {
     name = "pi-wrapper";
+    phases = [ "installPhase" ];
     installPhase = ''
       runHook preInstall
 
