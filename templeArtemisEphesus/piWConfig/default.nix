@@ -12,7 +12,7 @@ let
     keyPath = "/etc/keys.yaml";
   };
 in
-localLib.mkOptsAndEnvWrapperScript {
+localLib.mkWrapperScript {
   name = "pi";
   pkgToWrap = pkgs.pi-coding-agent;
   runtimeInputs = [
