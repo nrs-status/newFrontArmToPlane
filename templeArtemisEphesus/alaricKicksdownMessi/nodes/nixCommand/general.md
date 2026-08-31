@@ -8,3 +8,6 @@ body: `nix shell` starts a shell with the specified package on a flake. examples
 nix shell nixpkgs#grex 
 ```
 --
+title: build a flake package, no result symlink, print out dir
+creationDate: 2026-08-31 01:47
+body: `nix build --no-link --print-out-paths <flake>#<package>`
