@@ -21,6 +21,7 @@ in
   pkgs.stdenv.mkDerivation {
     name = "pi-wrapper";
     phases = [ "installPhase" ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
       runHook preInstall
 
