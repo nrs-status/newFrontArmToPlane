@@ -4,6 +4,7 @@
   pkgToWrap,
   opts ? [],
   envVars ? [],
+  preExecCommands ? [],
   runtimeInputs,
 }:
 let
@@ -27,10 +28,12 @@ let
       "export ${entry.key}"
     ]) envVars
   );
+  renderedPreExecCommands = pkgsLib.concatStringsSep "\n" preExecCommands;
 in
 pkgs.writeShellApplication {
   inherit name runtimeInputs;
   text = ''
     ${renderedEnvVarDecls}
-        exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"'';
+    ${renderedPreExecCommands}
+    exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"'';
 }
