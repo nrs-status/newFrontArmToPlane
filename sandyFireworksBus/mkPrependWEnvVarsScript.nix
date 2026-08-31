@@ -1,5 +1,6 @@
 { pkgs, pkgsLib, ... }:
 {
+  name,
   pkgToWrap,
   envVars, # is a list in order to have a predictable ordering of the variable declarations in the outputted script
   runtimeInputs ? [ ],
@@ -13,8 +14,7 @@ let
   );
 in
 pkgs.writeShellApplication {
-  name = pkgToWrap.pname or (builtins.parseDrvName pkgToWrap.name).name;
-  inherit runtimeInputs;
+  inherit name runtimeInputs;
   text = ''
     ${renderedEnvVarDecls}
     exec ${pkgsLib.getExe pkgToWrap} "$@"

@@ -1,5 +1,6 @@
 { pkgs, pkgsLib, ... }:
 {
+  name,
   pkgToWrap,
   opts,
   runtimeInputs,
@@ -21,7 +22,6 @@ let
   renderedOpts = pkgsLib.concatMapStringSep " " renderOpt opts;
 in
 pkgs.writeShellApplication {
-  name = pkgToWrap.pname or (builtins.parseDrvName pkgToWrap.name).name;
-  inherit runtimeInputs;
+  inherit name runtimeInputs;
   text = ''exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"'';
 }
