@@ -1,13 +1,13 @@
 {
   inputs = {
     nixvimFlake.url = "github:nix-community/nixvim";
-    nixpkgs2605.url = "github:NixOs/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
     peachRampSkateboard.url = "github:nrs-status/newPeachRampSkateboard";
   };
 
   outputs = inputs:
     let
-      pkgs = import inputs.nixpkgs2605 {
+      pkgs = import inputs.nixpkgs {
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
