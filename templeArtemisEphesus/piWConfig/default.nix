@@ -27,8 +27,8 @@ in
       runHook preInstall
 
       makeWrapper ${pkgsLib.getExe pkgs.pi-coding-agent} $out/bin/pi \
-        --run 'mkdir -p ~/.config/pi/agent' \
-        --run 'cat ${jsonFile} > ~/.config/pi/agent/auth.json'
+        --run 'mkdir -p ~/.pi/agent' \
+        --run 'cat ${jsonFile} > ~/.pi/agent/auth.json'
 
       runHook postInstall
       '';
