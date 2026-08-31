@@ -2,8 +2,8 @@
 {
   name,
   pkgToWrap,
-  opts,
-  envVars,
+  opts ? [],
+  envVars ? [],
   runtimeInputs,
 }:
 let

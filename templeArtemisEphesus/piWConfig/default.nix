@@ -17,58 +17,43 @@ let
       key = bashInterpolationToGetAPIKey;
     };
   };
-  configDirDrv = pkgs.stdenv.mkDerivation {
-    name = "piConfigDir";
-    phases = [ "installPhase" ]; # otherwise fails on unpackPhase
-    src = ./staticConfigFiles;
+in
+  pkgs.stdenv.mkDerivation {
+    name = "pi-wrapper";
     installPhase = ''
       runHook preInstall
 
-      mkdir -p $out 
-      cp $src/* $out
-
-      install -Dm644 ${pkgs.writeText "pi-auth-json-file" jsonAuthFileContent} $out/auth.json
+      makeWrapper ${pkgsLib.getExe pkgs.pi-coding-agent} $out/bin/pi \
+        --run 'cat ${jsonAuthFileContent} > ~/config/pi/agent/auth.json'
 
       runHook postInstall
-    '';
-  };
-in
-localLib.mkOptsAndEnvWrapperScript {
-  name = "pi";
-  pkgToWrap = pkgs.pi-coding-agent;
-  runtimeInputs = [
-    keyReader
-    configDirDrv
-    localPkgs.scripts.decryptSecret
-    localPkgs.secrets
-  ];
-  envVars = [
-    {
-      key = "PI_CODING_AGENT_DIR";
-      value = configDirDrv;
-    }
-    {
-      key = "PI_CODING_AGENT_SESSION_DIR";
-      value = "~/.declaredDataDir/pi/sessions";
-    }
-  ];
-  opts = [
-    # {
-    #   dash = "--";
-    #   optName = "provider";
-    #   val = "openrouter";
-    # }
-    # {
-    #   dash = "--";
-    #   optName = "api-key";
-    #   val = bashInterpolationToGetAPIKey;
-    # }
-    # {
-    #   dash = "--";
-    #   optName = "model";
-    #   val = "z-ai/glm-5.3-flash";
-    # }
-      { dash = "--"; optName = "offline"; val = null; }
-  ];
-
-}
+      '';
+  }
+# localLib.mkOptsAndEnvWrapperScript {
+#   name = "pi";
+#   pkgToWrap = pkgs.pi-coding-agent;
+#   runtimeInputs = [
+#     keyReader
+#     localPkgs.scripts.decryptSecret
+#     localPkgs.secrets
+#   ];
+#   envVars = [];
+#   opts = [
+#     # {
+#     #   dash = "--";
+#     #   optName = "provider";
+#     #   val = "openrouter";
+#     # }
+#     # {
+#     #   dash = "--";
+#     #   optName = "api-key";
+#     #   val = bashInterpolationToGetAPIKey;
+#     # }
+#     # {
+#     #   dash = "--";
+#     #   optName = "model";
+#     #   val = "z-ai/glm-5.3-flash";
+#     # }
+#   ];
+#
+# }
