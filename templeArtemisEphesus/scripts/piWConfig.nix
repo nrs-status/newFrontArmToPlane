@@ -36,6 +36,7 @@ let
   };
 in
 localLib.mkPrependWEnvVarsScript {
+  name = "pi";
   pkgToWrap = pkgs.pi-coding-agent;
   envVars = [
     {
