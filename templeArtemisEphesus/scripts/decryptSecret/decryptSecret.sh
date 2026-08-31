@@ -45,3 +45,5 @@ fi
 #main
 
 sops -d "$file" | yq --exit-status ".${key}" -
+
+sudo -k
