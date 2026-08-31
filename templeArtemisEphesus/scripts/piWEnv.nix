@@ -14,10 +14,20 @@ in
 localLib.mkPrependWEnvVarsScript {
   scriptName = "pi";
   packageToWrap = pkgs.pi-coding-agent;
-  runtimeInputs = [ keyReader localPkgs.secrets localPkgs.scripts.decryptSecret ];
-  envVars = {
-    SOPS_AGE_KEY = "$(${pkgsLib.getExe keyReader})";
-    OPENROUTER_API_KEY = "$(${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)";
-  };
+  runtimeInputs = [
+    keyReader
+    localPkgs.secrets
+    localPkgs.scripts.decryptSecret
+  ];
+  envVars = [
+    {
+      key = "SOPS_AGE_KEY";
+      value = "$(${pkgsLib.getExe keyReader})";
+    }
+    {
+      key = "OPENROUTER_API_KEY";
+      value = "$(${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)";
+    }
+  ];
 
 }

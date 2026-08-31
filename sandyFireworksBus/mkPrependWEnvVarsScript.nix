@@ -10,9 +10,11 @@ pkgs.writeShellApplication {
   inherit runtimeInputs;
   text = ''
     ${pkgsLib.concatStringsSep "\n" (
-      pkgsLib.mapAttrsToList (
-        name: value: ''${name}=${value}
-        export ${name}''
+      pkgsLib.concatMap (
+        entry: [
+          ''${entry.key}=${entry.value}''
+          "export ${entry.key}"
+        ]
       ) envVars
     )}
     exec ${pkgsLib.getExe packageToWrap} "$@"
