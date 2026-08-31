@@ -1,4 +1,10 @@
-{ pkgs, localLib, pkgsLib, localPkgs, ... }:
+{
+  pkgs,
+  localLib,
+  pkgsLib,
+  localPkgs,
+  ...
+}:
 let
   keyReader = localLib.mkKeyReader {
     envVarName = "SOPS_AGE_KEY";
@@ -12,8 +18,12 @@ let
   };
   configDirDrv = pkgs.stdenv.mkDerivation {
     name = "piConfigDir";
-    nativeBuildInputs = [  keyReader localPkgs.scripts.decryptSecret localPkgs.secrets ];
-    phases = [ "installPhase" ]; #otherwise fails on unpackPhase
+    nativeBuildInputs = [
+      keyReader
+      localPkgs.scripts.decryptSecret
+      localPkgs.secrets
+    ];
+    phases = [ "installPhase" ]; # otherwise fails on unpackPhase
     installPhase = ''
       runHook preInstall
 
@@ -31,6 +41,10 @@ localLib.mkPrependWEnvVarsScript {
     {
       key = "PI_CODING_AGENT_DIR";
       value = configDirDrv;
+    }
+    {
+      key = "PI_CODING_AGENT_SESSION_DIR";
+      value = "~/.declaredDataDir/pi/sessions";
     }
   ];
 
