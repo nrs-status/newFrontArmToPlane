@@ -6,7 +6,7 @@
   ...
 }:
 let
-  bashInterpolationToGetAPIKey = "\"! \"$(SOPS_AGE_KEY=$(${pkgsLib.getExe keyReader}) ${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)\"\"";
+  bashInterpolationToGetAPIKey = "\"! $(SOPS_AGE_KEY=$(${pkgsLib.getExe keyReader}) ${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)\"";
   keyReader = localLib.mkKeyReader {
     envVarName = "SOPS_AGE_KEY";
     keyPath = "/etc/keys.yaml";
