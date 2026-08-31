@@ -8,3 +8,7 @@ title: q:
 creationDate: Sat Aug 29 11:10:40 PM GMT 2026
 fuzzyAux: display command history, output
 body: Opens a buffer with the command history
+--
+title: <C-w><movement key>
+creationDate: 2026-08-31 05:24
+body: change currently focused buffer

@@ -37,3 +37,7 @@ body: `git restore --staged <path to file>`
 title: delete a branch
 creationDate: 2026-08-30 21:20
 body: `git branch -D <branch name>`
+--
+title: delete untracked files and directories
+creationDate: 2026-08-31 05:15
+body: `git clean -fd`
