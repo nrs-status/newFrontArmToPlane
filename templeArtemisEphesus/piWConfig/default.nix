@@ -28,7 +28,6 @@ let
       cp $src/* $out
 
       install -Dm644 ${pkgs.writeText "pi-auth-json-file" jsonAuthFileContent} $out/auth.json
-      mkdir -p $out/auth.json.lock
 
       runHook postInstall
     '';
