@@ -30,5 +30,6 @@ pkgs.writeShellApplication {
     fi
 
     echo ''${KEY}
+    sudo -k
   '';
 }

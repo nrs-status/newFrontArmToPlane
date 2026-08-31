@@ -18,7 +18,6 @@ pkgs.mkShell {
       btop # system monitor
       qimgv # image viewer
       vlc
-      pi-coding-agent
       fzf # fuzzy searcher
       grex # generate regex from test cases
       rgx # explain what a regex pattern does
@@ -33,6 +32,7 @@ pkgs.mkShell {
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
       firefox
+      piWConfig
     ]);
 
   shellHook = ''
