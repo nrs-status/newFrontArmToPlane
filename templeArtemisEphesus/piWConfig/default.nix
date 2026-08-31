@@ -20,7 +20,9 @@ localLib.mkWrapperScript {
     localPkgs.scripts.decryptSecret
     localPkgs.secrets
   ];
-  envVars = [];
+  preExecCommands = [
+    "rm -f ~/.pi/agent/auth.json"
+  ];
   opts = [
     {
       dash = "--";
