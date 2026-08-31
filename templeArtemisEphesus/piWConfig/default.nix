@@ -19,7 +19,7 @@ let
   };
 in
   pkgs.stdenv.mkDerivation {
-    name = "pi-wrapper";
+    name = "pi";
     phases = [ "installPhase" ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
