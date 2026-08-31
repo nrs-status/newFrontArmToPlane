@@ -17,17 +17,18 @@ let
       key = bashInterpolationToGetAPIKey;
     };
   };
+  jsonFile = pkgs.writeText "json-auth-file" jsonAuthFileContent;
 in
   pkgs.stdenv.mkDerivation {
     name = "pi";
     phases = [ "installPhase" ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
+    nativeBuildInputs = [ jsonFile pkgs.makeWrapper ];
     installPhase = ''
       runHook preInstall
 
       makeWrapper ${pkgsLib.getExe pkgs.pi-coding-agent} $out/bin/pi \
         --run 'mkdir -p ~/.config/pi/agent' \
-        --run "echo \"${jsonAuthFileContent}\" > ~/.config/pi/agent/auth.json"
+        --run 'cat ${jsonFile} > ~/.config/pi/agent/auth.json'
 
       runHook postInstall
       '';
