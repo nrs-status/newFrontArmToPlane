@@ -68,6 +68,7 @@ localLib.mkOptsAndEnvWrapperScript {
     #   optName = "model";
     #   val = "z-ai/glm-5.3-flash";
     # }
+      { dash = "--"; optName = "offline"; val = null; }
   ];
 
 }
