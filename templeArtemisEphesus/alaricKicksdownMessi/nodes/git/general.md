@@ -41,3 +41,12 @@ body: `git branch -D <branch name>`
 title: delete untracked files and directories
 creationDate: 2026-08-31 05:15
 body: `git clean -fd`
+--
+title: undo commits while keeping them in git history
+creationDate: 2026-08-31 06:12
+body: example:
+```
+git revert --no-commit <hash of some commit to remove>
+git revert --no-commit <hash of some other commit to remove>
+git commit -m <msg>
+```
