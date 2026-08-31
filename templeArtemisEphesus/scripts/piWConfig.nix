@@ -13,6 +13,7 @@ let
   configDirDrv = pkgs.stdenv.mkDerivation {
     name = "piConfigDir";
     nativeBuildInputs = [  keyReader localPkgs.scripts.decryptSecret localPkgs.secrets ];
+    phases = [ "installPhase" ]; #otherwise fails on unpackPhase
     installPhase = ''
       runHook preInstall
 
