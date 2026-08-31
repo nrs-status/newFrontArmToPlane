@@ -3,7 +3,21 @@
     enable = true;
     servers = {
 
-      nixd.enable = true;
+      nixd = {
+        enable = true;
+        settings = {
+          # Let nixd evaluate nixpkgs so its LSP can resolve lib functions and
+          # report their signature/documentation on hover (K), in completions,
+          # and via signature help while typing function arguments.
+          nixpkgs = {
+            expr = "import <nixpkgs> { }";
+          };
+          # it seems to me this setting is taken care of by `conform`; enable it if not
+          # formatting = {
+          #   command = [ "nixfmt" ];
+          # };
+        };
+      };
 
       bashls.enable = true;
 

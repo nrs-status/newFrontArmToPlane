@@ -73,6 +73,12 @@
       options.remap = true;
     }
     {
+      # show the LSP's signature information for the function under the cursor
+      action = "<Cmd>lua vim.lsp.buf.signature_help()<cr>";
+      key = "<leader>gs";
+      mode = [ "n" ];
+    }
+    {
       action = "<Cmd>lua vim.lsp.buf.definition()<cr>";
       key = "<leader>gd";
       mode = [ "n" ];
