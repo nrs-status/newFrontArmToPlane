@@ -24,10 +24,12 @@ let
       localPkgs.secrets
     ];
     phases = [ "installPhase" ]; # otherwise fails on unpackPhase
+    src = ./staticConfigFiles;
     installPhase = ''
       runHook preInstall
 
       mkdir -p $out 
+      cp $src/* $out
 
       install -Dm644 ${pkgs.writeText "pi-harness-auth-json" authJsonFileContents} $out/auth.json
 

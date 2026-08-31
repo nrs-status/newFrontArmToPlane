@@ -1,0 +1,14 @@
+{
+  "providers": {
+    "openrouter": {
+      "modelOverrides": {
+        "anthropic/claude-fable-5": {
+          "maxTokens": 10000
+        },
+        "deepseek/deepseek-v4-pro": {
+          "maxTokens": 10000
+        }
+      }
+    }
+  }
+}
