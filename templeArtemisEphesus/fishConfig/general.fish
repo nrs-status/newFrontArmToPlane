@@ -1,1 +1,1 @@
-#temp
+alias nvimread='nvim -R'
