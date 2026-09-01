@@ -65,7 +65,26 @@
     #codecompanion.enable = true;
 
     #llm integration emulating cursor
-    avante.enable = true;
+    avante = {
+      diff = {
+        autojump = true;
+        debug = false;
+        list_opener = "copen";
+      };
+      highlights = {
+        diff = {
+          current = "DiffText";
+          incoming = "DiffAdd";
+        };
+      };
+      hints = { enable = true; };
+      providers = {
+        openrouter = {
+          endpoint = "https://openrouter.ai/api/v1";
+          model = "z-ai/glm-5.3-flash";
+        };
+      };
+    };
 
     #regex pattern viewer
     patterns.enable = true;
