@@ -1,7 +1,9 @@
 { pkgs, ... }:
-pkgs.stdenv.mkDerivation {
+let
+  fishConfig = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
     src = ./fishDefaultConfigFiles;
+    nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
       runHook preInstall
 
@@ -25,4 +27,9 @@ pkgs.stdenv.mkDerivation {
 
       runHook postInstall
     '';
+  };
+in
+pkgs.writeShellApplication {
+  name = "fish";
+  text = "XDG_CONFIG_HOME=${fishConfig} ${pkgs.fish}";
 }

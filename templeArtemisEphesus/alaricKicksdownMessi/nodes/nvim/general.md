@@ -13,3 +13,6 @@ title: output the result of a lua command to a buffer
 creationDate: Sat Aug 29 11:35:38 PM GMT 2026
 body: open a buffer with `:new`, wrap the command `x` with `put =execute('lua =x')`, then run the command with `:%so` (double quotes must be escape)
 --
+title: open a file in read-only mode
+creationDate: 2026-09-01 02:35
+body: `nvim -R <path>`
