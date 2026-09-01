@@ -19,6 +19,7 @@ pkgs.mkShell {
       qimgv # image viewer
       vlc
       fzf # fuzzy searcher
+      television # fzf alternative, picker
       grex # generate regex from test cases
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
