@@ -23,17 +23,16 @@ pkgs.mkShell {
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
       navi # personal commandline cheatsheet manager
-      sesh # terminal session manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
-      sesh #tmux session manager
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
       firefox
-      pi
-      fish
-      tmux
+      pi #coding harness
+      fish #shell
+      tmux #terminal multiplexer
+      sesh #tmux session manager
     ]);
 
   shellHook = ''
