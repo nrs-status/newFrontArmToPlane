@@ -6,7 +6,6 @@ pkgs.mkShell {
   buildInputs =
     with pkgs;
     [
-      fish
       zoxide # 'cd' command alternative
       kdePackages.okular # ebook/pdf/djvu/etc. reader
       unzip
@@ -33,7 +32,8 @@ pkgs.mkShell {
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
       firefox
-      piWConfig
+      pi
+      fish
     ]);
 
   shellHook = ''
