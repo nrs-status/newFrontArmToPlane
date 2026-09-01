@@ -26,7 +26,6 @@ pkgs.mkShell {
       sesh # terminal session manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
-      tmux #terminal multiplexer
       sesh #tmux session manager
     ]
     ++ (with localPkgs; [
@@ -34,6 +33,7 @@ pkgs.mkShell {
       firefox
       pi
       fish
+      tmux
     ]);
 
   shellHook = ''
