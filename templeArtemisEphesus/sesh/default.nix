@@ -11,7 +11,7 @@ pkgs.stdenv.mkDerivation {
   install -Dm644 basic.toml $out/config
 
   cat > $out/config/main.toml <<EOF
-  import_paths = [
+  import = [
     "$out/config/basic.toml",
   ]
   EOF
