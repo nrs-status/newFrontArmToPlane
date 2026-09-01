@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgsLib, ... }:
 pkgs.stdenv.mkDerivation {
   name = "tmux";
   src = ./.;
@@ -15,7 +15,7 @@ pkgs.stdenv.mkDerivation {
     source-file $out/config/inheritedConf.conf
   EOF
 
-  makeWrapper ${pkgs.tmux}/bin/tmux $out/bin/tmux \
+  makeWrapper ${pkgsLib.getExe pkgs.tmux} $out/bin/tmux \
   --add-flags "-f $out/config/main.conf"
   
   runHook postInstall'';
