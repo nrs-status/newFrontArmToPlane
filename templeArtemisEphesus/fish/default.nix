@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgsLib, ... }:
 let
   fishConfig = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
@@ -31,5 +31,5 @@ let
 in
 pkgs.writeShellApplication {
   name = "fish";
-  text = "XDG_CONFIG_HOME=${fishConfig} ${pkgs.fish}";
+  text = "XDG_CONFIG_HOME=${fishConfig} ${pkgsLib.getExe pkgs.fish}";
 }
