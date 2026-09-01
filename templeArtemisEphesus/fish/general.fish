@@ -1,1 +1,1 @@
-alias nvimread='nvim -R'
+#to be filled
