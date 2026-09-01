@@ -22,6 +22,7 @@
       json = [ "fixjson" ];
       yaml = [ "yamlfmt" ];
       ocaml = [ "ocamlformat" ];
+      toml = [ "taplo" ];
     };
   };
 
@@ -30,5 +31,8 @@
 
   __depPackages.stylua.default = "stylua";
   dependencies.stylua.enable = true;
+
+  __depPackages.taplo.default = "taplo";
+  dependencies.taplo.enable = true;
 
 }
