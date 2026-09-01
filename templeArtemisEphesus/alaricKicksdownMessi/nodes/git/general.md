@@ -50,3 +50,8 @@ git revert --no-commit <hash of some commit to remove>
 git revert --no-commit <hash of some other commit to remove>
 git commit -m <msg>
 ```
+--
+title: make a vacuous commit whose only purpose is to annotate the git history
+creationDate: 2026-09-01 02:14
+body: `git commit --allow-empty -m <msg>`
+--
