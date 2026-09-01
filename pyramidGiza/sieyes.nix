@@ -37,7 +37,7 @@ pkgs.mkShell {
     ]);
 
   shellHook = ''
-    exec ${pkgsLib.getExe localPkgs.scripts.fishWConfig}
+    exec ${pkgsLib.getExe localPkgs.fish}
     echo "sieyes shell loaded"
   '';
 }
