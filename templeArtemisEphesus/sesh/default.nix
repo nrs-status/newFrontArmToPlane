@@ -18,7 +18,7 @@ pkgs.stdenv.mkDerivation {
 
   makeWrapper ${pkgsLib.getExe pkgs.sesh} $out/bin/sesh \
   --prefix PATH : ${pkgsLib.makeBinPath [ pkgs.tmux ]} \
-  --add-flags "--config $out/main.toml"
+  --add-flags "--config $out/config/main.toml"
 
   runHook postInstall'';
 }
