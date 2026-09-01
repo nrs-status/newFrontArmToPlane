@@ -3,7 +3,6 @@
     #adds pictograms to lsp
     lspkind.enable = true;
 
-
     telescope = {
       enable = true;
       extensions.fzf-native.enable = true;
@@ -66,22 +65,27 @@
 
     #llm integration emulating cursor
     avante = {
-      diff = {
-        autojump = true;
-        debug = false;
-        list_opener = "copen";
-      };
-      highlights = {
+      enable = true;
+      settings = {
         diff = {
-          current = "DiffText";
-          incoming = "DiffAdd";
+          autojump = true;
+          debug = false;
+          list_opener = "copen";
         };
-      };
-      hints = { enable = true; };
-      providers = {
-        openrouter = {
-          endpoint = "https://openrouter.ai/api/v1";
-          model = "z-ai/glm-5.3-flash";
+        highlights = {
+          diff = {
+            current = "DiffText";
+            incoming = "DiffAdd";
+          };
+        };
+        hints = {
+          enable = true;
+        };
+        providers = {
+          openrouter = {
+            endpoint = "https://openrouter.ai/api/v1";
+            model = "z-ai/glm-5.3-flash";
+          };
         };
       };
     };
