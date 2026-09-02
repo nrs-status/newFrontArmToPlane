@@ -2,7 +2,7 @@
 pkgs.stdenv.mkDerivation {
   name = "newsboat";
   src = ./.;
-  nativeBuildInputs = [ pkgs.mkWrapper ];
+  nativeBuildInputs = [ pkgs.makeWrapper ];
   installPhase = ''runHook preInstall
 
   mkdir -p $out/bin
