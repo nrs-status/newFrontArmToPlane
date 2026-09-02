@@ -4,6 +4,7 @@ let
     name = "fishConfig";
     src = ./.;
     nativeBuildInputs = [ pkgs.makeWrapper ];
+    fishScriptsDir = "${localPkgs.scripts.fishScripts}";
     installPhase = ''
       runHook preInstall
 
@@ -24,11 +25,6 @@ let
         source $out/fish/workTrunkConfig.fish
         source $out/fish/zoxideConfig.fish
 
-        echo ${localPkgs.scripts.fishScripts}
-        set fishScriptsDir "${localPkgs.scripts.fishScripts}"
-        echo echoing dir
-        echo $fishScriptsDir
-        
         for f in (ls "$fishScriptsDir" | sort)
           set -l path "$fishScriptsDir/$f"
           if test -f "$path"; and test -r "$path"
