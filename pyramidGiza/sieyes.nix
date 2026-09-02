@@ -25,6 +25,8 @@ pkgs.mkShell {
       navi # personal commandline cheatsheet manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
+      fd # `find` replacement
+      trash-cli # safer `rm`
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
