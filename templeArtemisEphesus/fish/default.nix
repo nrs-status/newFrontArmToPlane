@@ -24,6 +24,7 @@ let
         source $out/fish/workTrunkConfig.fish
         source $out/fish/zoxideConfig.fish
 
+        echo ${localPkgs.scripts.fishScripts}
         set -l dir ${localPkgs.scripts.fishScripts}
         
         for f in (ls "$dir" | sort)
