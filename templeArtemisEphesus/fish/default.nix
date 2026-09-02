@@ -1,4 +1,9 @@
-{ pkgs, localPkgs, pkgsLib, ... }:
+{
+  pkgs,
+  localPkgs,
+  pkgsLib,
+  ...
+}:
 let
   fishConfig = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
@@ -25,11 +30,12 @@ let
         source $out/fish/workTrunkConfig.fish
         source $out/fish/zoxideConfig.fish
 
+        #note that local variables must be escaped for them to survive nix's expansion of `$` at build time
         for f in (ls "$fishScriptsDir" | sort)
           set -l path "$fishScriptsDir/\$f"
-          if test -f "$path"; and test -r "$path"
-            echo "Sourcing $path"
-            source "$path"
+          if test -f "\$path"; and test -r "\$path"
+            echo "Sourcing \$path"
+            source "\$path"
           end
         end
 
