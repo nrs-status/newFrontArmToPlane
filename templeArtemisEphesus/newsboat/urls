@@ -1,0 +1,19 @@
+# News sources
+
+# --- Mainstream / international news ---
+https://www.ledevoir.com/rss/manchettes.xml "~Le Devoir (Manchettes)"
+https://www.pbs.org/newshour/feeds/rss/headlines "~PBS NewsHour"
+https://feeds.npr.org/1001/rss.xml "~NPR News"
+https://www.cbc.ca/webfeed/rss/rss-topstories "~CBC Top Stories"
+http://rss.cnn.com/rss/cnn_topstories.rss "~CNN Top Stories"
+https://www.aljazeera.com/xml/rss/all.xml "~Al Jazeera"
+
+# --- Respected conservative-leaning sources ---
+https://www.nationalreview.com/feed/ "~National Review (conservative)"
+https://www.telegraph.co.uk/rss.xml "~The Telegraph (conservative, UK)"
+
+# --- Communities ---
+# Reddit heavily rate-limits non-browser user agents, so use a browser UA per feed.
+https://www.reddit.com/r/worldnews/.rss "~r/worldnews" { user-agent = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" }
+https://www.reddit.com/r/LocalLLaMA/.rss "~r/LocalLLaMA" { user-agent = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" }
+https://hnrss.org/frontpage "~Hacker News"
