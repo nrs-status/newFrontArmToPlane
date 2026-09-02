@@ -10,7 +10,7 @@ pkgs.stdenv.mkDerivation {
   cp ./newsboat.config $out/newsboat.config
 
   makeWrapper ${pkgsLib.getExe pkgs.newsboat} $out/bin/newsboat \
-    --add-flags "--url-file=$out/urls"
+    --add-flags "--url-file=$out/urls" \
     --add-flags "--config-file=$out/newsboat.config"
 
   runHook postInstall'';
