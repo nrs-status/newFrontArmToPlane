@@ -25,7 +25,7 @@ let
         source $out/fish/zoxideConfig.fish
 
         echo ${localPkgs.scripts.fishScripts}
-        set -l dir ${localPkgs.scripts.fishScripts}
+        set -l dir "${localPkgs.scripts.fishScripts}"
         echo echoing dir
         echo $dir
         
