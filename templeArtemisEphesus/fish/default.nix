@@ -26,6 +26,8 @@ let
 
         echo ${localPkgs.scripts.fishScripts}
         set -l dir ${localPkgs.scripts.fishScripts}
+        echo echoing dir
+        echo $dir
         
         for f in (ls "$dir" | sort)
           set -l path "$dir/$f"
