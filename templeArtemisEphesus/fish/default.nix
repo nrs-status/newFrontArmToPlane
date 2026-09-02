@@ -1,4 +1,4 @@
-{ pkgs, pkgsLib, ... }:
+{ pkgs, localPkgs, pkgsLib, ... }:
 let
   fishConfig = pkgs.stdenv.mkDerivation {
     name = "fishConfig";
@@ -7,6 +7,7 @@ let
     installPhase = ''
       runHook preInstall
 
+      #this specific directory structure is needed by fish
       mkdir -p $out/fish
       mkdir $out/fish/functions
       mkdir $out/fish/completions
@@ -22,6 +23,17 @@ let
         source $out/fish/general.fish
         source $out/fish/workTrunkConfig.fish
         source $out/fish/zoxideConfig.fish
+
+        set -l dir ${localPkgs.scripts.fishScripts}
+        
+        for f in (ls "$dir" | sort)
+          set -l path "$dir/$f"
+          if test -f "$path"; and test -r "$path"
+            echo "Sourcing $path"
+            source "$path"
+          end
+        end
+
       end
       EOF
 
