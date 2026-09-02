@@ -25,12 +25,12 @@ let
         source $out/fish/zoxideConfig.fish
 
         echo ${localPkgs.scripts.fishScripts}
-        set -l dir "${localPkgs.scripts.fishScripts}"
+        set fishScriptsDir "${localPkgs.scripts.fishScripts}"
         echo echoing dir
-        echo $dir
+        echo $fishScriptsDir
         
-        for f in (ls "$dir" | sort)
-          set -l path "$dir/$f"
+        for f in (ls "$fishScriptsDir" | sort)
+          set -l path "$fishScriptsDir/$f"
           if test -f "$path"; and test -r "$path"
             echo "Sourcing $path"
             source "$path"
