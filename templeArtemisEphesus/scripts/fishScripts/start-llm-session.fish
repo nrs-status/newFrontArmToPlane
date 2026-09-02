@@ -1,9 +1,4 @@
 function start-llm-session --description "Bootstrap a new LLM session repo at the given path and launch pi"
-    #Check if `wt` is configured with `fish`, otherwise exit early with an error.
-    if not test -f "$XDG_CONFIG_HOME/fish/functions/wt.fish"
-        echo "Error: 'wt' is not configured with fish." >&2
-        return 1
-    end
 
     if test (count $argv) -ne 1
         echo "Usage: start_llm_session <path>" >&2
