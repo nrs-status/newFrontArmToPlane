@@ -25,6 +25,8 @@ let
         source $out/fish/workTrunkConfig.fish
         source $out/fish/zoxideConfig.fish
 
+        echo $fishScriptsDir
+
         for f in (ls "$fishScriptsDir" | sort)
           set -l path "$fishScriptsDir/$f"
           if test -f "$path"; and test -r "$path"
