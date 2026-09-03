@@ -48,6 +48,14 @@ in
 
     chmod +x $out/bin/${name}
 
+    # The heredoc above uses a quoted delimiter (<<'EOF'), so bash does NOT
+    # expand `$src` while the wrapper is generated. As a result the literal
+    # string `$src` would end up in the wrapper script and be unset at
+    # runtime. It is expanded here to prevent this
+    ${pkgsLib.optionalString (src != null) ''
+      substituteInPlace $out/bin/${name} --replace-fail '$src' "$src"
+    ''}
+
     runHook postInstall'';
   }
 # pkgs.writeShellApplication {
