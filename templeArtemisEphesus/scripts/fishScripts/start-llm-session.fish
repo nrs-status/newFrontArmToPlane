@@ -7,17 +7,15 @@ function start-llm-session --description "Bootstrap a new LLM session repo at th
 
     set -l session_dir $argv[1]
 
-    sesh mkdir $session_dir
-    cd $session_dir
+    sesh mkdir $session_dir -c "
+    git init &&
 
-    git init
+    wt switch -c run0 &&
 
-    wt switch -c run0
+    nvim instructions.txt &&
 
-    nvim instructions.txt
+    git add instructions.txt &&
+    git commit -m instructions &&
 
-    git add instructions.txt
-    git commit -m instructions
-
-    pi "Read and execute instructions.txt"
+    pi \"Read and execute instructions.txt\""
 end
