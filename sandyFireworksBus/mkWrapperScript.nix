@@ -36,7 +36,7 @@ in
     phases = [ "installPhase" ];
     installPhase = ''runHook preInstall
 
-    cat $out/bin/${name} <<EOF
+    cat > $out/bin/${name} <<EOF
      ${renderedEnvVarDecls}
      ${renderedPreExecCommands}
      exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
