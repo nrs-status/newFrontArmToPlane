@@ -50,6 +50,6 @@ in
     pkgToWrap = pkgs.fish;
     preExecCommands = [
       "rm -rf ~/.config/fish"
-      "cp -r ${fishConfig} ~/.config/fish"
+      "cp -r ${fishConfig} ~/.config/fish/"
     ];
   }
