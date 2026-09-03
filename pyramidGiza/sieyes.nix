@@ -27,6 +27,7 @@ pkgs.mkShell {
       worktrunk # wrapper for git worktrees
       fd # `find` replacement
       trash-cli # safer `rm`
+      bubblewrap # unpriviledged escalation tool
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
