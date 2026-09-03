@@ -1,6 +1,6 @@
 { pkgs, localLib, ... }:
 let
-  kittyConf = pkgs.writeTextFile "kitty-conf" (import ./conf.nix "${pkgs.kitty-themes}/share/kitty-themes/themes/gruvbox-dark.conf");
+  kittyConf = pkgs.writeText "kitty-conf" (import ./conf.nix "${pkgs.kitty-themes}/share/kitty-themes/themes/gruvbox-dark.conf");
 in
 localLib.mkWrapperScript {
   name = "kitty";
