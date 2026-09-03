@@ -36,6 +36,8 @@ in
     phases = [ "installPhase" ];
     installPhase = ''runHook preInstall
 
+    mkdir -p $out/bin
+
     cat > $out/bin/${name} <<EOF
      ${renderedEnvVarDecls}
      ${renderedPreExecCommands}
