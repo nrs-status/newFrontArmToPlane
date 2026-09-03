@@ -33,6 +33,7 @@ pkgs.mkShell {
       kitty #terminal emulator
       scripts.update-twc-fatp-input
       weechat #irc and matrix client
+      git #overrides wranHeart's `git`
     ]);
 
   shellHook = ''
