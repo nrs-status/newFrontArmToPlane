@@ -51,5 +51,6 @@ in
     preExecCommands = [
       "rm -rf ~/.config/fish"
       "cp -r ${fishConfig} ~/.config/fish/"
+      "chmod -R u+w ~/.config/fish"
     ];
   }
