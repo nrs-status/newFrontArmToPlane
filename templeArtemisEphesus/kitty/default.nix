@@ -12,4 +12,8 @@ localLib.mkWrapperScript {
       val = "${kittyConf}";
     }
   ];
+  # kitty only recognizes its `+command` mode (e.g. `+runpy`) when it is the
+  # first CLI argument, so options must be appended after "$@" instead of
+  # prepended. Otherwise `kitty +runpy ...` silently launches a GUI instead.
+  optsAfterArgs = true;
 }

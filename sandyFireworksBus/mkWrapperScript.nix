@@ -7,6 +7,10 @@
   envVars ? [],
   preExecCommands ? [],
   runtimeInputs ? [],
+  # If true, rendered `opts` are placed *after* the caller's arguments in the
+  # final command line. Needed for programs (e.g. kitty) whose `+command`
+  # mode (like `+runpy`) is only recognized when it is the first argument.
+  optsAfterArgs ? false,
 }:
 let
   renderOpt =
@@ -43,7 +47,9 @@ in
     #!/usr/bin/env bash
     ${renderedEnvVarDecls}
     ${renderedPreExecCommands}
-    exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
+    exec ${pkgsLib.getExe pkgToWrap} ${
+      if optsAfterArgs then "\"$@\" ${renderedOpts}" else "${renderedOpts} \"$@\""
+    }
     EOF
 
     chmod +x $out/bin/${name}
