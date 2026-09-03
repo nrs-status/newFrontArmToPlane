@@ -7,7 +7,7 @@ function start-llm-session --description "Bootstrap a new LLM session repo at th
 
     set -l session_dir $argv[1]
 
-    mkdir -p $session_dir
+    sesh mkdir $session_dir
     cd $session_dir
 
     git init
