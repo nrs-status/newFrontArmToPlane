@@ -36,6 +36,7 @@ pkgs.mkShell {
       fish #shell
       tmux #terminal multiplexer
       sesh #tmux session manager
+      scripts.update-twc-fatp-input
     ]);
 
   shellHook = ''
