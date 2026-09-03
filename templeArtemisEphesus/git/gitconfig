@@ -1,6 +1,6 @@
 [credential "https://github.com"]
 	username = nrs-status
-	helper = "store --file /run/secrets/nrs-status-git-credential"
+	helper = "store --file /run/secrets/git/github/nrs-status/credential"
 
 [user]
 	name = nrs-status
