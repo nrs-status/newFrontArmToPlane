@@ -1,0 +1,10 @@
+[credential "https://github.com"]
+	username = nrs-status
+	helper = "store --file /run/secrets/nrs-status-git-credential"
+
+[user]
+	name = nrs-status
+	email = sebaarsim@gmail.com
+
+[url "https://github.com/"]
+	insteadOf = git@github.com:
