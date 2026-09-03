@@ -5,7 +5,6 @@ in
 localLib.mkWrapperScript {
   name = "kitty";
   pkgToWrap = pkgs.kitty;
-  src = ./.;
   opts = [
     {
       dash = "--";
