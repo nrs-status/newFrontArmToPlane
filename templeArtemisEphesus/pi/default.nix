@@ -3,14 +3,6 @@
   localLib,
   ...
 }:
-# pkgs.stdenv.mkDerivation {
-#   name = "pi";
-#   src = ./.;
-#   phases = [ "installPhase" ];
-#   nativBuildInputs = [ pkgs.makeWrapper ];
-#   installPhase = "runHook preInstall
-#   runHook postInstall";
-# }
 localLib.mkWrapperScript {
   name = "pi";
   pkgToWrap = pkgs.pi-coding-agent;

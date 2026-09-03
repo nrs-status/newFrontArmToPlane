@@ -10,7 +10,6 @@ pkgs.mkShell {
       kdePackages.okular # ebook/pdf/djvu/etc. reader
       bottles # games launcher
       google-chrome
-      kitty # terminal emulator
       wofi # launcher/menu
       btop # system monitor
       qimgv # image viewer
@@ -31,6 +30,7 @@ pkgs.mkShell {
       fish #shell
       tmux #terminal multiplexer
       sesh #tmux session manager
+      kitty #terminal emulator
       scripts.update-twc-fatp-input
     ]);
 

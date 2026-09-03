@@ -24,8 +24,7 @@
     in {
       packages."x86_64-linux" = localPkgs;
       devShells."x86_64-linux" = import ./pyramidGiza {
-        localPkgs = inputs.self.packages."x86_64-linux";
-        inherit baseLib pkgs pkgsLib;
+        inherit baseLib pkgs localPkgs pkgsLib;
       };
     };
 }
