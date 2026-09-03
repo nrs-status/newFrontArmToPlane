@@ -34,15 +34,19 @@ in
   pkgs.stdenv.mkDerivation {
     inherit name runtimeInputs src;
     phases = [ "installPhase" ];
-    installPhase = ''runHook preInstall
+    installPhase = ''
+    runHook preInstall
 
     mkdir -p $out/bin
 
-    cat > $out/bin/${name} <<EOF
+    cat > $out/bin/${name} <<'EOF'
+    #!/usr/bin/env bash
     ${renderedEnvVarDecls}
     ${renderedPreExecCommands}
     exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
     EOF
+
+    chmod +x $out/bin/${name}
 
     runHook postInstall'';
   }
