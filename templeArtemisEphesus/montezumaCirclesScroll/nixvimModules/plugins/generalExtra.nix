@@ -94,6 +94,10 @@
     patterns.enable = true;
 
     fzf-lua.enable = true;
+    otter = {
+      enable = true;
+      treesitter.highlight.enable = true;
+    };
 
   };
 }
