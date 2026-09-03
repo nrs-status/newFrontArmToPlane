@@ -1,4 +1,4 @@
-{ gruvboxDarkConfig }:
+gruvboxDarkConfig:
 ''
 shell_integration no-rc
 
