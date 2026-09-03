@@ -8,8 +8,6 @@ pkgs.mkShell {
     [
       zoxide # 'cd' command alternative
       kdePackages.okular # ebook/pdf/djvu/etc. reader
-      unzip
-      unrar
       bottles # games launcher
       google-chrome
       kitty # terminal emulator
@@ -17,7 +15,6 @@ pkgs.mkShell {
       btop # system monitor
       qimgv # image viewer
       vlc
-      fzf # fuzzy searcher
       television # fzf alternative, picker
       grex # generate regex from test cases
       rgx # explain what a regex pattern does
@@ -25,8 +22,6 @@ pkgs.mkShell {
       navi # personal commandline cheatsheet manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
-      fd # `find` replacement
-      trash-cli # safer `rm`
       bubblewrap # unpriviledged escalation tool
     ]
     ++ (with localPkgs; [
