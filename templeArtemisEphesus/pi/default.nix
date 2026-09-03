@@ -1,43 +1,27 @@
 {
   pkgs,
   localLib,
-  pkgsLib,
-  localPkgs,
   ...
 }:
-let
-  bashInterpolationToGetAPIKey = "\"$(SOPS_AGE_KEY=$(${pkgsLib.getExe keyReader}) ${pkgsLib.getExe localPkgs.scripts.decryptSecret} ${localPkgs.secrets}/secrets.yaml OPENROUTER_API_KEY)\"";
-  keyReader = localLib.mkKeyReader {
-    envVarName = "SOPS_AGE_KEY";
-    keyPath = "/etc/keys.yaml";
-  };
-in
+# pkgs.stdenv.mkDerivation {
+#   name = "pi";
+#   src = ./.;
+#   phases = [ "installPhase" ];
+#   nativBuildInputs = [ pkgs.makeWrapper ];
+#   installPhase = "runHook preInstall
+#   runHook postInstall";
+# }
 localLib.mkWrapperScript {
   name = "pi";
   pkgToWrap = pkgs.pi-coding-agent;
-  runtimeInputs = [
-    keyReader
-    localPkgs.scripts.decryptSecret
-    localPkgs.secrets
-  ];
   preExecCommands = [
     "rm -f ~/.pi/agent/auth.json"
   ];
   opts = [
     {
       dash = "--";
-      optName = "provider";
-      val = "openrouter";
-    }
-    {
-      dash = "--";
-      optName = "api-key";
-      val = bashInterpolationToGetAPIKey;
-    }
-    {
-      dash = "--";
       optName = "model";
-      val = "z-ai/glm-5.3-flash";
+      val = "openrouter/z-ai/glm-5.3-flash";
     }
   ];
 

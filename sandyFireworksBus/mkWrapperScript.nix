@@ -2,10 +2,11 @@
 {
   name,
   pkgToWrap,
+  src ? null,
   opts ? [],
   envVars ? [],
   preExecCommands ? [],
-  runtimeInputs,
+  runtimeInputs ? [],
 }:
 let
   renderOpt =
@@ -30,10 +31,23 @@ let
   );
   renderedPreExecCommands = pkgsLib.concatStringsSep "\n" preExecCommands;
 in
-pkgs.writeShellApplication {
-  inherit name runtimeInputs;
-  text = ''
-    ${renderedEnvVarDecls}
-    ${renderedPreExecCommands}
-    exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"'';
-}
+  pkgs.stdenv.mkDerivation {
+    inherit name runtimeInputs src;
+    phases = [ "installPhase" ];
+    installPhase = ''runHook preInstall
+
+    cat $out/bin/${name} <<EOF
+     ${renderedEnvVarDecls}
+     ${renderedPreExecCommands}
+     exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
+    EOF
+
+    runHook postInstall'';
+  }
+# pkgs.writeShellApplication {
+#   inherit name runtimeInputs;
+#   text = ''
+#     ${renderedEnvVarDecls}
+#     ${renderedPreExecCommands}
+#     exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"'';
+# }
