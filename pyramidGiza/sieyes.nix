@@ -32,6 +32,7 @@ pkgs.mkShell {
       sesh #tmux session manager
       kitty #terminal emulator
       scripts.update-twc-fatp-input
+      weechat #irc and matrix client
     ]);
 
   shellHook = ''
