@@ -9,6 +9,7 @@ localLib.mkWrapperScript {
   src = ./.;
   preExecCommands = [
     "rm -f ~/.config/weechat"
+    "mkdir -p ~/.config/weechat"
     "cp $src/matrix.config $src/irc.config ~/.config/weechat"
   ];
 }
