@@ -1,5 +1,7 @@
 gruvboxDarkConfig:
 ''
+font_family Iosevka
+
 shell_integration no-rc
 
 bold_font Iosevka Semibold
