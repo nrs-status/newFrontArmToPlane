@@ -67,6 +67,7 @@
     avante = {
       enable = true;
       settings = {
+        provider = "openrouter";
         diff = {
           autojump = true;
           debug = false;
@@ -83,8 +84,11 @@
         };
         providers = {
           openrouter = {
+            #openrouter exposes an OpenAI-compatible API
+            __inherited_from = "openai";
             endpoint = "https://openrouter.ai/api/v1";
             model = "z-ai/glm-5.3-flash";
+            api_key_name = "cmd:cat /run/secrets/OPENROUTER_API_KEY";
           };
         };
       };
