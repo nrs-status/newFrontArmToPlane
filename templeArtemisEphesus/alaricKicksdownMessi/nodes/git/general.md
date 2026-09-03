@@ -55,3 +55,6 @@ title: make a vacuous commit whose only purpose is to annotate the git history
 creationDate: 2026-09-01 02:14
 body: `git commit --allow-empty -m <msg>`
 --
+title: edit last the last `git commit`'s message
+creationDate: 2026-09-03 01:42
+body: `git commit --amend`
