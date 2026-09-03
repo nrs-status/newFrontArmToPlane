@@ -6,5 +6,8 @@ path = "~/llmSessions"
 name = "sieyes shell config"
 startup_command = "nvim ~/baghdad_plane/flakes/newFrontArmToPlane/pyramidGiza/sieyes.nix"
 
+[[session]]
+name = "chat0"
+startup_command = "pi"
 
 
