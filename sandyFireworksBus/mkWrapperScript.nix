@@ -39,9 +39,9 @@ in
     mkdir -p $out/bin
 
     cat > $out/bin/${name} <<EOF
-     ${renderedEnvVarDecls}
-     ${renderedPreExecCommands}
-     exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
+    ${renderedEnvVarDecls}
+    ${renderedPreExecCommands}
+    exec ${pkgsLib.getExe pkgToWrap} ${renderedOpts} "$@"
     EOF
 
     runHook postInstall'';
