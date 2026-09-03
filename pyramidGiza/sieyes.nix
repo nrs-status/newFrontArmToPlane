@@ -40,7 +40,7 @@ pkgs.mkShell {
     ]);
 
   shellHook = ''
-    THATWATERCHARMANDER_PATH=$(cat /run/secrets/THATWATERCHARMANDER_PATH) #required for script that updates twc's fatp input
+    export THATWATERCHARMANDER_PATH=$(cat /run/secrets/THATWATERCHARMANDER_PATH) #required for script that updates twc's fatp input
     exec ${pkgsLib.getExe localPkgs.fish}
     echo "sieyes shell loaded"
   '';
