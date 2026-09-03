@@ -28,7 +28,6 @@ pkgs.mkShell {
       fd # `find` replacement
       trash-cli # safer `rm`
       bubblewrap # unpriviledged escalation tool
-      ssh-to-age # for turning wranHearst ssh key to age in templeArtemisEphesus/secrets due to sops-nix idiosyncracy
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
