@@ -4,8 +4,8 @@
   ...
 }:
 localLib.mkWrapperScript {
-  name = "pi";
-  pkgToWrap = pkgs.pi-coding-agent;
+  name = "git";
+  pkgToWrap = pkgs.git;
   src = ./.;
   preExecCommands = [
     "rm -f ~/.gitconfig"
