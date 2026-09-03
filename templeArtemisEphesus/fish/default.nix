@@ -1,7 +1,7 @@
 {
   pkgs,
   localPkgs,
-  pkgsLib,
+  localLib,
   ...
 }:
 let
@@ -13,22 +13,21 @@ let
     installPhase = ''
       runHook preInstall
 
-      #this specific directory structure is needed by fish
-      mkdir -p $out/fish
-      mkdir $out/fish/functions
-      mkdir $out/fish/completions
+      mkdir -p $out
+      mkdir $out/functions
+      mkdir $out/completions
 
-      cp -r fishDefaultConfigFiles $out/fish
+      cp -r fishDefaultConfigFiles $out
 
-      install -Dm644 workTrunkConfig.fish $out/fish/workTrunkConfig.fish
-      install -Dm644 zoxideConfig.fish $out/fish/zoxideConfig.fish
-      install -Dm644 general.fish $out/fish/general.fish
+      install -Dm644 workTrunkConfig.fish $out/workTrunkConfig.fish
+      install -Dm644 zoxideConfig.fish $out/zoxideConfig.fish
+      install -Dm644 general.fish $out/general.fish
 
-      cat > $out/fish/config.fish <<EOF
+      cat > $out/config.fish <<EOF
       if status is-interactive
-        source $out/fish/general.fish
-        source $out/fish/workTrunkConfig.fish
-        source $out/fish/zoxideConfig.fish
+        source $out/general.fish
+        source $out/workTrunkConfig.fish
+        source $out/zoxideConfig.fish
 
         #note that local variables must be escaped for them to survive nix's expansion of `$` at build time
         for f in (ls "$fishScriptsDir" | sort)
@@ -46,7 +45,11 @@ let
     '';
   };
 in
-pkgs.writeShellApplication {
-  name = "fish";
-  text = "XDG_CONFIG_HOME=${fishConfig} ${pkgsLib.getExe pkgs.fish}";
-}
+  localLib.mkWrapperScript {
+    name = "fish";
+    pkgToWrap = pkgs.fish;
+    preExecCommands = [
+      "rm -rf ~/.config/fish"
+      "cp -r ${fishConfig} ~/.config/fish"
+    ];
+  }
