@@ -14,7 +14,7 @@ pkgs.writeShellApplication {
     sudo git add ./flake.lock
     sudo git commit -m "updating lockfile's frontArmToPlane input" ./flake.lock
 
-    if [[ "''${"1:-"}" == "--rebuild" ]]; then
+    if [[ "''${1:-}" == "--rebuild" ]]; then
       sudo nixos-rebuild switch --flake .#wranHearst
     fi
 
