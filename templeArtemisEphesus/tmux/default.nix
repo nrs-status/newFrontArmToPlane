@@ -10,8 +10,11 @@ pkgs.stdenv.mkDerivation {
   mkdir -p $out/bin $out/config
 
   install -Dm644 inheritedConf.conf $out/config
+  install -Dm644 basic.conf $out/config
+
 
   cat > $out/config/main.conf <<EOF
+    source-file $out/config/basic.conf
     source-file $out/config/inheritedConf.conf
   EOF
 
