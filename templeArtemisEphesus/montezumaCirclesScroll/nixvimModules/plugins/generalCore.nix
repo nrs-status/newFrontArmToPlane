@@ -46,6 +46,7 @@
     treesitter = {
       enable = true;
       indent.enable = true;
+      highlight.enable = true; #needed for `otter`
     };
 
     #add context at the top of the window, wherever you are
