@@ -1,4 +1,7 @@
 { pkgs, localLib, ... }:
+let
+  kittyConf = pkgs.writeTextFile "kitty-conf" (import ./conf.nix "${pkgs.kitty-themes}/share/kitty-themes/themes/gruvbox-dark.conf");
+in
 localLib.mkWrapperScript {
   name = "kitty";
   pkgToWrap = pkgs.kitty;
@@ -7,7 +10,7 @@ localLib.mkWrapperScript {
     {
       dash = "--";
       optName = "config";
-      val = "$src/kitty.conf";
+      val = "${kittyConf}";
     }
   ];
 }
