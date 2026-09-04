@@ -28,3 +28,5 @@ there are two options for packaging containers in NixOS: `nixos-container` and `
 }
 ```
 but for current immediate usecase, `pi` agents, the problem with this method is that the interface to run short-lived containers is a bit clumsy. Since there's no `ENTRYPOINT` analogue, you have to produce an analogous idiom using `systemd` services, and then pass the `pi` commands with `nixos-container run`. The `dockerTools` namespace allows you to use a declaring style similar to the one for dockerfiles, and I don't know exactly what the default base image is but it seems to be either NixOS or a barebones Linux equipped with `nix`.
+
+One approach to make `nixos-container` work with a similar workflow is to parametrize `nixos-container create` by wrapping it in a script that generated a config file, which is then passed to `nixos-container create` with the `--config-file` flag.

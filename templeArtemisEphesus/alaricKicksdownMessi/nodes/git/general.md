@@ -63,3 +63,7 @@ title: merge target deleted a file we want the branch merging to keep
 creationDate: 2026-09-03 22:22
 fuzzyAux: conflict 
 body: `git add <deleted file>; git rebase --continue`
+--
+title: show what files were changed by a given commit
+creationDate: 2026-09-04 06:14
+body: `git show --name-status <commit hash>`
