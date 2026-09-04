@@ -11,7 +11,7 @@ localLib.mkWrapperScript
     name = "git";
     pkgToWrap = pkgs.git;
     preExecCommands = [
-      "mkdir -p ~/.config/git/config"
+      "mkdir -p ~/.config/git/"
       "rm -rf ~/.config/git/config"
       "install -m 600 ${gitConfig} ~/.config/git/config"
     ];
