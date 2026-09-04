@@ -18,7 +18,6 @@ pkgs.dockerTools.buildLayeredImage {
     localPkgs.pi
   ];
 
-  runAsRoot = "mkdir -p /workspace";
 
   #llm-generated; the docs suggest the build process may fail due to permissions?
   fakeRootCommands = ''
