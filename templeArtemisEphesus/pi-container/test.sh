@@ -23,7 +23,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # 1. Build the container image from the flake and load it into the local
 #    docker daemon.
 echo "== building container image =="
-nix build "$FLAKE_DIR#packages.x86_64-linux.pi-container" -o "$FLAKE_DIR/result-pi-container-test"
+nix build "$FLAKE_DIR#packages.x86_64-linux.pi-container.container" -o "$FLAKE_DIR/result-pi-container-test"
 docker load -i "$FLAKE_DIR/result-pi-container-test" >/dev/null
 
 # 2. Directory-mount variant: the whole secrets directory is bind-mounted.
@@ -69,7 +69,22 @@ docker run --rm -v /run/secrets:/run/secrets:ro --entrypoint bash "$IMAGE" -c '
 ' && echo "no key found in any /proc/*/cmdline" \
    || fail "API key leaked into a process cmdline"
 
+# 6. Run-script test: the flake's `pi-container.runScript` must mount the
+#    workspace read-write, honour --bind / --ro-bind pairs, and pass the
+#    prompt through to pi.
+echo "== test 5: run script mounts and prompt passthrough =="
+nix build "$FLAKE_DIR#packages.x86_64-linux.pi-container.runScript" -o "$FLAKE_DIR/result-pi-container-test-run"
+RUN_SCRIPT="$FLAKE_DIR/result-pi-container-test-run/bin/run-pi-container"
+WS_DIR="$(mktemp -d)"
+echo "run-script workspace marker" >"$WS_DIR/host-marker"
+out="$("$RUN_SCRIPT" "$WS_DIR" \
+  --ro-bind /run/secrets /run/secrets \
+  -p "Reply with exactly: CONNECTED")"
+echo "$out"
+grep -q "CONNECTED" <<<"$out" || fail "run script: pi did not get a completion"
+rm -rf "$WS_DIR"
+
 echo
 echo "ALL TESTS PASSED: the container connects to OpenRouter, and the API key"
 echo "is read from /run/secrets/OPENROUTER_API_KEY without ever appearing in"
-echo "a process cmdline."
+echo "a process cmdline. The run script mounts the workspace and bind paths."
