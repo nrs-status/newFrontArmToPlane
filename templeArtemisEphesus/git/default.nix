@@ -4,7 +4,7 @@
   ...
 }:
 let 
-  gitConfig = pkgs.writeTextFile "git-config" (import ./config.nix { inherit pkgs; });
+  gitConfig = pkgs.writeText "git-config" (import ./config.nix { inherit pkgs; });
 in
 localLib.mkWrapperScript {
   name = "git";
