@@ -1,4 +1,4 @@
-{ pkgs, localPkgs, ... }:
+{ pkgs, localPkgs, pkgsLib, ... }:
 pkgs.dockerTools.buildLayeredImage {
   name = "simple-pi-container";
   tag = "nixos";
@@ -35,6 +35,6 @@ pkgs.dockerTools.buildLayeredImage {
       "LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive"
     ];
     WorkingDir = "/workspace";
-    Entrypoint = [ "${localPkgs.pi}" ];
+    Entrypoint = [ "${pkgsLib.getExe localPkgs.pi}" ];
   };
 }
