@@ -10,7 +10,9 @@ localLib.mkWrapperScript {
   preExecCommands = [
     "mkdir -p ~/.pi/agent"
     "rm -f ~/.pi/agent/auth.json"
-    "cp $src/auth.json ~/.pi/agent/auth.json"
+    "install -m 600 $src/auth.json ~/.pi/agent/auth.json"
+    "install -m 600 $src/models.json ~/.pi/agent/models.json"
+    "install -m 600 $src/models-store.json ~/.pi/agent/models-store.json"
   ];
   opts = [
     {

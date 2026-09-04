@@ -1,0 +1,11 @@
+{
+  "startDatetime": "2026-09-04T05:46:40.775Z",
+  "endDatetime": "2026-09-04T06:08:37.384Z",
+  "model": "z-ai/glm-5.3-flash",
+  "totalTokens": 2648136,
+  "inputTokens": 621709,
+  "outputTokens": 23611,
+  "totalCost": 0.082573,
+  "inputCost": 0.046628,
+  "outputCost": 0.005903
+}

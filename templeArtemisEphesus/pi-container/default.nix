@@ -25,6 +25,10 @@ pkgs.dockerTools.buildLayeredImage {
     chmod 1777 tmp
     chmod 700 root
     ln -sfn ../bin usr/bin
+    # `pi` resolves the `"! <command>"` api-key entries in auth.json via Node's
+    # child_process.execSync, which spawns `/bin/sh -c <command>`. Without this
+    # symlink the key cannot be read from /run/secrets inside the container.
+    ln -sfn bash bin/sh
   '';
 
   config = {
