@@ -22,6 +22,7 @@ pkgs.mkShell {
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
       bubblewrap # unpriviledged escalation tool
+      delta # git diff pretty printer
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
