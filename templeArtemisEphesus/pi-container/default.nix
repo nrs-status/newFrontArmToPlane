@@ -1,5 +1,5 @@
 { pkgs, localPkgs, ... }:
-pkgs.dockerTools.buildImage {
+pkgs.dockerTools.buildLayeredImage {
   name = "simple-pi-container";
   tag = "nixos";
   maxLayers = 120; # for specificity
