@@ -35,7 +35,7 @@ pkgs.dockerTools.buildLayeredImage {
     Env = [
       "PATH=/bin:/usr/bin"
       "HOME=/root" # emulating behaviour of `node:24-bookworm-slim` container
-      "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt" #
+      "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt" 
       "LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive"
     ];
     WorkingDir = "/workspace";
