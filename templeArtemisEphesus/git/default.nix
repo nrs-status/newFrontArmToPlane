@@ -9,6 +9,6 @@ localLib.mkWrapperScript {
   src = ./.;
   preExecCommands = [
     "rm -f ~/.gitconfig"
-    "cp $src/gitconfig ~/.gitconfig"
+    "cp $src/gitconfig ~/.config/git/config"
   ];
 }
