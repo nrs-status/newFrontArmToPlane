@@ -31,6 +31,13 @@ but for current immediate usecase, `pi` agents, the problem with this method is 
 
 One approach to make `nixos-container` work with a similar workflow is to parametrize `nixos-container create` by wrapping it in a script that generated a config file, which is then passed to `nixos-container create` with the `--config-file` flag.
 --
+title: how NixOS VMs are managed on NixOS
+creatinoDate: 2026-09-05 06:15
+body:
+1. The "manifest" of a NixOS VM is a NixOS config, full stop. VMs therefore are served as the values of attributes for the `nixosConfigurations` output of a flake. The value of an attribute for the `nixosConfigurations` output is, concretely, the result of evaluating `pkgsLib.nixosSystem` on a NixOS config. This means, therefore, that VM images are never imported by a user or a shell: they must be instrumentalized through a script. A NixOS VM is closer to a "library"-like package than a package containing a binary. 
+2. A convenient idiom for serving the scripts that instrumentalize VMs (e.g. in `microvm.nix`) is providing these as entries to the `apps` flake output. Therefore: a given flake serves VM images on the `nixosConfigurations` attribute and uses these as build inputs to scripts that are then served as entries for the `apps` flake output.
+
+--
 title: short report about installing `lanchamarcou`
 creationDate: 2026-09-05 00:31
 body: In order to install NixOS on `lanchamarcou`, I took the following steps:
