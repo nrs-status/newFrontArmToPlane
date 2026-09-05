@@ -67,3 +67,7 @@ body: `git add <deleted file>; git rebase --continue`
 title: show what files were changed by a given commit
 creationDate: 2026-09-04 06:14
 body: `git show --name-status <commit hash>`
+--
+title: inspect the diff of a staged file
+creationDate: 2026-09-05 00:45
+body: `git diff HEAD -- <file>`
