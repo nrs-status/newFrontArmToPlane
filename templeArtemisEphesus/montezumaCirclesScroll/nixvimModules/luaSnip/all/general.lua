@@ -31,17 +31,6 @@ return {
 
 Once you are done: 
 - Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
-- Create a file called SIGNATURE.json. Fill out the keys of this json file using the following description:
-startDatetime: the datetime at the very beginning of this agent session. 
-endDatetime: the datetime at the very end of this agent session. 
-model: The model that ran these instructions
-totalTokens: total API token usage
-inputTokens: number of API input tokens used in this session
-outputTokens: number of API output tokens used in this session
-totalCost: total API cost
-inputCost: API cost for input tokens
-outputCost: API cost for output tokens
-- For some of the information required by SIGNATURE.json, you will need to rely on the `pi` agent harness's report about the current session.
 - As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
       ]],
 			{ i(1) },
