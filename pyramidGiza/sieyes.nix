@@ -23,6 +23,7 @@ pkgs.mkShell {
       worktrunk # wrapper for git worktrees
       bubblewrap # unpriviledged escalation tool
       delta # git diff pretty printer
+      moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR 
 
       #testing these for a workflow for querying the psql server
       visidata

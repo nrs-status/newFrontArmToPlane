@@ -14,8 +14,18 @@ abbr -a glg git log --graph --oneline --decorate --all
 abbr -a gpu git push --set-upstream origin (git branch --show-current 2>/dev/null)
 abbr -a grst git restore --staged
 abbr -a gs git status
+abbr -a gss git status --short
+abbr -a gssb git status --short --branch
 abbr -a gsw git switch
 abbr -a gswc git switch --create
+
+#wt abbrevs
+
+abbr -a wts wt switch
+abbr -a wtsc wt switch --create
+abbr -a wtl wt list
+abbr -a wtr wt remove
+abbr -a wtrf wt remove --force
 
 # ─────────────────────────────────────────────────────────────
 # git aliases (functions — survive abbreviation expansion issues)
