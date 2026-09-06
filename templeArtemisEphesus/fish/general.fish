@@ -35,6 +35,23 @@ abbr -a ezlsm eza -ls modified
 abbr -a ezlsc eza -ls created
 abbr -a ezlsa eza -ls accessed
 
+#nix
+abbr -a sunrsf sudo nixos-rebuild switch --flake
+abbr -a nrsf nixos-rebuild switch --flake
+abbr -a sunfu sudo nix flake update
+abbr -a nfu nix flake update
+
+abbr -a nr nix run
+abbr -a nd nix develop
+abbr -a ns nix shell
+abbr -a nb nix build
+abbr -a nbnp nix build --no-link --print-out-paths
+abbr -a nbpn nix build --no-link --print-out-paths
+abbr -a nreg nix registry
+
+#neovim
+abbr -a nR nvim -R
+
 # ─────────────────────────────────────────────────────────────
 # git aliases (functions — survive abbreviation expansion issues)
 # ─────────────────────────────────────────────────────────────
