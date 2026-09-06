@@ -34,9 +34,13 @@ title: unstage a file
 creationDate: 2026-08-30 02:15
 body: `git restore --staged <path to file>`
 --
-title: delete a branch
+title: force delete a branch
 creationDate: 2026-08-30 21:20
 body: `git branch -D <branch name>`
+--
+title: delete a branch
+creationDate: 2026-09-06 01:31
+body: `git branch -d <branch name>` (this is the expected workflow when merging)
 --
 title: delete untracked files and directories
 creationDate: 2026-08-31 05:15
@@ -91,3 +95,8 @@ explore the `git revert` command for making a commit that undoes the commit, use
 title: list branches
 creationDate: 2026-09-06 00:36
 body: `git branch`
+
+--
+title: show a summary of file changes at a particular commit 
+creationDate: 2026-09-06 01:36
+body: `git show --stat <rev>`

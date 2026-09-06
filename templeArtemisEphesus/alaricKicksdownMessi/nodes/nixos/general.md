@@ -37,9 +37,10 @@ body:
 1. The "manifest" of a NixOS VM is a NixOS config, full stop. VMs therefore are served as the values of attributes for the `nixosConfigurations` output of a flake. The value of an attribute for the `nixosConfigurations` output is, concretely, the result of evaluating `pkgsLib.nixosSystem` on a NixOS config. This means, therefore, that VM images are never imported by a user or a shell: they must be instrumentalized through a script. A NixOS VM is closer to a "library"-like package than a package containing a binary. 
 2. A convenient idiom for serving the scripts that instrumentalize VMs (e.g. in `microvm.nix`) is providing these as entries to the `apps` flake output. Therefore: a given flake serves VM images on the `nixosConfigurations` attribute and uses these as build inputs to scripts that are then served as entries for the `apps` flake output.
 3. A NixOS installer is literally a NixOS image like any other: if you read the NixOS derivation from which a NixOS installer is built (one example is the nix expression located at `$(nix eval --raw nixpkgs#path)/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix`), you can see it is just a NixOS module like any other; as a Nix expression it is exactly the same kind of thing as e.g. the `wranHearst` config. A NixOS installer also shares the image-specific structure of NixOS configs such as `wranHearst`: when the NixOS installer boots, it boots into a NixOS `toplevel` just like any other NixOS system would: it contains a call to `${cfg.system.build.toplevel}/init` to provide the installation environment. What actually distinguishes a the image of a NixOS installer from one of a regular NixOS system is that (1) the NixOS installer image has all kernel modules available, in order to support a wide variety of hardware, and (2) the NixOS installer image does not specify a file system at all.
-
-
-
+--
+title: attribute containing the VM scripts in a NixOS eval where the config has virtualisation
+creationDate: 2026-09-06 02:14
+body: `config.system.build.vm`
 --
 title: short report about installing `lanchamarcou` (INCOMPLETE/INACCURATE/IN PROGRESS)
 creationDate: 2026-09-05 00:31
