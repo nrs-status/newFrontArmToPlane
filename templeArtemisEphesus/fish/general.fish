@@ -11,7 +11,7 @@ abbr -a gd git diff
 abbr -a gl git log
 abbr -a glo git log --oneline
 abbr -a glg git log --graph --oneline --decorate --all
-abbr -a gpu git push --set-upstream origin (git branch --show-current 2>/dev/null)
+abbr -a gpu git push --set-upstream origin 
 abbr -a grst git restore --staged
 abbr -a gs git status
 abbr -a gss git status --short
