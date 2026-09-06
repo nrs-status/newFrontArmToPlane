@@ -30,6 +30,11 @@ abbr -a wtrf wt remove --force
 #zoxide
 abbr -a zq zoxide query
 
+#eza
+abbr -a ezlsm eza -ls modified
+abbr -a ezlsc eza -ls created
+abbr -a ezlsa eza -ls accessed
+
 # ─────────────────────────────────────────────────────────────
 # git aliases (functions — survive abbreviation expansion issues)
 # ─────────────────────────────────────────────────────────────
