@@ -52,6 +52,9 @@ abbr -a nreg nix registry
 #neovim
 abbr -a nR nvim -R
 
+#pi
+abbr -a pir pi "Read and execute ./instructions.txt"
+
 # ─────────────────────────────────────────────────────────────
 # git aliases (functions — survive abbreviation expansion issues)
 # ─────────────────────────────────────────────────────────────
