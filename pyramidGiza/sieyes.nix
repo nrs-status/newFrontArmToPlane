@@ -41,6 +41,7 @@ pkgs.mkShell {
       scripts.update-twc-fatp-input
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
+      tell # glm-5.3-flash generated note-making client for the `doc` db
     ]);
 
   shellHook = ''
