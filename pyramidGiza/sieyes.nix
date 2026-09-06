@@ -35,6 +35,7 @@ pkgs.mkShell {
       firefox
       pi #coding harness
       fish #shell
+      nushell #testing out fish alternative
       tmux #terminal multiplexer
       sesh #tmux session manager
       kitty #terminal emulator
