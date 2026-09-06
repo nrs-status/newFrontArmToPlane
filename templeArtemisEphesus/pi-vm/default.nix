@@ -1,7 +1,9 @@
-{ pkgs, localPkgs, pkgsLib, ... }:
+#used as an environment to make it easier to write and test bash scripts for setting up the `pi` vm
+{ modulesPath, pkgs, localPkgs, pkgsLib, ... }:
 pkgsLib.nixosSystem {
   system = "x86_64-linux";
   modules = [
+    "${modulesPath}/virtualisation/qemu-vm.nix"
     {
       networking.hostName = "pi-vm";
       system.stateVersion = "26.11";
