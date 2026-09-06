@@ -25,10 +25,12 @@ pkgs.mkShell {
       delta # git diff pretty printer
       moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR 
 
+      nushell #for testing a different shell
+
       #testing these for a workflow for querying the psql server
       visidata
       harlequin
-      pgcli
+      pgcli #complementary to `psql`. `pgcli` is for interactive use, `psql` for scripting
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
