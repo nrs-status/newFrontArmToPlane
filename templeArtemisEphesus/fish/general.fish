@@ -27,6 +27,9 @@ abbr -a wtl wt list
 abbr -a wtr wt remove
 abbr -a wtrf wt remove --force
 
+#zoxide
+abbr -a zq zoxide query
+
 # ─────────────────────────────────────────────────────────────
 # git aliases (functions — survive abbreviation expansion issues)
 # ─────────────────────────────────────────────────────────────
