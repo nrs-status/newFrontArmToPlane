@@ -23,6 +23,11 @@ pkgs.mkShell {
       worktrunk # wrapper for git worktrees
       bubblewrap # unpriviledged escalation tool
       delta # git diff pretty printer
+
+      #testing these for a workflow for querying the psql server
+      visidata
+      harlequin
+      pgcli
     ]
     ++ (with localPkgs; [
       montezumaCirclesScroll.full # nixvim `full` profile
