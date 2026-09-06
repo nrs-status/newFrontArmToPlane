@@ -71,3 +71,20 @@ body: `git show --name-status <commit hash>`
 title: inspect the diff of a staged file
 creationDate: 2026-09-05 00:45
 body: `git diff HEAD -- <file>`
+--
+title: commit only some of the current uncommitted changes, but in a new branch different from the current one
+creationDate: 2026-09-06 00:25
+body:
+`git stash push -m <msg> -- <file0> <file1> ... <filen>` 
+`git switch -c <new branch>`
+`git add ...`
+`git commit ...`
+`git switch <previous branch>`
+`git stash pop` 
+--
+title: undo the last commit locally, keeping changes staged
+creationDate: 2026-09-06 00:33
+body: `git reset --soft HEAD~1`
+use without `--soft` option to unstage as well
+explore the `git revert` command for making a commit that undoes the commit, useful in a shared setting or a setting involved a push/pull state
+---
