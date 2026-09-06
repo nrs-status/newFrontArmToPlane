@@ -15,3 +15,7 @@ body: `nix build --no-link --print-out-paths <flake>#<package>`
 title: build a vm from a flake containing a nixos config
 creationDate: 2026-09-03 07:38
 body: `nixos-rebuild build-vm <flake path>#<host name>`
+--
+title: force the `nix` command to forget fetch-level caches
+creationDate: 2026-09-05 19:43
+body: use the `--refresh` option. Note that this does not rewrite the lock.
