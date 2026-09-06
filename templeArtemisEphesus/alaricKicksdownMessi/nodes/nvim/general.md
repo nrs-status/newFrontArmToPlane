@@ -16,3 +16,8 @@ body: open a buffer with `:new`, wrap the command `x` with `put =execute('lua =x
 title: open a file in read-only mode
 creationDate: 2026-09-01 02:35
 body: `nvim -R <path>`
+--
+title: send visual selection to command line without overwriting selection
+creationDate: 2026-09-06 21:37
+body: visual selection with `w !` e.g.:
+`:'<,'>w !md5sum > /tmp/out && cat /tmp/out `
