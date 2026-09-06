@@ -88,3 +88,6 @@ body: `git reset --soft HEAD~1`
 use without `--soft` option to unstage as well
 explore the `git revert` command for making a commit that undoes the commit, useful in a shared setting or a setting involved a push/pull state
 ---
+title: list branches
+creationDate: 2026-09-06 00:36
+body: `git branch`
