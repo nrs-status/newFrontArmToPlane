@@ -98,8 +98,14 @@
     patterns.enable = true;
 
     fzf-lua.enable = true;
+
     otter = {
       enable = true;
+      settings = {
+        extensions = {
+          nix = "nix";
+        };
+      };
     };
 
   };

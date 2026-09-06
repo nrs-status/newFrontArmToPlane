@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   plugins = {
 
@@ -46,7 +47,15 @@
     treesitter = {
       enable = true;
       indent.enable = true;
-      highlight.enable = true; #needed for `otter`
+      highlight.enable = true; # needed for `otter`
+
+      #testing whether this fixes bash within nix strings
+      grammarPackages = with config.plugins.treesitter.package.builtGrammars; [
+        lua
+        bash
+        vim
+        nix
+      ];
     };
 
     #add context at the top of the window, wherever you are
@@ -60,6 +69,5 @@
     #lsp improvements and prettification
     lspsaga.enable = true;
 
-    
   };
 }
