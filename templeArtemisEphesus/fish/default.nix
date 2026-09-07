@@ -50,7 +50,6 @@ in
     pkgToWrap = pkgs.fish;
     preExecCommands = [
       "rm -rf ~/.config/fish"
-      "mkdir -p ~/.config/fish"
       "cp -r ${fishConfig} ~/.config/fish/"
       "chmod -R u+w ~/.config/fish"
     ];
