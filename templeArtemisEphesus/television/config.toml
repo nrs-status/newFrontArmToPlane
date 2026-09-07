@@ -1,0 +1,69 @@
+# Basic television configuration
+# Merged on top of television's built-in defaults at runtime.
+
+# General settings
+tick_rate = 50
+default_channel = "files"
+history_size = 200
+global_history = false
+
+[ui]
+ui_scale = 100
+orientation = "landscape"
+theme = "default"
+
+[ui.input_bar]
+position = "top"
+prompt = "❯"
+border_type = "rounded"
+
+[ui.status_bar]
+separator_open = ""
+separator_close = ""
+hidden = false
+
+[ui.results_panel]
+border_type = "rounded"
+
+[ui.preview_panel]
+size = 50
+scrollbar = true
+border_type = "rounded"
+hidden = false
+
+[ui.help_panel]
+show_categories = true
+hidden = true
+
+[ui.remote_control]
+show_channel_descriptions = true
+sort_alphabetically = true
+
+[keybindings]
+esc = "quit"
+ctrl-c = "quit"
+down = "select_next_entry"
+up = "select_prev_entry"
+tab = "toggle_selection_down"
+backtab = "toggle_selection_up"
+enter = "confirm_selection"
+pagedown = "scroll_preview_half_page_down"
+pageup = "scroll_preview_half_page_up"
+ctrl-y = "copy_entry_to_clipboard"
+ctrl-r = "reload_source"
+ctrl-t = "toggle_remote_control"
+ctrl-o = "toggle_preview"
+ctrl-h = "toggle_help"
+
+[shell_integration]
+fallback_channel = "files"
+
+[shell_integration.channel_triggers]
+"files" = ["cat", "less", "head", "tail", "bat"]
+"git-branch" = ["git checkout", "git switch"]
+"git-log" = ["git log", "git show"]
+"dirs" = ["cd", "ls", "z"]
+
+[shell_integration.keybindings]
+"smart_autocomplete" = "ctrl-t"
+"command_history" = "ctrl-r"

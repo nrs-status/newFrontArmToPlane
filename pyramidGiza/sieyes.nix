@@ -14,7 +14,6 @@ pkgs.mkShell {
       btop # system monitor
       qimgv # image viewer
       vlc
-      television # fzf alternative, picker
       grex # generate regex from test cases
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
@@ -46,6 +45,8 @@ pkgs.mkShell {
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # glm-5.3-flash generated note-making client for the `doc` db
+
+      television #testing it out, alternative to fzf
     ]);
 
   shellHook = ''
