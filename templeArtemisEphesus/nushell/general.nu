@@ -18,7 +18,7 @@ $env.config.abbreviations = {
     gb: git branch
     gc: git commit
     gcm: git commit --message
-}
+};
 alias gd = git diff
 alias gl = git log
 alias glo = git log --oneline
