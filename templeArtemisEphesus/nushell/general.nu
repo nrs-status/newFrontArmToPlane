@@ -86,3 +86,10 @@ def gps [] {
 def gbl [] {
     git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:short) %(refname:short) %(subject)'
 }
+#
+# Shadows `nix registry list` so it returns a table with columns: owner, flakeref, ui.
+def "nix registry list" [...args: string] {
+    ^nix registry list ...$args
+    | detect columns --no-headers
+    | rename owner flakeref ui
+}
