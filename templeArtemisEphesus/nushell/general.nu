@@ -86,7 +86,7 @@ def gbl [] {
 $env.config.menus ++= [
     {
         # List all unique successful commands
-        name: working_dirs_cd_menu
+        name: "working_dirs_cd_menu"
         only_buffer_difference: true
         marker: "? "
         type: {
