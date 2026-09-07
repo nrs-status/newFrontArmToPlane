@@ -133,12 +133,14 @@ def broot-source [] {
         let $cl = commandline
         let $pos = commandline get-cursor
 
+        #find token under cursor
         let $element = ast --flatten $cl
             | flatten
             | where start <= $pos and end >= $pos
             | get content.0 -i
             | default ''
 
+        #if cursor is on a path, open broot there, else open in current dir
         let $path_exp = $element
             | str trim -c '"'
             | str trim -c "'"
@@ -146,11 +148,11 @@ def broot-source [] {
             | if $in =~ '^~' { path expand } else {}
             | if ($in | path exists) {} else {'.'}
 
-        let $config_path = $env.XDG_CONFIG_HOME? | default '~/.config' | path join broot select.toml
-
-        let $broot_path = ^broot $path_exp --conf $config_path
+        #run broot and quote result
+        let $broot_path = ^broot $path_exp
             | if ' ' in $in { $"`($in)`" } else {}
 
+        #put result on command line
         if $path_exp == '.' {
             commandline edit --insert $broot_path
         } else {
@@ -160,6 +162,7 @@ def broot-source [] {
 
     view source $broot_closure | lines | skip | drop | to text
 }
+
 $env.config.keybindings ++= [
     {
          name: broot_path_completion
