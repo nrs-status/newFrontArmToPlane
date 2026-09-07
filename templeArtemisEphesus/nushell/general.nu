@@ -115,6 +115,7 @@ $env.config.keybindings ++= [{
     name: "working_dirs_cd_menu"
     modifier: "alt_shift"
     keycode: "char_r"
+    mode: [emacs, vi_normal, vi_insert]
     event: {send: menu name: working_dirs_cd_menu}
 }]
 
