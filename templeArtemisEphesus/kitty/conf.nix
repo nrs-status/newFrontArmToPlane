@@ -21,4 +21,19 @@ symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d4,U+e200
 touch_scroll_multiplier 3
 
 include ${gruvboxDarkConfig}
+
+
+#-------------- kitty-scrollback.nvim
+allow_remote_control yes
+listen_on unix:/tmp/kitty 
+shell_integration
+
+# kitty-scrollback.nvim Kitten alias
+action_alias kitty_scrollback_nvim kitten '/nix/store/lvfjsjqa9hcyca4mk63j7sgw72xri0i3-vim-pack-dir/pack/myNeovimPackages/start/kitty-scrollback.nvim/python/kitty_scrollback_nvim.py'
+# Browse scrollback buffer in nvim
+map kitty_mod+h kitty_scrollback_nvim
+# Browse output of the last shell command in nvim
+map kitty_mod+g kitty_scrollback_nvim --config ksb_builtin_last_cmd_output
+# Show clicked command output in nvim
+mouse_map ctrl+shift+right press ungrabbed combine : mouse_select_command_output : kitty_scrollback_nvim --config ksb_builtin_last_visited_cmd_output
 ''
