@@ -111,5 +111,7 @@
 
     kitty-scrollback.enable = true;
 
+    #structural editing
+    treesj.enable = true;
   };
 }

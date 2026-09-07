@@ -12,7 +12,10 @@
     sleuth.enable = true;
 
     #commands to add/remove/replace brackets, parenthesis, etc. in combination with motion commands
-    vim-surround.enable = false;
+    #testing mini.surround replacement
+    #vim-surround.enable = false;
+
+    
     auto-save = {
       enable = true;
       settings = {
@@ -80,6 +83,17 @@
         ai = {
           n_lines = 50;
           search_method = "cover_or_next";
+        };
+        surround = {
+          mappings = {
+            add = "gsa";
+            delete = "gsd";
+            find = "gsf";
+            find_left = "gsF";
+            highlight = "gsh";
+            replace = "gsr";
+            update_n_lines = "gsn";
+          };
         };
       };
     };
