@@ -29,7 +29,11 @@
 
       kotlin_language_server = { enable = true; };
 
-      nushell = { enable = true; };
+    nushell = { 
+      enable = true; 
+      # todo: refactor mkNixvim so that I can call pass localPkgs to modules. it would probably be a good idea, at the same time, to stop punning package names (but punning binaries is fine, proper nix expressions shouldn't call packages by path basename)
+      # package = localPkgs.nushell;
+    };
 
 
       postgres_lsp = { enable = true; };
