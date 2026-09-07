@@ -27,6 +27,7 @@ pkgs.mkShell {
       gum #testing it out to make quick TUIs
       tree-sitter #testing out whether I can use it to extract substrings
       pet # testing out, snippet manager
+      atuin # testing out, terminal history manager
 
       #testing these for a workflow for querying the psql server
       visidata
