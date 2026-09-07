@@ -26,6 +26,7 @@ pkgs.mkShell {
       moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR 
 
       gum #testing it out to make quick TUIs
+      treesitter #testing out whether I can use it to extract substrings
 
       #testing these for a workflow for querying the psql server
       visidata
