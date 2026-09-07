@@ -111,12 +111,12 @@ $env.config.menus ++= [
         }
     }
 ]
-$env.config.keybindings ++= [
+$env.config.keybindings ++= [{
     name: "working_dirs_cd_menu"
     modifier: "alt_shift"
     keycode: "char_r"
     event: {send: menu name: working_dirs_cd_menu}
-    ]
+}]
 
 # Shadows `nix registry list` so it returns a table with columns: owner, flakeref, ui.
 def "nix registry list" [...args: string] {
