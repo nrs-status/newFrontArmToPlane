@@ -99,14 +99,17 @@
 
     fzf-lua.enable = true;
 
-    otter = {
-      enable = true;
-      settings = {
-        extensions = {
-          nix = "nix";
-        };
-      };
-    };
+    #needs configuration, works in principle
+    # otter = {
+    #   enable = true;
+    #   settings = {
+    #     extensions = {
+    #       nix = "nix";
+    #     };
+    #   };
+    # };
+
+    kitty-scrollback.enable = true;
 
   };
 }
