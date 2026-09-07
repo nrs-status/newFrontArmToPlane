@@ -55,6 +55,7 @@
         bash
         vim
         nix
+        nu
       ];
     };
 

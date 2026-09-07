@@ -29,6 +29,8 @@
 
       kotlin_language_server = { enable = true; };
 
+      nushell = { enable = true; };
+
 
       postgres_lsp = { enable = true; };
 

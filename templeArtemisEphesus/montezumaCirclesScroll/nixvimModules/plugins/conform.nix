@@ -23,6 +23,7 @@
       yaml = [ "yamlfmt" ];
       ocaml = [ "ocamlformat" ];
       toml = [ "taplo" ];
+      nu = [ "nufmt" ];
     };
   };
 
@@ -34,5 +35,8 @@
 
   __depPackages.taplo.default = "taplo";
   dependencies.taplo.enable = true;
+
+  __depPackages.nufmt.default = "nufmt";
+  dependencies.nufmt.enable = true;
 
 }
