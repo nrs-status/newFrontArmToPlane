@@ -1,15 +1,10 @@
-# ─────────────────────────────────────────────────────────────
-# base settings
-# ─────────────────────────────────────────────────────────────
 
 $env.config.show_banner = false
 $env.config.edit_mode = "vi"
 $env.config.history.file_format = "sqlite"
 $env.config.history.isolation = true
 
-# ─────────────────────────────────────────────────────────────
-# abbreviations (the analog of fish's `abbr -a` entries)
-# ─────────────────────────────────────────────────────────────
+$env.config.completions.algorithm = "Fuzzy" #allows incomplete paths, e.g. /a/b/c will match the completion /axaxax/bxbxbx/cxcxcxc
 
 $env.config.abbreviations = {
     g: git
@@ -34,10 +29,6 @@ $env.config.abbreviations = {
     gdw: "git diff --word-diff"
     gshow: "git show --stat --oneline"
     gamend: "git commit --amend --no-edit"
-
-    # wt: nushell type-checks flags at parse time, so aliases forwarding
-    # worktrunk flags (e.g. `wtsc = wt switch --create`) cannot be defined
-    # against the `wt` custom command. Use `wt switch --create` directly instead.
 
     # zoxide
     zq: "zoxide query"
@@ -87,10 +78,99 @@ def gps [] {
 def gbl [] {
     git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:short) %(refname:short) %(subject)'
 }
-#
+
+# ------------------- other
+
+#menu of previous dirs and keybinding
+
+$env.config.menus ++= [
+    {
+        # List all unique successful commands
+        name: working_dirs_cd_menu
+        only_buffer_difference: true
+        marker: "? "
+        type: {
+            layout: list
+            page_size: 23
+        }
+        style: {
+            text: green
+            selected_text: green_reverse
+        }
+        source: {|buffer, position|
+            open $nu.history-path
+            | query db "SELECT DISTINCT(cwd) FROM history ORDER BY id DESC"
+            | get CWD
+            | into string
+            | where $it =~ $buffer
+            | compact --empty
+            | each {
+                if ($in has ' ') { $'"($in)"' } else {}
+                | {value: $in}
+            }
+        }
+    }
+]
+$env.config.keybindings ++= [
+    name: working_dirs_cd_menu
+    modifier: alt_shift
+    keycode: char_r
+    event: {send: menu name: working_dirs_cd_menu}
+    ]
+
 # Shadows `nix registry list` so it returns a table with columns: owner, flakeref, ui.
 def "nix registry list" [...args: string] {
     ^nix registry list ...$args
     | detect columns --no-headers
     | rename owner flakeref ui
 }
+
+
+# add broot path paster
+#  `broot-source` command enables syntax highlighting in edit mode.
+def broot-source [] {
+    let $broot_closure = {
+        let $cl = commandline
+        let $pos = commandline get-cursor
+
+        let $element = ast --flatten $cl
+            | flatten
+            | where start <= $pos and end >= $pos
+            | get content.0 -i
+            | default ''
+
+        let $path_exp = $element
+            | str trim -c '"'
+            | str trim -c "'"
+            | str trim -c '`'
+            | if $in =~ '^~' { path expand } else {}
+            | if ($in | path exists) {} else {'.'}
+
+        let $config_path = $env.XDG_CONFIG_HOME? | default '~/.config' | path join broot select.toml
+
+        let $broot_path = ^broot $path_exp --conf $config_path
+            | if ' ' in $in { $"`($in)`" } else {}
+
+        if $path_exp == '.' {
+            commandline edit --insert $broot_path
+        } else {
+            $cl | str replace $element $broot_path | commandline edit -r $in
+        }
+    }
+
+    view source $broot_closure | lines | skip | drop | to text
+}
+$env.config.keybindings ++= [
+    {
+         name: broot_path_completion
+         modifier: control
+         keycode: char_t
+         mode: [emacs, vi_normal, vi_insert]
+         event: [
+            {
+                send: ExecuteHostCommand
+                cmd: (broot-source)
+            }
+        ]
+    }
+]
