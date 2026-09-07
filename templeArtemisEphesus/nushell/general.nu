@@ -112,9 +112,9 @@ $env.config.menus ++= [
     }
 ]
 $env.config.keybindings ++= [
-    name: working_dirs_cd_menu
-    modifier: alt_shift
-    keycode: char_r
+    name: "working_dirs_cd_menu"
+    modifier: "alt_shift"
+    keycode: "char_r"
     event: {send: menu name: working_dirs_cd_menu}
     ]
 
