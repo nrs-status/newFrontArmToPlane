@@ -3,13 +3,12 @@
 # ─────────────────────────────────────────────────────────────
 
 $env.config.show_banner = false
-$env.config.edit_mode = "emacs"
+$env.config.edit_mode = "vi"
 $env.config.history.file_format = "sqlite"
 $env.config.history.isolation = true
 
 # ─────────────────────────────────────────────────────────────
-# git aliases (nushell has no abbreviations — plain aliases are
-# the direct analog of fish's `abbr -a` entries)
+# abbreviations (the analog of fish's `abbr -a` entries)
 # ─────────────────────────────────────────────────────────────
 
 $env.config.abbreviations = {
@@ -18,67 +17,60 @@ $env.config.abbreviations = {
     gb: "git branch"
     gc: "git commit"
     gcm: "git commit --message"
+    gd: "git diff"
+    gl: "git log"
+    glo: "git log --oneline"
+    glg: "git log --graph --oneline --decorate --all"
+    gpu: "git push --set-upstream origin"
+    grst: "git restore --staged"
+    gss: "git status --short"
+    gssb: "git status --short --branch"
+    gsw: "git switch"
+    gswc: "git switch --create"
+    gs: "git status -sb"
+    gl2: "git log --graph --oneline --decorate --all"
+    glast: "git log -1 --stat"
+    gds: "git diff --staged"
+    gdw: "git diff --word-diff"
+    gshow: "git show --stat --oneline"
+    gamend: "git commit --amend --no-edit"
+
+    # wt: nushell type-checks flags at parse time, so aliases forwarding
+    # worktrunk flags (e.g. `wtsc = wt switch --create`) cannot be defined
+    # against the `wt` custom command. Use `wt switch --create` directly instead.
+
+    # zoxide
+    zq: "zoxide query"
+
+    # eza
+    ezlsm: "eza -ls modified"
+    ezlsc: "eza -ls created"
+    ezlsa: "eza -ls accessed"
+
+    # nix
+    sunrsf: "sudo nixos-rebuild switch --flake"
+    nrsf: "nixos-rebuild switch --flake"
+    sunfu: "sudo nix flake update"
+    nfu: "nix flake update"
+    nr: "nix run"
+    nd: "nix develop"
+    ns: "nix shell"
+    nb: "nix build"
+    nbnp: "nix build --no-link --print-out-paths"
+    nbpn: "nix build --no-link --print-out-paths"
+    nreg: "nix registry"
+
+    # neovim
+    nR: "nvim -R"
+
+    # pi
+    pir: 'pi "Read and execute ./instructions.txt"'
 }
-alias gd = git diff
-alias gl = git log
-alias glo = git log --oneline
-alias glg = git log --graph --oneline --decorate --all
-alias gpu = git push --set-upstream origin
-alias grst = git restore --staged
-alias gss = git status --short
-alias gssb = git status --short --branch
-alias gsw = git switch
-alias gswc = git switch --create
-
-# wt aliases: nushell type-checks flags at parse time, so aliases forwarding
-# worktrunk flags (e.g. `wtsc = wt switch --create`) cannot be defined against
-# the `wt` custom command. Use `wt switch --create` directly instead.
-
-# zoxide
-alias zq = zoxide query
-
-# eza
-alias ezlsm = eza -ls modified
-alias ezlsc = eza -ls created
-alias ezlsa = eza -ls accessed
-
-# nix
-alias sunrsf = sudo nixos-rebuild switch --flake
-alias nrsf = nixos-rebuild switch --flake
-alias sunfu = sudo nix flake update
-alias nfu = nix flake update
-
-alias nr = nix run
-alias nd = nix develop
-alias ns = nix shell
-alias nb = nix build
-alias nbnp = nix build --no-link --print-out-paths
-alias nbpn = nix build --no-link --print-out-paths
-alias nreg = nix registry
-
-# neovim
-alias nR = nvim -R
-
-# pi
-alias pir = pi "Read and execute ./instructions.txt"
 
 # ─────────────────────────────────────────────────────────────
-# git aliases (custom commands — the analog of fish functions,
+# git custom commands (the analog of fish functions,
 # they survive "abbreviation expansion issues")
 # ─────────────────────────────────────────────────────────────
-
-# Compact status
-alias gs = git status -sb
-
-# Pretty one-line log with graph
-alias gl2 = git log --graph --oneline --decorate --all
-
-# Last commit
-alias glast = git log -1 --stat
-
-# Diff helpers
-alias gds = git diff --staged
-alias gdw = git diff --word-diff
 
 # Undo last commit, keeping changes staged
 def gundo [] {
@@ -90,13 +82,7 @@ def gps [] {
     git push -u origin (git branch --show-current)
 }
 
-# Show files changed in a commit
-alias gshow = git show --stat --oneline
-
 # List local branches with last commit date, newest first
 def gbl [] {
     git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:short) %(refname:short) %(subject)'
 }
-
-# Quick amend without editing the message
-alias gamend = git commit --amend --no-edit
