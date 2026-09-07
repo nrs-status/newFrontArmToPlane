@@ -12,11 +12,13 @@ $env.config.history.isolation = true
 # the direct analog of fish's `abbr -a` entries)
 # ─────────────────────────────────────────────────────────────
 
-alias g = git
-alias ga = git add
-alias gb = git branch
-alias gc = git commit
-alias gcm = git commit --message
+$env.config.abbreviations = {
+    g: git
+    ga: git add
+    gb: git branch
+    gc: git commit
+    gcm: git commit --message
+}
 alias gd = git diff
 alias gl = git log
 alias glo = git log --oneline
