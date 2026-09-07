@@ -70,5 +70,7 @@
     #lsp improvements and prettification
     lspsaga.enable = true;
 
+    # jump around file
+    flash.enable = true;
   };
 }
