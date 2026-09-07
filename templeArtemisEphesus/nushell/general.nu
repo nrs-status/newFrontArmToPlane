@@ -14,11 +14,11 @@ $env.config.history.isolation = true
 
 $env.config.abbreviations = {
     g: git
-    ga: git add
-    gb: git branch
-    gc: git commit
-    gcm: git commit --message
-};
+    ga: "git add"
+    gb: "git branch"
+    gc: "git commit"
+    gcm: "git commit --message"
+}
 alias gd = git diff
 alias gl = git log
 alias glo = git log --oneline
