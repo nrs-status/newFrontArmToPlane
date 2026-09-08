@@ -39,6 +39,9 @@
     which-key.enable = true;
 
     #renders lsp responses as lines on top of code
+    #TODO: config to make the toggle that can be seen at 8:03 in
+    #https://www.youtube.com/watch?v=xdXE1tOT-qg 
+    #(am not sure whether it's this plugin or just a simple wrapper around vim.diagnostic.enable()/disable())
     lsp-lines.enable = true;
 
     #simple navigation popup
@@ -113,5 +116,12 @@
 
     #structural editing
     treesj.enable = true;
+
+    #improved quickfix list
+    #does this overlap with trouble.nvim? worth checking quicker.nvim also
+    nvim-bqf.enable = true;
+
+    #show at top of screen e.g. which function we are in
+    treesitter-context.enable = true;
   };
 }
