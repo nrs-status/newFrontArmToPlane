@@ -61,6 +61,7 @@ let
       source ${nuScriptsDir}/rg-completions.nu
       source ${nuScriptsDir}/tar-completions.nu
       source ${nuScriptsDir}/television-completions.nu
+      source ${nuScriptsDir}/git-completions.nu
 
       EOF
 
