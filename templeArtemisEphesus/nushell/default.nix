@@ -4,6 +4,15 @@
   ...
 }:
 let
+  # Git completions from nushell's official script collection, pinned to a
+  # rev of https://github.com/nushell/nu_scripts (main as of 2026-08-25).
+  # Provides `extern "git ..."` definitions so tab-completion works for
+  # git subcommands, flags, remotes and branches.
+  gitCompletions = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/nushell/nu_scripts/cee236cf46a597b43f36b56ccee5881fc0483c56/custom-completions/git/git-completions.nu";
+    hash = "sha256-iXOvtQZCNLWfF+wGi+sL/VN5Ht3JFC5MtQNOtCrMW34=";
+  };
+
   # Analog of `localPkgs.scripts.fishScripts`: a derivation holding the
   # nushell scripts sourced at runtime by the config.
   nuScriptsDir = pkgs.stdenv.mkDerivation {
@@ -47,6 +56,7 @@ let
       source $out/workTrunkConfig.nu
       source $out/zoxideConfig.nu
       source ${nuScriptsDir}/start-llm-session.nu
+      source ${gitCompletions}
       EOF
 
       runHook postInstall
