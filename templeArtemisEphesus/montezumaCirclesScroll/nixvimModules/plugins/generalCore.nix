@@ -74,7 +74,10 @@
     lspsaga.enable = true;
 
     # jump around file
+    # test out mini.jump2d afterwards.
     flash.enable = true;
+
+
 
     # various small utilities
     mini = {
@@ -84,6 +87,8 @@
           n_lines = 50;
           search_method = "cover_or_next";
         };
+        #functions to go forwards/backwards to certain target
+        bracketed = {};
         surround = {
           mappings = {
             add = "gsa";
