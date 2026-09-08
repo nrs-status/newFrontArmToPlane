@@ -59,44 +59,6 @@
     #run code in-editor
     sniprun.enable = true;
 
-    #FAILS
-    #llm integration
-    #parrot.enable = true;
-
-    #llm integration, test after parrot
-    #codecompanion.enable = true;
-
-    #llm integration emulating cursor
-    avante = {
-      enable = true;
-      settings = {
-        provider = "openrouter";
-        diff = {
-          autojump = true;
-          debug = false;
-          list_opener = "copen";
-        };
-        highlights = {
-          diff = {
-            current = "DiffText";
-            incoming = "DiffAdd";
-          };
-        };
-        hints = {
-          enable = true;
-        };
-        providers = {
-          openrouter = {
-            #openrouter exposes an OpenAI-compatible API
-            __inherited_from = "openai";
-            endpoint = "https://openrouter.ai/api/v1";
-            model = "z-ai/glm-5.3-flash";
-            api_key_name = "cmd:cat /run/secrets/OPENROUTER_API_KEY";
-          };
-        };
-      };
-    };
-
     #regex pattern viewer
     patterns.enable = true;
 
