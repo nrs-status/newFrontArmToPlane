@@ -56,7 +56,25 @@ let
       source $out/workTrunkConfig.nu
       source $out/zoxideConfig.nu
       source ${nuScriptsDir}/start-llm-session.nu
+<<<<<<< HEAD
       source ${gitCompletions}
+||||||| parent of cb52e6f (adding various aliases and completions to `nu`)
+=======
+
+      # aliases (vendored from github:nushell/nu_scripts)
+      source ${nuScriptsDir}/eza-aliases.nu
+      source ${nuScriptsDir}/bat-aliases.nu
+
+      # custom completions (vendored from github:nushell/nu_scripts)
+      source ${nuScriptsDir}/curl-completions.nu
+      source ${nuScriptsDir}/podman-completions.nu
+      source ${nuScriptsDir}/eza-completions.nu
+      source ${nuScriptsDir}/nix-completions.nu
+      source ${nuScriptsDir}/ssh-completions.nu
+      source ${nuScriptsDir}/rg-completions.nu
+      source ${nuScriptsDir}/tar-completions.nu
+      source ${nuScriptsDir}/television-completions.nu
+>>>>>>> cb52e6f (adding various aliases and completions to `nu`)
       EOF
 
       runHook postInstall
