@@ -36,10 +36,12 @@ body: `git restore --staged <path to file>`
 --
 title: force delete a branch
 creationDate: 2026-08-30 21:20
+fuzzyAux: remove
 body: `git branch -D <branch name>`
 --
 title: delete a branch
 creationDate: 2026-09-06 01:31
+fuzzyAux: remove
 body: `git branch -d <branch name>` (this is the expected workflow when merging)
 --
 title: delete untracked files and directories
