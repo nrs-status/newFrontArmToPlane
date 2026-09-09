@@ -9,5 +9,6 @@
   "./plugins/hop.nix"
   "./plugins/lspCore.nix"
   "./plugins/harpoon.nix"
+  "./plugins/vimHighlighter.nix"
   "./luaSnip"
 ]

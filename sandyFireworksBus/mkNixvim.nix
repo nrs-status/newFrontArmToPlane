@@ -1,4 +1,4 @@
-{ baseLib, pkgsLib, nixvimFlake, ... }: 
+{ baseLib, pkgsLib, pkgs, nixvimFlake, ... }: 
 { modulesPath, moduleSetsPath }:
 baseLib.withDebug rec { 
   importPairs = baseLib.importPairsOfDirPath {
@@ -10,6 +10,8 @@ baseLib.withDebug rec {
   nixvimEvalsAux = _: modulePathList: nixvimFlake.lib.evalNixvim {
     system = "x86_64-linux";
     modules = modulePathList;
+    # making the flake's pkgs available to nixvim modules via special args
+    extraSpecialArgs = { inherit pkgs; };
   };
   nixvimEvals = builtins.mapAttrs nixvimEvalsAux withCorrectRoot;
   __output = builtins.mapAttrs (_: eval: eval.config.build.package) nixvimEvals;
