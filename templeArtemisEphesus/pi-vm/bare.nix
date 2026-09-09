@@ -39,8 +39,8 @@ nixosSystem {
         target = "/root/.pi";
       };
       virtualisation.sharedDirectories.pi-project = {
-        source = "\${PI_PROJECT_DIR}";
-        target = "/root/project";
+        source = "\${SHARED_DIR}";
+        target = "/workspace";
       };
 
       environment.systemPackages =
