@@ -64,7 +64,7 @@
 
     #add context at the top of the window, wherever you are
     treesitter-context = {
-      enable = false;
+      enable = true;
       settings = {
         max_lines = 5;
       };

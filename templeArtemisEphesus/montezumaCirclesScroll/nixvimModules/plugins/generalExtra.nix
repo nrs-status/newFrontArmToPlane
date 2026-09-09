@@ -83,7 +83,5 @@
     #does this overlap with trouble.nvim? worth checking quicker.nvim also
     nvim-bqf.enable = true;
 
-    #show at top of screen e.g. which function we are in
-    treesitter-context.enable = true;
   };
 }
