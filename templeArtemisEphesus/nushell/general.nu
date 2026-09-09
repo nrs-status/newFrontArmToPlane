@@ -68,6 +68,12 @@ $env.config.abbreviations = {
 
     # pi
     pir: 'pi "Read and execute ./instructions.txt"'
+
+    #wt
+    wts: "wt switch"
+    wtsc: "wt switch --create"
+    wtr: "wt remove"
+    wtm: "wt merge"
 }
 
 # ─────────────────────────────────────────────────────────────
