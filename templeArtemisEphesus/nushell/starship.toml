@@ -2,7 +2,22 @@
 # Pointed to at runtime via the STARSHIP_CONFIG environment variable
 # (set in the generated config.nu).
 
+# Single-line prompt: only path, git branch and prompt character.
+# Explicitly listing the modules keeps everything else (package, status,
+# cmd_duration, ...) out of the prompt, so prompt and user input share one line.
+format = "$directory$git_branch$character"
+
 [directory]
 truncation_length = 2 # show last two dirs
 fish_style_pwd_dir_length = 1 # abbreviate earlier dirs to 1 char (fish-style)
 truncate_to_repo = false
+
+[git_branch]
+symbol = "" # drop the "git:" prefix, keep it short
+format = "[$symbol$branch]($style) "
+
+[character]
+format = "$symbol " # prompt character directly after the branch, same line
+
+[line_break]
+disabled = true # no newline before the input line
