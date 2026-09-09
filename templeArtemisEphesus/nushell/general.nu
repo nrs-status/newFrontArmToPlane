@@ -44,6 +44,8 @@ $env.config.abbreviations = {
     g: git
     ga: "git add"
     gb: "git branch"
+    gbd: "git branch -d"
+    gbD: "git branch -D"
     gc: "git commit"
     gcm: "git commit --message"
     gd: "git diff"
@@ -60,7 +62,7 @@ $env.config.abbreviations = {
     glast: "git log -1 --stat"
     gds: "git diff --staged"
     gdw: "git diff --word-diff"
-    gshow: "git show --stat --oneline"
+    gsh: "git show --stat --oneline"
     gamend: "git commit --amend --no-edit"
 
     # zoxide
