@@ -77,6 +77,9 @@ $env.config.abbreviations = {
     wtm: "wt merge"
     wtmm: "wt merge main"
     wtl: "wt list"
+
+    #broot
+    br: "broot"
 }
 
 # ─────────────────────────────────────────────────────────────
