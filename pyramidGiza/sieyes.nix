@@ -45,9 +45,11 @@ pkgs.mkShell {
       sesh #tmux session manager
       kitty #terminal emulator
       scripts.update-twc-fatp-input
+      scripts.compare-flake-pins 
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # glm-5.3-flash generated note-making client for the `doc` db
+      broot # dir navigator
 
       television #testing it out, alternative to fzf
     ]);
