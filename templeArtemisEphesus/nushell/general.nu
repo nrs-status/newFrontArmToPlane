@@ -105,6 +105,12 @@ $env.config.abbreviations = {
 
     #broot
     br: "broot"
+
+    #nushell
+    f: "first"
+    l: "lines"
+    w: "where"
+    o: "open"
 }
 
 # ─────────────────────────────────────────────────────────────
