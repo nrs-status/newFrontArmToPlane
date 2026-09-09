@@ -73,9 +73,6 @@
     #lsp improvements and prettification
     lspsaga.enable = true;
 
-    # jump around file
-    # test out mini.jump2d afterwards.
-    flash.enable = true;
 
 
 
