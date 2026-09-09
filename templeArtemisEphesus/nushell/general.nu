@@ -58,9 +58,9 @@ $env.config.abbreviations = {
     ns: "nix shell"
     nb: "nix build"
     nbnp: "nix build --no-link --print-out-paths"
-    nbpn: "nix build --no-link --print-out-paths"
     nre: "nix registry"
     nrel: "nix registry list"
+    nrer: "nix registry remove"
 
     # neovim
     nR: "nvim -R"
