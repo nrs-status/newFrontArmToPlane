@@ -73,7 +73,10 @@ $env.config.abbreviations = {
     wts: "wt switch"
     wtsc: "wt switch --create"
     wtr: "wt remove"
+    wtrDf: "wt remove -D --force"
     wtm: "wt merge"
+    wtmm: "wt merge main"
+    wtl: "wt list"
 }
 
 # ─────────────────────────────────────────────────────────────
