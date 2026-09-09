@@ -6,6 +6,29 @@ $env.config.history.isolation = true
 
 $env.config.completions.algorithm = "Fuzzy" #allows incomplete paths, e.g. /a/b/c will match the completion /axaxax/bxbxbx/cxcxcxc
 
+# ─────────────────────────────────────────────────────────────
+# fish-style ghost completion from shell history
+# ─────────────────────────────────────────────────────────────
+
+# Uses nushell's built-in history hinter — reedline's `CwdAwareHinter`,
+# which is described in the official reedline sources as "Similar to
+# `fish` autosuggestions". When `show_hints` is true and `hinter.closure`
+# is null, nushell wires the CwdAwareHinter into the line editor
+# (see the official repo: crates/nu-cli/src/repl.rs and the knob's
+# documentation in crates/nu-config/default_files/doc_config.nu).
+#
+# While typing, the most recent history entry matching the current line
+# (preferably one from this directory) is shown as dim "ghost" text.
+# Accept the whole hint with → or Ctrl+f, word-by-word with Alt+f —
+# built-in reedline defaults.
+$env.config.show_hints = true
+
+# the ghost text itself: dim + italic, the fish autosuggestion look
+$env.config.color_config.hints = { fg: "dark_gray", attr: "i" }
+
+# make sure the built-in hinter is used (a closure would replace it)
+$env.config.hinter.closure = null
+
 # modules (vendored from github:nushell/nu_scripts)
 use jc.nu
 use result.nu
