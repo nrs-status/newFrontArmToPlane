@@ -38,10 +38,6 @@ nixosSystem {
         source = "/home/sieyes/.pi";
         target = "/root/.pi";
       };
-      virtualisation.sharedDirectories.pi-project = {
-        source = "\${SHARED_DIR}";
-        target = "/workspace";
-      };
 
       environment.systemPackages =
         with pkgs;
