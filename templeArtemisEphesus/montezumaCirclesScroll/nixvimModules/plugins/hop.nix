@@ -1,5 +1,7 @@
 #disabled while testing `flash`, might replace by `flash` entirely
-# {
+# NOTE: a nix file consisting only of comments contains no expression and is a
+# parse error, so an empty (i.e. disabled) module body is provided below.
+{
 #   plugins = {
 #     #find-next-character motion
 #     hop = { enable = true; };
@@ -32,3 +34,4 @@
 #   ];
 # }
 #
+}

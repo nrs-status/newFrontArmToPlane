@@ -36,6 +36,10 @@ let
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
 
+      # nu modules `use`d by general.nu (relative paths must sit next to it)
+      install -Dm644 nuScripts/jc.nu $out/jc.nu
+      install -Dm644 nuScripts/result.nu $out/result.nu
+
       cat > $out/config.nu <<EOF
       # nushell entry point, generated at build time.
       # Note that nushell variables must be escaped (\$) for them to

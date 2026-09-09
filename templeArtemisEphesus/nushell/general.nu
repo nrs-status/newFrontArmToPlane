@@ -6,6 +6,16 @@ $env.config.history.isolation = true
 
 $env.config.completions.algorithm = "Fuzzy" #allows incomplete paths, e.g. /a/b/c will match the completion /axaxax/bxbxbx/cxcxcxc
 
+# modules (vendored from github:nushell/nu_scripts)
+use jc.nu
+use result.nu
+
+# activate the `result` module (see result.nu header comment):
+# every displayed output is stored and retrievable via `result`, `result ls`, `result select`
+$env.config.hooks.display_output = {
+    result hook | if (term size).columns >= 100 { table -e } else { table }
+}
+
 $env.config.abbreviations = {
     g: git
     ga: "git add"

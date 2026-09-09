@@ -14,6 +14,7 @@ pkgs.mkShell {
       btop # system monitor
       qimgv # image viewer
       vlc
+      jc # convert command output to structured json 
       grex # generate regex from test cases
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
