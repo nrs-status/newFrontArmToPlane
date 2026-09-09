@@ -148,7 +148,7 @@ def broot-source [] {
         let $element = ast --flatten $cl
             | flatten
             | where start <= $pos and end >= $pos
-            | get content.0 -i
+            | get content.0 -o
             | default ''
 
         #if cursor is on a path, open broot there, else open in current dir
