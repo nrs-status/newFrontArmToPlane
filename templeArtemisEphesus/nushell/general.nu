@@ -33,7 +33,6 @@ $env.config.abbreviations = {
     gsw: "git switch"
     gswc: "git switch --create"
     gs: "git status -sb"
-    gl2: "git log --graph --oneline --decorate --all"
     glast: "git log -1 --stat"
     gds: "git diff --staged"
     gdw: "git diff --word-diff"
@@ -61,6 +60,7 @@ $env.config.abbreviations = {
     nre: "nix registry"
     nrel: "nix registry list"
     nrer: "nix registry remove"
+    nrea: "nix registry add"
 
     # neovim
     nR: "nvim -R"
