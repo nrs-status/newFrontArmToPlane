@@ -1,7 +1,0 @@
-You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
-
-Extend the starship configuration at ./templeArtemisEphesus/nushell/starship.toml so that the prompt and user input fit one a single line. For this, remove everything superfluous from the prompt except the path (which currently has a configuration that shortnes it a bit, keep this config) and the current git branch.
-
-Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
-- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
