@@ -1,4 +1,4 @@
-def main [--push-fatp --rebuild] {
+def main [--push-fatp, --rebuild] {
   let initialPath = $env.PWD
   if $push_fatp {
     cd $env.FRONTARMTOPLANE_PATH
