@@ -133,7 +133,7 @@ $env.config.keybindings ++= [{
 def "nix registry list" [...args: string] {
     ^nix registry list ...$args
     | detect columns --no-headers
-    | rename owner flakeref ui
+    | rename owner flakeref uri
 }
 
 
