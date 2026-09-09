@@ -5,6 +5,7 @@
   "./extraConfigLua"
   "./plugins/cmp.nix"
   "./plugins/conform.nix"
+  "./plugins/flash.nix"
   "./plugins/generalCore.nix"
   "./plugins/hop.nix"
   "./plugins/lspCore.nix"
