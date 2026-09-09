@@ -1,0 +1,8 @@
+# starship configuration used by the nushell setup.
+# Pointed to at runtime via the STARSHIP_CONFIG environment variable
+# (set in the generated config.nu).
+
+[directory]
+truncation_length = 2 # show last two dirs
+fish_style_pwd_dir_length = 1 # abbreviate earlier dirs to 1 char (fish-style)
+truncate_to_repo = false

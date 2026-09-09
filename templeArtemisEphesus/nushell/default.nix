@@ -23,7 +23,10 @@ let
   nuConfig = pkgs.stdenv.mkDerivation {
     name = "nuConfig";
     src = ./.;
-    nativeBuildInputs = [ pkgs.zoxide ];
+    nativeBuildInputs = [
+      pkgs.zoxide
+      pkgs.starship
+    ];
     installPhase = ''
       runHook preInstall
 
@@ -33,8 +36,12 @@ let
       # fish zoxideConfig.fish file)
       ${pkgs.zoxide}/bin/zoxide init nushell > $out/zoxideConfig.nu
 
+      # starship prompt integration, generated at build time
+      ${pkgs.starship}/bin/starship init nu > $out/starshipInit.nu
+
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
+      install -Dm644 starship.toml $out/starship.toml
 
       # nu modules `use`d by general.nu (relative paths must sit next to it)
       install -Dm644 nuScripts/jc.nu $out/jc.nu
@@ -50,6 +57,12 @@ let
       source $out/general.nu
       source $out/workTrunkConfig.nu
       source $out/zoxideConfig.nu
+
+      # starship prompt (config location set explicitly, since starship's
+      # default would be ~/.config/starship.toml, outside this tree)
+      \$env.STARSHIP_CONFIG = '$out/starship.toml'
+      source $out/starshipInit.nu
+
       source ${nuScriptsDir}/start-llm-session.nu
 
       # aliases (vendored from github:nushell/nu_scripts)
