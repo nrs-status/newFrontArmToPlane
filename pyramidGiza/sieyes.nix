@@ -53,8 +53,9 @@ pkgs.mkShell {
     ]);
 
   shellHook = ''
-    export THATWATERCHARMANDER_PATH=$(cat /run/secrets/THATWATERCHARMANDER_PATH) #required for script that updates twc's fatp input
-    exec ${pkgsLib.getExe localPkgs.fish}
+    export THATWATERCHARMANDER_PATH=$(cat /run/secrets/paths/wranHearst/thatWaterCharmander) #required for script that updates twc's fatp input
+    export FRONTARMTOPLANE_PATH=$(cat /run/secrets/paths/wranHearst/frontArmToPlane)
+    exec ${pkgsLib.getExe localPkgs.nushell}
     echo "sieyes shell loaded"
   '';
 }
