@@ -1,5 +1,6 @@
 #used as an environment to make it easier to write and test bash scripts for setting up the `pi` vm
 {
+  nixosSystem,
   modulesPath,
   pkgs,
   localPkgs,
@@ -7,7 +8,7 @@
   ...
 }:
 { mountHostNixStore }:
-pkgsLib.nixosSystem {
+nixosSystem {
   system = "x86_64-linux";
   modules = [
     "${modulesPath}/virtualisation/qemu-vm.nix"
