@@ -9,6 +9,7 @@ $env.config.completions.algorithm = "Fuzzy" #allows incomplete paths, e.g. /a/b/
 # modules (vendored from github:nushell/nu_scripts)
 use jc.nu
 use result.nu
+use std/dirs
 
 # activate the `result` module (see result.nu header comment):
 # every displayed output is stored and retrievable via `result`, `result ls`, `result select`
