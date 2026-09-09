@@ -7,6 +7,6 @@
 verbs = [
   { invocation = "edit", key = "ctrl-e", execution = "$EDITOR {file}" },
   { invocation = "create", execution = "$EDITOR {sub-path}" },
-  { invocation = "ok", key = "enter", leave_broot = "true", execution = ":print_path", apply_to = "file" },
-  { invocation = "ok", key = "alt-enter", leave_broot = "true", execution = ":print_path", apply_to = "any" },
+  { invocation = "ok", key = "enter", leave_broot = true, execution = ":print_path", apply_to = "file" },
+  { invocation = "ok", key = "alt-enter", leave_broot = true, execution = ":print_path", apply_to = "any" },
 ]
