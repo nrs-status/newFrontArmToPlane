@@ -23,6 +23,7 @@
         inherit baseLib pkgsLib pkgs;
       };
       modulesPath = "${inputs.nixpkgs}/nixos/modules";
+      nixosSystem = inputs.nixpkgs.lib.nixosSystem;
       localPkgsArgs = {
         # abstracting this out is useful for debugging sessions
         inherit
@@ -31,6 +32,7 @@
           pkgs
           pkgsLib
           modulesPath
+          nixosSystem
           ;
       };
       localPkgs = pkgs.lib.fix (
