@@ -52,6 +52,14 @@ let
       # in the build sandbox)
       HOME=$TMPDIR ${pkgs.atuin}/bin/atuin init nu > $out/atuinConfig.nu
 
+      # `atuin init nu` emits two keybindings that share the name `atuin`
+      # (Ctrl+R search and the Up-arrow search), which makes nushell print a
+      # `nu::shell::shared_keybindings_name` warning ("Multiple keybindings
+      # share a name") on every startup. Rename them to unique names; the
+      # first occurrence is the Ctrl+R binding, the second the Up-arrow one.
+      sed -i '0,/name: atuin$/s//name: atuin_search/' $out/atuinConfig.nu
+      sed -i '0,/name: atuin$/s//name: atuin_up_search/' $out/atuinConfig.nu
+
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
       install -Dm644 starship.toml $out/starship.toml
