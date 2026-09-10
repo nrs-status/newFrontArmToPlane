@@ -25,7 +25,7 @@
   ];
   extraConfigVim = ''
     " settings for vim-highlighter (based on upstream defaults, made explicit
-    " here for tweakability; note that `f` is taken by the `flash` plugin)
+    " here for tweakability)
     let HiSet   = '<Leader>h<CR>'
     let HiErase = '<Leader>h<BS>'
     let HiClear = '<Leader>h<C-L>'
