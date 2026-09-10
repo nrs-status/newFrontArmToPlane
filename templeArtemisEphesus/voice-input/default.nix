@@ -1,5 +1,9 @@
 # voice-input: push-to-talk audio recording + OpenRouter transcription + insertion at cursor.
 #
+# notifications: transient notifications (-t 5000, max 5 s) are sent on recording
+# start and on transcription end (inserted / empty); error notifications are
+# critical and persist.
+#
 # subcommands:
 #   start                 : start recording the default audio source with pw-record
 #   finish                : stop recording, transcribe the wav using the program at
@@ -77,11 +81,11 @@ pkgs.writeShellScriptBin "voice-input" ''
     #flatten newlines and trim whitespace so wtype never hits Enter and inserts nothing superfluous
     text="$(printf '%s' "$text" | tr '\n' ' ' | tr -s ' ' | sed -e 's/^ *//;s/ *$//')"
     if [ ''${#text} -eq 0 ]; then
-      notify "voice-input" "transcription was empty, nothing inserted"
+      notify -t 5000 "voice-input" "transcription was empty, nothing inserted"
       return 0
     fi
     if ${pkgs.wtype}/bin/wtype -s 5 -- "$text"; then
-      notify "voice-input" "inserted transcription: ''${text:0:60}..."
+      notify -t 5000 "voice-input" "inserted transcription: ''${text:0:60}..."
     else
       notify -u critical "voice-input" "wtype failed: no wayland cursor to insert at?"
       return 1
@@ -96,7 +100,7 @@ pkgs.writeShellScriptBin "voice-input" ''
     rm -f "$recordFile"
     ${pkgs.pipewire}/bin/pw-record --target @DEFAULT_AUDIO_SOURCE@ --rate 16000 --channels 1 "$recordFile" >/dev/null 2>&1 &
     echo "$!" > "$pidFile"
-    notify "voice-input" "recording started... (release rightcontrol to transcribe)"
+    notify -t 5000 "voice-input" "recording started... (release rightcontrol to transcribe)"
   }
 
   finish() {
