@@ -1,0 +1,11 @@
+You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
+
+A new virtual machine was created from ./bare.nix at ./wservice.nix However, it has not been tested yet. The new virtual machine must satisfy the the following constraint. It must consist of one single new service that calls by in JSON mode, using the contents of a string located in the virtual machine's /sys/firmware/qemu_fw_cfg/ directory. The contents of the string are left undetermined and they will become available later due to options passed to the qemu command.
+
+furthermore, the service must stream the output of `pi --mode json` to a unix socket the host can read
+
+You must test that the virtual machine declared at ./wservice.nix works and otherwise modify the configuration file in order for it to work.
+
+Once you are done: 
+- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
