@@ -24,11 +24,12 @@ pkgs.mkShell {
       bubblewrap # unpriviledged escalation tool
       delta # git diff pretty printer
       moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR 
+      atuin # terminal history manager
+      jless # interactive json navigator
 
       gum #testing it out to make quick TUIs
       tree-sitter #testing out whether I can use it to extract substrings
       pet # testing out, snippet manager
-      atuin # testing out, terminal history manager
 
       #testing these for a workflow for querying the psql server
       visidata
@@ -46,6 +47,7 @@ pkgs.mkShell {
       kitty #terminal emulator
       scripts.update-twc-fatp-input
       scripts.compare-flake-pins 
+      scripts.llm-gcm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # glm-5.3-flash generated note-making client for the `doc` db
