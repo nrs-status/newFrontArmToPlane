@@ -8,6 +8,43 @@
 #                           transcription wherever the cursor is with wtype
 #   transcribe-file <path>: like finish but transcribes a given file instead of a recording
 #                           (useful for testing, e.g. with ~/baghdad_plane/rectest/out.wav)
+#
+# options (before the subcommand, forwarded to the transcriber):
+#   --config <file>       use <file> as the configuration file (instead of
+#                         $VOICE_INPUT_CONFIG / the default search path)
+#   --api-url <url>       override the 'api_url' config parameter
+#   --model <id>          override the 'model' config parameter
+#   --api-key-file <path> override the 'api_key_file' config parameter
+#   --prompt <text>       override the 'prompt' config parameter
+#   --pipe-command <cmd>  override the 'pipe_command' config parameter
+#
+# precedence (highest wins): CLI options > environment variables > config file
+# > built-in defaults
+#
+# configuration file (searched in this order):
+#   $VOICE_INPUT_CONFIG
+#   ${XDG_CONFIG_HOME:-~/.config}/voice-input/config
+#
+#   api_url = <url>
+#       OpenRouter endpoint the transcription request is POSTed to.
+#       Default: https://openrouter.ai/api/v1/chat/completions
+#   model = <model id>
+#       OpenRouter model used for transcription (must accept audio input).
+#       Default: google/gemini-2.5-flash
+#   api_key_file = <path>
+#       File the OpenRouter API key is read from.
+#       Default: /run/secrets/OPENROUTER_API_KEY
+#   prompt = <text>
+#       Instruction sent to the model together with the audio.
+#   pipe_command = <shell command>
+#       If set, the transcription text is piped through this command (on stdin,
+#       transformed text from stdout) before it is inputted/typed at the cursor.
+#       Example: pipe_command = sed -e 's/um //g'
+#
+# environment variables (override the config file):
+#   OPENROUTER_API_KEY / OPENROUTER_API_KEY_FILE : API key / key file
+#   OPENROUTER_MODEL                             : model override
+#   OPENROUTER_API_URL                           : API endpoint override (testing)
 { pkgs, ... }:
 
 let
@@ -25,13 +62,15 @@ pkgs.writeShellScriptBin "voice-input" ''
     ${pkgs.libnotify}/bin/notify-send -a voice-input "$@"
   }
 
-  transcribeAndInsert() { #$1 = wav file to transcribe
+  #transcribeAndInsert <wav-file> [transcriber options...]
+  transcribeAndInsert() {
+    wavFile="$1"; shift
     transcribeScript="${pyScript}"
-    if [ ! -f "$1" ]; then
-      notify -u critical "voice-input" "no audio file to transcribe: $1"
+    if [ ! -f "$wavFile" ]; then
+      notify -u critical "voice-input" "no audio file to transcribe: $wavFile"
       return 1
     fi
-    if ! text="$(${pythonEnv}/bin/python "$transcribeScript" "$1" 2>"$logFile")"; then
+    if ! text="$(${pythonEnv}/bin/python "$transcribeScript" "$wavFile" "$@" 2>"$logFile")"; then
       notify -u critical "voice-input" "transcription failed, see $logFile"
       return 1
     fi
@@ -65,6 +104,7 @@ pkgs.writeShellScriptBin "voice-input" ''
       notify -u critical "voice-input" "no recording in progress"
       return 1
     fi
+    #$1.. = optional transcriber options (e.g. --config, --model)
     pid="$(cat "$pidFile")"
     rm -f "$pidFile"
     kill -INT "$pid" 2>/dev/null || true
@@ -78,22 +118,43 @@ pkgs.writeShellScriptBin "voice-input" ''
       notify -u critical "voice-input" "recorder did not stop, wav may be incomplete"
       return 1
     fi
-    transcribeAndInsert "$recordFile"
+    transcribeAndInsert "$recordFile" "$@"
   }
+
+  #collect leading --options (each takes one value argument) to forward to the
+  #transcriber; the first non-option argument starts the subcommand
+  opts=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --config|--api-url|--model|--api-key-file|--prompt|--pipe-command)
+        if [ $# -lt 2 ]; then
+          echo "voice-input: missing value for $1" >&2
+          exit 1
+        fi
+        opts+=("$1" "$2")
+        shift 2
+        ;;
+      *) break ;;
+    esac
+  done
 
   case "''${1:-}" in
     start) start ;;
-    finish) finish ;;
+    finish) finish "''${opts[@]+"''${opts[@]}"}" ;;
     transcribe-file)
       file="''${2:-}"
       if [ -z "$file" ]; then
-        echo "usage: voice-input transcribe-file <path>" >&2
+        echo "usage: voice-input [--config FILE] [--api-url URL] [--model ID]" \
+             "[--api-key-file FILE] [--prompt TEXT] [--pipe-command CMD]" \
+             "start|finish|transcribe-file <path>" >&2
         exit 1
       fi
-      transcribeAndInsert "$file"
+      transcribeAndInsert "$file" ''${opts[@]+"''${opts[@]}"}
       ;;
     *)
-      echo "usage: voice-input start|finish|transcribe-file <path>" >&2
+      echo "usage: voice-input [--config FILE] [--api-url URL] [--model ID]" \
+           "[--api-key-file FILE] [--prompt TEXT] [--pipe-command CMD]" \
+           "start|finish|transcribe-file <path>" >&2
       exit 1
       ;;
   esac
