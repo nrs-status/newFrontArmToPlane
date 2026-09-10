@@ -7,6 +7,12 @@
 # cmd_duration, ...) out of the prompt, so prompt and user input share one line.
 format = "$directory$git_branch$character"
 
+# Right prompt: current time at the extreme right end of the input zone
+# (like the default nushell prompt). `starship init nu` already wires
+# PROMPT_COMMAND_RIGHT to `starship prompt --right`; the right prompt was
+# simply empty because right_format listed nothing.
+right_format = "$time"
+
 [directory]
 truncation_length = 2 # show last two dirs
 fish_style_pwd_dir_length = 1 # abbreviate earlier dirs to 1 char (fish-style)
@@ -15,6 +21,12 @@ truncate_to_repo = false
 [git_branch]
 symbol = "" # drop the "git:" prefix, keep it short
 format = "[$symbol$branch]($style) "
+
+[time]
+disabled = false # opt in: the time module is disabled by default in starship
+format = "[$time]($style)" # no trailing space: it sits flush against the screen edge
+style = "green" # plain green, matching the default nushell prompt's clock
+time_format = "%H:%M:%S" # hh:mm:ss, like nushell's default prompt
 
 [character]
 format = "$symbol " # prompt character directly after the branch, same line
