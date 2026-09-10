@@ -4,7 +4,6 @@
   modulesPath,
   pkgs,
   localPkgs,
-  pkgsLib,
   ...
 }:
 { mountHostNixStore }:
