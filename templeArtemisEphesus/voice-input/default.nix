@@ -8,7 +8,7 @@
 #                           transcription wherever the cursor is with wtype
 #   transcribe-file <path>: like finish but transcribes a given file instead of a recording
 #                           (useful for testing, e.g. with ~/baghdad_plane/rectest/out.wav)
-{ pkgs }:
+{ pkgs, ... }:
 
 let
   pyScript = pkgs.writeText "voice-transcriber.py" (builtins.readFile ./transcribe.py);
