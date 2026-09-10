@@ -5,7 +5,7 @@ in pkgs.writeShellApplication {
 		name = "llm-gcm";
 		runtimeInputs = [
 			localPkgs.pi 
-			localPkgs.neovim
+			localPkgs.montezumaCirclesScroll.full #nixvim
 			localPkgs.git
 		];
 		text = "${pkgsLib.getExe localPkgs.nushell} --config ~/.config/nushell/config.nu ${script} \"$@\"";
