@@ -7,27 +7,62 @@ $env.config.history.isolation = true
 $env.config.completions.algorithm = "Fuzzy" #allows incomplete paths, e.g. /a/b/c will match the completion /axaxax/bxbxbx/cxcxcxc
 
 # ─────────────────────────────────────────────────────────────
-# fish-style ghost completion from shell history
+# fish-style ghost completion, sourced from atuin history
 # ─────────────────────────────────────────────────────────────
 
-# Uses nushell's built-in history hinter — reedline's `CwdAwareHinter`,
-# which is described in the official reedline sources as "Similar to
-# `fish` autosuggestions". When `show_hints` is true and `hinter.closure`
-# is null, nushell wires the CwdAwareHinter into the line editor
-# (see the official repo: crates/nu-cli/src/repl.rs and the knob's
-# documentation in crates/nu-config/default_files/doc_config.nu).
+# While typing, the most recent entry in atuin's sqlite history that
+# extends the current line (preferably one from this directory) is shown
+# as dim "ghost" text after the cursor. Accept the whole hint with → or
+# Ctrl+f, word-by-word with Alt+f — built-in reedline defaults.
 #
-# While typing, the most recent history entry matching the current line
-# (preferably one from this directory) is shown as dim "ghost" text.
-# Accept the whole hint with → or Ctrl+f, word-by-word with Alt+f —
-# built-in reedline defaults.
+# Why a custom hinter: nushell's built-in hinter (reedline's
+# `CwdAwareHinter`, the default when `hinter.closure` is null) only reads
+# nushell's own history file ($nu.history-path) — and with
+# `$env.config.history.isolation = true` that shrinks to the commands
+# typed in this very session. All shell history is recorded to atuin by
+# the `atuin init nu` hooks (sourced in config.nu as atuinConfig.nu), so
+# the ghost completion is wired to atuin's database instead, via
+# nushell's external hinter closure (`$env.config.hinter.closure`,
+# supported since nu 0.104; see crates/nu-cli/src/hints/external_hinter.rs
+# in the nushell repo). The closure receives `{line, pos, cwd}` and must
+# return the hint (the suffix that would complete the line) as a string,
+# a `{hint: string}` record, or null for "no suggestion".
 $env.config.show_hints = true
 
 # the ghost text itself: dim + italic, the fish autosuggestion look
+# (the `hints` color_config entry is applied to the external hinter too,
+# see `style_computer.compute("hints", ...)` in crates/nu-cli/src/repl.rs)
 $env.config.color_config.hints = { fg: "dark_gray", attr: "i" }
 
-# make sure the built-in hinter is used (a closure would replace it)
-$env.config.hinter.closure = null
+# sqlite db atuin records commands into; ATUIN_DB_PATH mirrors atuin's
+# own env override of its data dir
+def atuin-history-db [] {
+    $env.ATUIN_DB_PATH? | default ($nu.home-dir | path join ".local/share/atuin/history.db")
+}
+
+$env.config.hinter.closure = {|ctx|
+    # text up to the cursor is what the suggestion must extend
+    let prefix = ($ctx.line | str substring 0..<$ctx.pos)
+
+    # nothing typed yet → nothing to suggest
+    if ($prefix | str trim | is-empty) { return null }
+
+    # exact-prefix match (`substr(command, 1, length(?1)) = ?1` instead of
+    # LIKE, so `%`/`_` in the input don't act as wildcards), cwd-aware like
+    # the built-in CwdAwareHinter: entries from the current directory beat
+    # older ones from elsewhere; newest first otherwise. `command != ?1`
+    # keeps atuin from suggesting the line itself.
+    open (atuin-history-db)
+    | query db "SELECT command FROM history
+                WHERE deleted_at IS NULL
+                  AND substr(command, 1, length(?1)) = ?1
+                  AND command != ?1
+                ORDER BY (cwd = ?2) DESC, timestamp DESC
+                LIMIT 1" --params [$prefix, $ctx.cwd]
+    | get command.0? | default null
+    # only the suffix after the cursor is shown as ghost text
+    | if $in == null { null } else { $in | str substring ($prefix | str length).. }
+}
 
 # modules (vendored from github:nushell/nu_scripts)
 use jc.nu
