@@ -26,6 +26,7 @@ let
     nativeBuildInputs = [
       pkgs.zoxide
       pkgs.starship
+      pkgs.atuin
     ];
     installPhase = ''
       runHook preInstall
@@ -38,6 +39,18 @@ let
 
       # starship prompt integration, generated at build time
       ${pkgs.starship}/bin/starship init nu > $out/starshipInit.nu
+
+      # atuin shell-history integration, generated at build time
+      # (`atuin init nu`): hooks for recording commands into atuin's sqlite
+      # history, plus Ctrl+R / Up-arrow interactive `atuin search` keybindings.
+      # It *appends* to `$env.config.hooks` and `$env.config.keybindings`, so
+      # it is sourced last in config.nu (after general.nu). The `atuin` binary
+      # itself is expected on the runtime PATH (system-provided, like
+      # zoxide/starship); only the generated glue lives in this tree.
+      # (HOME is pointed at the build's temp dir: `atuin init nu` insists on
+      # loading its client settings from ~/.config/atuin, which does not exist
+      # in the build sandbox)
+      HOME=$TMPDIR ${pkgs.atuin}/bin/atuin init nu > $out/atuinConfig.nu
 
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
@@ -62,6 +75,10 @@ let
       # default would be ~/.config/starship.toml, outside this tree)
       \$env.STARSHIP_CONFIG = '$out/starship.toml'
       source $out/starshipInit.nu
+
+      # atuin shell history (record commands + Ctrl+R / Up search); sourced
+      # after general.nu since it appends to config hooks & keybindings
+      source $out/atuinConfig.nu
 
       source ${nuScriptsDir}/start-llm-session.nu
 
