@@ -11,6 +11,6 @@ def main [--push-fatp, --rebuild] {
     if $rebuild {
         sudo nixos-rebuild switch --flake .#wranHearst
     }
-
+    systemctl --user start cachesieyesShellShell.service #re-cached sieyesShell
     cd $initialPath
 }
