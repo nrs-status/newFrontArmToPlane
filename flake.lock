@@ -69,18 +69,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-mB0sr9jXDWyzAAfMMf6U0HZ9q0udOOLP3crRzkyhDKQ=",
-        "path": "/nix/store/dp6m9y1isnizmkzyvm4arkcvhr6x4c2q-nixos-24.11.716868.60e405b241ed/nixos",
-        "type": "path"
-      },
-      "original": {
-        "path": "/nix/store/dp6m9y1isnizmkzyvm4arkcvhr6x4c2q-nixos-24.11.716868.60e405b241ed/nixos",
-        "type": "path"
-      }
-    },
     "nixvimFlake": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -123,8 +111,7 @@
       "inputs": {
         "nixpkgs": "nixpkgs",
         "nixvimFlake": "nixvimFlake",
-        "peachRampSkateboard": "peachRampSkateboard",
-        "tellFlake": "tellFlake"
+        "peachRampSkateboard": "peachRampSkateboard"
       }
     },
     "systems": {
@@ -141,24 +128,6 @@
         "owner": "nix-systems",
         "ref": "future-26.11",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "tellFlake": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_4"
-      },
-      "locked": {
-        "lastModified": 1788735204,
-        "narHash": "sha256-3b2p6xMYwc0TXTi62QJFfPJqvidfJX/HPHqIiZYIdEI=",
-        "owner": "nrs-status",
-        "repo": "tell",
-        "rev": "e34975438a1fd11508ecffedeb756e584415f66c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nrs-status",
-        "repo": "tell",
         "type": "github"
       }
     }

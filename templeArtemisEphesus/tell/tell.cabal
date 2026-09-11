@@ -1,0 +1,15 @@
+cabal-version:      2.4
+name:               tell
+version:            0.1.0.0
+synopsis:           Insert entries into the nodes table of the doc PostgreSQL database
+build-type:         Simple
+
+executable tell
+    main-is:          Main.hs
+    hs-source-dirs:   app
+    build-depends:    base
+                    , optparse-applicative
+                    , postgresql-simple
+                    , text
+    default-language: Haskell2010
+    ghc-options:      -Wall

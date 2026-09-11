@@ -51,7 +51,8 @@ pkgs.mkShell {
       pi-vm.run-pi-vm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
-      tell # glm-5.3-flash generated note-making client for the `doc` db
+      tell # note-making client for the `doc` db (internalized from the former `tell' flake)
+      pi-json-span-processor # aggregates `pi --mode json' event streams into spans
       broot # dir navigator
 
       television #testing it out, alternative to fzf
