@@ -1,4 +1,4 @@
-# Creates a new VM from ./bare.nix (`import` + `extendModules`), adding exactly
+# Creates a new VM from ../bare.nix (`import` + `extendModules`), adding exactly
 # one single new service: `pi-json` (see the `wserviceModule` below).
 #
 # The service reads the contents of a string located in the vm's
@@ -26,7 +26,7 @@
 # e.g. -fw_cfg name=opt/pi/api-key,file=<path-to-key-file>
 #
 # Host directories can be shared with the VM over 9p (the packaged runner
-# `runWserviceVm' in ./default.nix, from ./runWserviceVm.py, wires all of
+# `run-pi-vm' in ../default.nix, from ./runWserviceVm.py, wires all of
 # this up): the host's qemu command line
 # passes a tab-separated mounts manifest as the fw_cfg file opt/pi/mounts,
 #
@@ -58,7 +58,9 @@ let
   #   entry stores the file's exact bytes (no NUL terminator), unlike a
   #   `string=` entry; passing the key as a file also keeps it off the
   #   qemu command line, where it would be visible in `ps` output.
-  # The service logic itself lives in ./wservicePiJson.py, a Python program:
+  # The service logic itself lives in the shared ../wservicePiJson.py, a
+  # Python program (the microvm variant in ../microvm/ uses the exact same
+  # program):
   # only the store paths of the few host binaries it needs are substituted in
   # here at build time, keeping this module readable.
   pi-json = pkgs.runCommand "pi-json"
@@ -72,7 +74,7 @@ let
     }
     ''
       mkdir -p $out/bin
-      substituteAll ${./wservicePiJson.py} $out/bin/pi-json
+      substituteAll ${../wservicePiJson.py} $out/bin/pi-json
       chmod +x $out/bin/pi-json
     '';
 
@@ -128,7 +130,7 @@ let
       };
     };
 in
-(import ./bare.nix {
+(import ../bare.nix {
   inherit nixosSystem modulesPath pkgs localPkgs;
 } { inherit mountHostNixStore; }).extendModules {
   modules = [ wserviceModule ];

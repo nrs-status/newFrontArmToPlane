@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the pi `wservice' VM (templeArtemisEphesus/pi-vm/wservice.nix) and
+"""Run the pi `wservice' VM (templeArtemisEphesus/pi-vm/basic/wservice.nix) and
 stream its `pi --mode json' JSON event output to stdout or to a file.
 
 The prompt fed to `pi' is read from stdin: pipe it in, or type it in a

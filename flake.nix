@@ -3,6 +3,11 @@
     nixvimFlake.url = "github:nix-community/nixvim";
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
     peachRampSkateboard.url = "github:nrs-status/newPeachRampSkateboard";
+    # microvm.nix: modules to run NixOS configurations as micro-VMs
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -19,6 +24,7 @@
         inherit baseLib pkgsLib pkgs;
       };
       modulesPath = "${inputs.nixpkgs}/nixos/modules";
+      microvmFlake = inputs.microvm;
       nixosSystem = inputs.nixpkgs.lib.nixosSystem;
       localPkgsArgs = {
         # abstracting this out is useful for debugging sessions
@@ -29,6 +35,7 @@
           pkgsLib
           modulesPath
           nixosSystem
+          microvmFlake
           ;
       };
       localPkgs = pkgs.lib.fix (

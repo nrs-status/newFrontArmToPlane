@@ -1,5 +1,8 @@
 #!/usr/bin/env @pythonInterpreter@
-"""The `pi-json' guest service of the wservice VM (wservice.nix).
+"""The `pi-json' guest service shared by the wservice VM
+(basic/wservice.nix) and the wservice microvm (microvm/wservice-microvm.nix):
+both configurations have the exact same behavior, so they use this exact same
+program.
 
 It reads the prompt the host passed through the qemu fw_cfg string
 `opt/pi/json-prompt' (e.g. -fw_cfg name=opt/pi/json-prompt,string=<contents>),
@@ -12,7 +15,7 @@ done (or the service fails to start), the VM powers itself off so the host's
 runner sees the stream end cleanly.
 
 The store paths of the few host binaries used below are substituted at build
-time (see wservice.nix).
+time (see basic/wservice.nix and microvm/wservice-microvm.nix).
 """
 
 import os
@@ -51,7 +54,8 @@ MOUNTS_MANIFEST = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/mounts/raw"
 # `! cat /run/secrets/OPENROUTER_API_KEY'.
 API_KEY_PATH = "/run/secrets/OPENROUTER_API_KEY"
 
-# Binaries substituted at build time (see wservice.nix).
+# Binaries substituted at build time (see basic/wservice.nix and
+# microvm/wservice-microvm.nix).
 PI = "@pi@"
 MOUNT = "@mount@"
 MODPROBE = "@modprobe@"
