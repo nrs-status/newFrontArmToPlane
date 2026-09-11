@@ -1,0 +1,11 @@
+You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
+
+Create a program that takes a WiFi network config and a password and builds a minimal non-graphical nix OS installer image that is a very simple extension of the official minimum nixos installer and tries to connect to the Wi-Fi network specified in the arguments and sets the root password to the password passed as an argument.
+
+Clarification: the Wi-Fi password and the root password may be given as two separate arguments (--wifi-password and --root-password). A single combined password argument (--password, or the positional PASSWORD) is also accepted as shorthand and is used for both roles when no separate passwords are given.
+
+package this program in a directory at ./templeArtemisEphesus/img-builder
+
+Once you are done: 
+- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
