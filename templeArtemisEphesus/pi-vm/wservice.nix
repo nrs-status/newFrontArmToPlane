@@ -63,8 +63,7 @@ let
       fi
       echo "pi-json: read prompt (''${#prompt} bytes) from ${fwCfgPromptRaw}" >&2
 
-      # The shared ~/.pi/agent/auth.json resolves its openrouter key through
-      # `! cat /run/secrets/OPENROUTER_API_KEY`; provision it from fw_cfg if
+      # localPkgs.pi provisions it key with `! cat /run/secrets/OPENROUTER_API_KEY`; provision it from fw_cfg if
       # the host provided the key, e.g.
       #   -fw_cfg name=opt/pi/api-key,file=<path-to-key-file>
       # (a fw_cfg `file=` entry holds the file's exact bytes; strip any NULs
