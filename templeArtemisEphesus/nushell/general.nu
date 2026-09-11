@@ -93,12 +93,16 @@ $env.config.abbreviations = {
     gssb: "git status --short --branch"
     gsw: "git switch"
     gswc: "git switch --create"
-    gs: "git status -sb"
+    gs: "git status"
+    gst: "git stash"
+    gstp: "git stash push"
+    gi: "git init"
     glast: "git log -1 --stat"
     gds: "git diff --staged"
     gdw: "git diff --word-diff"
     gsh: "git show --stat --oneline"
     gamend: "git commit --amend --no-edit"
+
 
     # zoxide
     zq: "zoxide query"
