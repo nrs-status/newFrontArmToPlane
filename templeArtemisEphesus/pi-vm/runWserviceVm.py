@@ -24,6 +24,14 @@ chardev writes made while no client is attached, so the connect must happen
 promptly (the guest's pi-json service only starts writing after boot, so
 connecting within a second or two is safe).
 
+The VM's serial console (kernel messages, getty) is non-interactive here: it
+cannot take over the terminal the program is run from (the subprocess's stdin
+is /dev/null, so there is no way to type into the VM's console shell); all of
+its output is sent to this program's stderr. When the program finishes, it
+also reports on stderr the host locations of all the paths that were passed
+to it (via --workdir/-w, --read-write/-rw and --read-only/-ro) and shared
+with the VM.
+
 The host's /run/secrets/OPENROUTER_API_KEY, if it exists and is readable, is
 passed to the VM through the fw_cfg file `opt/pi/api-key' (see wservice.nix).
 """
@@ -228,11 +236,13 @@ def main():
                       HOST_API_KEY_PATH), file=sys.stderr)
 
         env = dict(os.environ, QEMU_OPTS=" ".join(qemu_opts))
-        # The VM console (kernel messages, getty) goes to the subprocess's
-        # stdout; keep it out of the JSON stream on our stdout by redirecting
-        # the subprocess's stdout to our stderr.
+        # The VM's serial console (kernel messages, getty) is sent entirely to
+        # our stderr, and the console is non-interactive: the subprocess's
+        # stdin is /dev/null, so running this program never drops the shell it
+        # is run from into a shell inside the VM.
         vm_process = subprocess.Popen([VM_SCRIPT], cwd=tmp, env=env,
-                                      stdout=sys.stderr)
+                                      stdin=subprocess.DEVNULL,
+                                      stdout=sys.stderr, stderr=sys.stderr)
 
         exit_code = 0
         try:
@@ -265,8 +275,25 @@ def main():
                 except subprocess.TimeoutExpired:
                     vm_process.kill()
                     vm_process.wait()
+            # The program has finished executing: report on stderr the host
+            # locations of the paths it was given and shared with the VM.
+            print_host_paths(workdir, read_write, read_only)
 
-    return exit_code
+
+def print_host_paths(workdir, read_write, read_only):
+    """Report on stderr the host locations of the paths this program was
+    given (options --workdir/-w, --read-write/-rw, --read-only/-ro) and
+    shared with the VM."""
+    print("run-wservice-vm: host locations of the paths passed to this "
+          "program:", file=sys.stderr)
+    print("run-wservice-vm:   workdir (read-write): {0}".format(workdir),
+          file=sys.stderr)
+    for path in read_write:
+        print("run-wservice-vm:   read-write: {0}".format(path),
+              file=sys.stderr)
+    for path in read_only:
+        print("run-wservice-vm:   read-only: {0}".format(path),
+              file=sys.stderr)
 
 
 if __name__ == "__main__":
