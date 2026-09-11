@@ -1,9 +1,0 @@
-You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
-
-Modify the NixOS configuration located at ./templeArtemisEphesus/pi-vm/wservice.nix So that the code for the script it defines becomes instead a Python program  and place the code in a separate file that `wservice.nix` then imports. The purpose of this change is to make the configuration more readable and more easily understandable.
-
-Test that the run-pi-vm program still works properly after your modification.
-
-Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
-- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
