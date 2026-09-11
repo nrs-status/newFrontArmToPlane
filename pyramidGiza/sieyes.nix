@@ -21,7 +21,7 @@ pkgs.mkShell {
       navi # personal commandline cheatsheet manager
       nix-index # provides nix-locate, which can find which package provides a given command
       worktrunk # wrapper for git worktrees
-      bubblewrap # unpriviledged escalation tool
+      bubblewrap # unpriviledged containerization tool
       delta # git diff pretty printer
       moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR 
       atuin # terminal history manager
