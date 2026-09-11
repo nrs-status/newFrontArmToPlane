@@ -33,11 +33,6 @@ nixosSystem {
         diskSize = 8192;
       };
 
-      virtualisation.sharedDirectories.pi-config = {
-        source = "/home/sieyes/.pi";
-        target = "/root/.pi";
-      };
-
       environment.systemPackages =
         with pkgs;
         [
