@@ -49,6 +49,7 @@ pkgs.mkShell {
       scripts.compare-flake-pins 
       scripts.llm-gcm
       pi-vm.run-pi-vm
+      pi-vm.run-pi-microvm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # note-making client for the `doc` db (internalized from the former `tell' flake)
