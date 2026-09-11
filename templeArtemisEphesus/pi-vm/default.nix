@@ -15,16 +15,16 @@ inputs: rec {
     let
       vmScript = "${(wservice { mountHostNixStore = true; }).config.system.build.vm}/bin/run-pi-vm-vm";
     in
-    inputs.pkgs.runCommand "run-wservice-vm"
+    inputs.pkgs.runCommand "run-pi-vm"
       {
         nativeBuildInputs = [ inputs.pkgs.python3 ];
-        meta.mainProgram = "run-wservice-vm";
+        meta.mainProgram = "run-pi-vm";
       }
       ''
         mkdir -p $out/bin
-        substitute ${./runWserviceVm.py} $out/bin/run-wservice-vm \
+        substitute ${./runWserviceVm.py} $out/bin/run-pi-vm \
           --subst-var-by vmScript ${vmScript}
-        chmod +x $out/bin/run-wservice-vm
-        patchShebangs $out/bin/run-wservice-vm
+        chmod +x $out/bin/run-pi-vm
+        patchShebangs $out/bin/run-pi-vm
       '';
 }
