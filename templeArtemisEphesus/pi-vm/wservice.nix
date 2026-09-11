@@ -22,8 +22,8 @@
 #
 # The shared ~/.pi/agent/auth.json resolves the openrouter key through
 # `! cat /run/secrets/OPENROUTER_API_KEY`; the service provisions it (mode
-# 0600) from the optional fw_cfg string `opt/pi/api-key` if the host passed
-# e.g. -fw_cfg name=opt/pi/api-key,string=<key>
+# 0600) from the optional fw_cfg file `opt/pi/api-key` if the host passed
+# e.g. -fw_cfg name=opt/pi/api-key,file=<path-to-key-file>
 {
   nixosSystem,
   modulesPath,
@@ -33,10 +33,13 @@
 }:
 { mountHostNixStore }:
 let
-  # fw_cfg string entries (contents decided by the host's later qemu command line):
+  # fw_cfg entries (contents decided by the host's later qemu command line):
   # - name=opt/pi/json-prompt,string=<contents>: prompt fed to `pi --mode json`
-  # - name=opt/pi/api-key,string=<key>: (optional) provisions the guest's
-  #   /run/secrets/OPENROUTER_API_KEY
+  # - name=opt/pi/api-key,file=<path-to-key-file>: (optional) provisions the
+  #   guest's /run/secrets/OPENROUTER_API_KEY from a host file. A `file=`
+  #   entry stores the file's exact bytes (no NUL terminator), unlike a
+  #   `string=` entry; passing the key as a file also keeps it off the
+  #   qemu command line, where it would be visible in `ps` output.
   fwCfgPromptRaw = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/json-prompt/raw";
   fwCfgKeyRaw = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/api-key/raw";
 
@@ -63,14 +66,16 @@ let
       # The shared ~/.pi/agent/auth.json resolves its openrouter key through
       # `! cat /run/secrets/OPENROUTER_API_KEY`; provision it from fw_cfg if
       # the host provided the key, e.g.
-      #   -fw_cfg name=opt/pi/api-key,string=<key>
+      #   -fw_cfg name=opt/pi/api-key,file=<path-to-key-file>
+      # (a fw_cfg `file=` entry holds the file's exact bytes; strip any NULs
+      # for good measure and drop a trailing newline with xargs)
       if [ ! -e /run/secrets/OPENROUTER_API_KEY ]; then
         mkdir -p /run/secrets
-        if cat ${fwCfgKeyRaw} > /run/secrets/OPENROUTER_API_KEY 2>/dev/null; then
+        if cat ${fwCfgKeyRaw} | tr -d '\0' | xargs printf '%s' > /run/secrets/OPENROUTER_API_KEY 2>/dev/null && [ -s /run/secrets/OPENROUTER_API_KEY ]; then
           chmod 600 /run/secrets/OPENROUTER_API_KEY
-          echo "pi-json: provisioned /run/secrets/OPENROUTER_API_KEY from the opt/pi/api-key fw_cfg string" >&2
+          echo "pi-json: provisioned /run/secrets/OPENROUTER_API_KEY from the opt/pi/api-key fw_cfg file" >&2
         else
-          echo "pi-json: no openrouter key: /run/secrets/OPENROUTER_API_KEY is missing and no -fw_cfg name=opt/pi/api-key,string=<key> was given" >&2
+          echo "pi-json: no openrouter key: /run/secrets/OPENROUTER_API_KEY is missing and no -fw_cfg name=opt/pi/api-key,file=<path-to-key-file> was given" >&2
         fi
       fi
 
