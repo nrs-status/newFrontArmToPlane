@@ -19,8 +19,27 @@ Host directories are shared with the VM through qemu 9p shares:
   --read-write/-rw    mounted read-write (repeatable)
   --read-only/-ro     mounted read-only (repeatable)
 
+  --disk-size/-d      disk space allocated to the virtual machine, i.e. the
+                      size of the disk image attached to the VM as a
+                      virtio-blk drive (e.g. 8G, 2048M, or a plain byte
+                      count). Optional: falls back to the PI_VM_DISK_SIZE
+                      environment variable and then to 10G.
+
+  --ram/-r            RAM allocated to the virtual machine (e.g. 2G, 2048M,
+                      or a plain byte count). Optional: falls back to the
+                      PI_VM_RAM environment variable and then to the build-
+                      time default (1536M, see wservice-microvm.nix).
+
 The 9p shares and the mount manifest (fw_cfg file `opt/pi/mounts') that the
 guest service reads to mount them are set up here; see wservice-microvm.nix.
+
+The disk space allocated to the VM is set at run time with the obligatory
+option --disk-size/-d: this program creates an ext4-formatted sparse raw disk
+image of the requested size in its temporary directory (labeled
+`pi-microvm-data') and attaches it to the qemu command line (passed through
+QEMU_OPTS, like every other dynamic option) as a virtio-blk drive; the guest
+sees it as /dev/vda. The image is ephemeral: it lives in this program's
+temporary directory and is deleted when the VM is done.
 
 The JSON event stream crosses the VM boundary through a virtio-serial port
 that qemu bridges to a host unix socket (-chardev socket,server=on,wait=off);
@@ -52,6 +71,7 @@ the non-microvm `run-pi-vm-vm' script does.
 
 import argparse
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -83,6 +103,22 @@ GUEST_RO_FMT = "/mnt/ro-{0}"
 # How long to wait for qemu to start listening on the JSON stream socket.
 SOCKET_CONNECT_TIMEOUT = 300
 
+# Disk size resolution (CLI option --disk-size/-d > PI_VM_DISK_SIZE > this
+# default): the size of the disk image attached to the VM.
+DISK_SIZE_ENV = "PI_VM_DISK_SIZE"
+DEFAULT_DISK_SIZE = "10G"
+
+# RAM size resolution (CLI option --ram/-r > PI_VM_RAM > no override, i.e.
+# the microvm's build-time mem from wservice-microvm.nix). The resolved
+# size is passed to the wrapped VM start script through the
+# RUN_PI_MICROVM_MEM environment variable (see ../default.nix): the
+# microvm.nix runner bakes its build-time memory into its qemu command line
+# (`-m' plus a matching memory-backend-memfd needed by its 9p-share NUMA
+# options), so a second `-m' appended through QEMU_OPTS would be rejected
+# by qemu; the wrapper script rewrites the baked-in memory size instead.
+RAM_ENV = "PI_VM_RAM"
+RUNNER_MEM_ENV = "RUN_PI_MICROVM_MEM"
+
 
 def fail(message):
     print(f"run-pi-microvm: {message}", file=sys.stderr)
@@ -102,19 +138,61 @@ def share_path(path, flag):
     return real
 
 
+def create_disk_image(path, size, label):
+    """Create an ext4-formatted sparse raw disk image of the requested size
+    (e.g. 8G, 2048M, or a plain byte count) at path, with the filesystem
+    label `label'. The image is attached to the VM with --disk-size/-d
+    semantics: it is the disk space allocated to the virtual machine.
+    """
+    for tool in ("truncate", "mkfs.ext4"):
+        if shutil.which(tool) is None:
+            fail(f"{tool} is needed to create the VM's disk image but is not "
+                 "in PATH")
+    result = subprocess.run(["truncate", "-s", size, path],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"could not create the {size} disk image at {path}: "
+             f"{result.stderr.strip()}")
+    result = subprocess.run(["mkfs.ext4", "-L", label, path],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"could not format the disk image at {path} as ext4: "
+             f"{result.stderr.strip()}")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="run-pi-microvm",
         description="Run the pi wservice microvm and stream its "
                     "`pi --mode json' JSON event output to stdout (or to a "
                     "file with -o). The prompt for pi is read from stdin.",
-        epilog="Host directories are shared with the VM over 9p: --workdir "
-               "read-write (pi's working directory), --read-write read-write, "
-               "--read-only read-only.",
+        epilog="The disk space allocated to the VM is set with "
+               "--disk-size/-d (default: the PI_VM_DISK_SIZE environment "
+               "variable, then 10G). RAM usage is set with --ram/-r "
+               "(default: the PI_VM_RAM environment variable, then the "
+               "microvm's build-time mem). Host directories are shared "
+               "with the VM over 9p: --workdir read-write (pi's working "
+               "directory), --read-write read-write, --read-only "
+               "read-only.",
     )
     parser.add_argument(
         "-o", "--output", metavar="FILE",
         help="file the JSON stream is written to (default: stdout)",
+    )
+    parser.add_argument(
+        "-d", "--disk-size", dest="disk_size", metavar="SIZE",
+        default=None,
+        help="disk space allocated to the VM, i.e. the size of the disk "
+             "image attached to it as a virtio-blk drive, e.g. 8G, 2048M or "
+             "a plain byte count (default: the PI_VM_DISK_SIZE environment "
+             "variable, then 10G)",
+    )
+    parser.add_argument(
+        "-r", "--ram", dest="ram", metavar="SIZE",
+        default=None,
+        help="RAM allocated to the VM, e.g. 2G, 2048M or a plain byte count "
+             "(default: the PI_VM_RAM environment variable, then the "
+             "microvm's build-time mem)",
     )
     parser.add_argument(
         "-w", "--workdir", metavar="DIR",
@@ -179,8 +257,29 @@ def connect_to_stream_socket(sock_path, vm_process, timeout):
     return None
 
 
+def resolve_sizes(args):
+    """Resolve the disk and RAM sizes: a command line option wins over the
+    matching environment variable, and the disk size finally falls back to
+    DEFAULT_DISK_SIZE (10G); the RAM size has no further default, so the
+    microvm keeps its build-time mem when neither option nor variable is
+    set. Returns (disk_size, ram_size_or_None)."""
+    disk_size = args.disk_size or os.environ.get(DISK_SIZE_ENV) or \
+        DEFAULT_DISK_SIZE
+    ram_size = args.ram or os.environ.get(RAM_ENV)
+    if ram_size is not None:
+        # The RAM size is passed to the wrapped VM start script through the
+        # RUN_PI_MICROVM_MEM environment variable, which the start script
+        # substitutes into its qemu command line: values with whitespace
+        # would produce broken qemu command lines.
+        if any(c.isspace() for c in ram_size):
+            fail("RAM size must not contain whitespace: {0!r}".format(
+                ram_size))
+    return disk_size, ram_size
+
+
 def main():
     args = parse_args()
+    disk_size, ram_size = resolve_sizes(args)
 
     if args.workdir is None:
         # Create the default workdir: a fresh directory under /tmp whose name
@@ -214,7 +313,21 @@ def main():
 
         write_mounts_manifest(manifest_path, workdir, read_write, read_only)
 
+        # The VM's disk, sized by --disk-size/-d (or PI_VM_DISK_SIZE, or
+        # the 10G default).
+        disk_image = os.path.join(tmp, "pi-microvm-disk.img")
+        create_disk_image(disk_image, disk_size, "pi-microvm-data")
+        print("run-pi-microvm: disk image ({0}) at {1}".format(
+            disk_size, disk_image), file=sys.stderr)
+        if ram_size is not None:
+            print("run-pi-microvm: RAM size {0}".format(ram_size),
+                  file=sys.stderr)
+        else:
+            print("run-pi-microvm: no RAM size given: using the microvm's "
+                  "build-time mem", file=sys.stderr)
+
         qemu_opts = []
+
         add_9p_share(qemu_opts, 0, workdir, TAG_WORKDIR, read_only=False)
         for i, host_path in enumerate(read_write):
             add_9p_share(qemu_opts, 1 + i, host_path, TAG_RW_FMT.format(i),
@@ -223,6 +336,16 @@ def main():
         for i, host_path in enumerate(read_only):
             add_9p_share(qemu_opts, base + i, host_path, TAG_RO_FMT.format(i),
                          read_only=True)
+
+        # Attach the disk created above (sized with --disk-size/-d) as a
+        # virtio-blk drive: the guest sees it as /dev/vda. (The statically
+        # built microvm has no volumes and boots with the /nix/store 9p share
+        # instead of a store disk, so /dev/vda is free.)
+        qemu_opts += [
+            "-drive", "file={0},format=raw,if=none,id=pi-disk".format(
+                disk_image),
+            "-device", "virtio-blk-pci,drive=pi-disk",
+        ]
 
         # Bridge the guest's pi-json virtserialport to a host unix socket
         # this program reads the JSON stream from (see wservice-microvm.nix).
@@ -252,7 +375,13 @@ def main():
                   "will run without an openrouter key".format(
                       HOST_API_KEY_PATH), file=sys.stderr)
 
-        env = dict(os.environ, QEMU_OPTS=" ".join(qemu_opts))
+        # RUN_PI_MICROVM_MEM makes the wrapped VM start script rewrite the
+        # microvm.nix runner's baked-in memory size (see ../default.nix);
+        # without it, the microvm keeps its build-time mem.
+        env = dict(os.environ,
+                   QEMU_OPTS=" ".join(qemu_opts))
+        if ram_size is not None:
+            env[RUNNER_MEM_ENV] = ram_size
         # The VM's serial console (kernel messages, getty) is sent entirely to
         # our stderr, and the console is non-interactive: the subprocess's
         # stdin is /dev/null, so running this program never drops the shell it

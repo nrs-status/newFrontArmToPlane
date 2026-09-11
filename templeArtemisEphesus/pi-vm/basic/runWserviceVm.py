@@ -13,8 +13,28 @@ Host directories are shared with the VM through qemu 9p shares:
   --read-write/-rw    mounted read-write (repeatable)
   --read-only/-ro     mounted read-only (repeatable)
 
+  --disk-size/-d      disk space allocated to the virtual machine, i.e. the
+                      size of the VM's root disk image (e.g. 8G, 2048M, or a
+                      plain byte count). Optional: falls back to the
+                      PI_VM_DISK_SIZE environment variable and then to 10G.
+
+  --ram/-r            RAM allocated to the virtual machine (e.g. 2G, 2048M,
+                      or a plain byte count). Optional: falls back to the
+                      PI_VM_RAM environment variable and then to the build-
+                      time default (2048M, see bare.nix).
+
 The 9p shares and the mount manifest (fw_cfg file `opt/pi/mounts') that the
 guest service reads to mount them are set up here; see wservice.nix.
+
+The VM's root disk is sized at run time with the obligatory option
+--disk-size/-d: this program creates the disk image itself (an ext4-
+formatted sparse raw file of the requested size, labeled `nixos' exactly
+like the image the VM's runner script would create) and passes it to the VM
+script through the NIX_DISK_IMAGE environment variable; the script only
+creates its own (build-time-sized) image when that file does not exist
+already, so the requested size takes effect. The image is ephemeral: it
+lives in this program's temporary directory and is deleted when the VM is
+done.
 
 The JSON event stream crosses the VM boundary through a virtio-serial port
 that qemu bridges to a host unix socket (-chardev socket,server=on,wait=off);
@@ -38,6 +58,7 @@ passed to the VM through the fw_cfg file `opt/pi/api-key' (see wservice.nix).
 
 import argparse
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -67,6 +88,15 @@ GUEST_RO_FMT = "/mnt/ro-{0}"
 # How long to wait for qemu to start listening on the JSON stream socket.
 SOCKET_CONNECT_TIMEOUT = 300
 
+# Disk size resolution (CLI option --disk-size/-d > PI_VM_DISK_SIZE > this
+# default): the size of the VM's root disk image.
+DISK_SIZE_ENV = "PI_VM_DISK_SIZE"
+DEFAULT_DISK_SIZE = "10G"
+
+# RAM size resolution (CLI option --ram/-r > PI_VM_RAM > no override, i.e.
+# the VM's build-time memorySize from bare.nix): passed to qemu as -m.
+RAM_ENV = "PI_VM_RAM"
+
 
 def fail(message):
     print(f"run-wservice-vm: {message}", file=sys.stderr)
@@ -86,19 +116,65 @@ def share_path(path, flag):
     return real
 
 
+def create_disk_image(path, size, label):
+    """Create an ext4-formatted sparse raw disk image of the requested size
+    (e.g. 8G, 2048M, or a plain byte count) at path, with the filesystem
+    label `label'.
+
+    The VM's runner script creates its root disk image (labeled `nixos', the
+    label the guest's initrd mounts the root filesystem by) only when the
+    NIX_DISK_IMAGE file does not exist yet, so creating it here with the
+    --disk-size/-d size is how the disk space chosen at run time takes
+    effect.
+    """
+    for tool in ("truncate", "mkfs.ext4"):
+        if shutil.which(tool) is None:
+            fail(f"{tool} is needed to create the VM's disk image but is not "
+                 "in PATH")
+    result = subprocess.run(["truncate", "-s", size, path],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"could not create the {size} disk image at {path}: "
+             f"{result.stderr.strip()}")
+    result = subprocess.run(["mkfs.ext4", "-L", label, path],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"could not format the disk image at {path} as ext4: "
+             f"{result.stderr.strip()}")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="run-wservice-vm",
         description="Run the pi wservice VM and stream its `pi --mode json' "
                     "JSON event output to stdout (or to a file with -o). "
                     "The prompt for pi is read from stdin.",
-        epilog="Host directories are shared with the VM over 9p: --workdir "
-               "read-write (pi's working directory), --read-write read-write, "
-               "--read-only read-only.",
+        epilog="The disk space allocated to the VM is set with "
+               "--disk-size/-d (default: the PI_VM_DISK_SIZE environment "
+               "variable, then 10G). RAM usage is set with --ram/-r "
+               "(default: the PI_VM_RAM environment variable, then the "
+               "VM's build-time memorySize). Host directories are shared "
+               "with the VM over 9p: --workdir read-write (pi's working "
+               "directory), --read-write read-write, --read-only "
+               "read-only.",
     )
     parser.add_argument(
         "-o", "--output", metavar="FILE",
         help="file the JSON stream is written to (default: stdout)",
+    )
+    parser.add_argument(
+        "-d", "--disk-size", dest="disk_size", metavar="SIZE",
+        default=None,
+        help="disk space allocated to the VM, i.e. the size of its root disk "
+             "image, e.g. 8G, 2048M or a plain byte count (default: the "
+             "PI_VM_DISK_SIZE environment variable, then 10G)",
+    )
+    parser.add_argument(
+        "-r", "--ram", dest="ram", metavar="SIZE",
+        default=None,
+        help="RAM allocated to the VM, e.g. 2G, 2048M or a plain byte count "
+             "(default: the PI_VM_RAM environment variable, then the VM's "
+             "build-time memorySize)",
     )
     parser.add_argument(
         "-w", "--workdir", metavar="DIR",
@@ -162,8 +238,28 @@ def connect_to_stream_socket(sock_path, vm_process, timeout):
     return None
 
 
+def resolve_sizes(args):
+    """Resolve the disk and RAM sizes: a command line option wins over the
+    matching environment variable, and the disk size finally falls back to
+    DEFAULT_DISK_SIZE (10G); the RAM size has no further default, so the VM
+    keeps its build-time memorySize when neither option nor variable is set.
+    Returns (disk_size, ram_size_or_None)."""
+    disk_size = args.disk_size or os.environ.get(DISK_SIZE_ENV) or \
+        DEFAULT_DISK_SIZE
+    ram_size = args.ram or os.environ.get(RAM_ENV)
+    if ram_size is not None:
+        # The RAM size becomes part of QEMU_OPTS, which the VM's start script
+        # word-splits: values with whitespace would produce broken qemu
+        # command lines.
+        if any(c.isspace() for c in ram_size):
+            fail("RAM size must not contain whitespace: {0!r}".format(
+                ram_size))
+    return disk_size, ram_size
+
+
 def main():
     args = parse_args()
+    disk_size, ram_size = resolve_sizes(args)
 
     if args.workdir is None:
         # Create the default workdir: a fresh directory under /tmp whose name
@@ -197,7 +293,29 @@ def main():
 
         write_mounts_manifest(manifest_path, workdir, read_write, read_only)
 
+        # The VM's root disk, sized by --disk-size/-d (or PI_VM_DISK_SIZE,
+        # or the 10G default): created here so the VM start script (which
+        # only creates its own, build-time-sized image when the
+        # NIX_DISK_IMAGE file is missing) uses the requested size.
+        disk_image = os.path.join(tmp, "pi-vm-disk.img")
+        create_disk_image(disk_image, disk_size, "nixos")
+        print("run-wservice-vm: root disk image ({0}) at {1}".format(
+            disk_size, disk_image), file=sys.stderr)
+        if ram_size is not None:
+            print("run-wservice-vm: RAM size {0}".format(ram_size),
+                  file=sys.stderr)
+        else:
+            print("run-wservice-vm: no RAM size given: using the VM's "
+                  "build-time memorySize", file=sys.stderr)
+
         qemu_opts = []
+
+        # RAM override (from --ram/-r or PI_VM_RAM): qemu takes the last -m
+        # option, and the VM start script puts $QEMU_OPTS after its own
+        # build-time -m, so this overrides that default.
+        if ram_size is not None:
+            qemu_opts += ["-m", ram_size]
+
         add_9p_share(qemu_opts, 0, workdir, TAG_WORKDIR, read_only=False)
         for i, host_path in enumerate(read_write):
             add_9p_share(qemu_opts, 1 + i, host_path, TAG_RW_FMT.format(i),
@@ -235,7 +353,11 @@ def main():
                   "will run without an openrouter key".format(
                       HOST_API_KEY_PATH), file=sys.stderr)
 
-        env = dict(os.environ, QEMU_OPTS=" ".join(qemu_opts))
+        # NIX_DISK_IMAGE makes the VM start script use the disk image created
+        # above (with the --disk-size/-d size) instead of creating its own.
+        env = dict(os.environ,
+                   QEMU_OPTS=" ".join(qemu_opts),
+                   NIX_DISK_IMAGE=disk_image)
         # The VM's serial console (kernel messages, getty) is sent entirely to
         # our stderr, and the console is non-interactive: the subprocess's
         # stdin is /dev/null, so running this program never drops the shell it
