@@ -1,65 +1,63 @@
-# Summary
+# Summary: packaging `prompt-to-bash`
 
-Task: package and test the new script `templeArtemisEphesus/scripts/pi-json-span-ingest/pi-json-span-ingest.py`.
+Branch: `prompt-to-bash`
 
-Git branch: `span-ingest-script`
+1. **Read the task** (`./instructions.txt`): package the new script in the script
+   directory, test the packaging, write this summary, and send a `notify-send`
+   notification including the git branch.
 
-## Steps
+2. **Explored the repository layout**:
+   - Top-level `flake.nix` builds `packages.x86_64-linux` from
+     `templeArtemisEphesus/` (auto-imported via `baseLib.importPairsOfDirPath`)
+     and dev shells from `pyramidGiza/`.
+   - Inspected how sibling scripts are packaged
+     (`scripts/scan-and-connect`, `scripts/pi-json-span-ingest`,
+     `scripts/compare-flake-pins`) to follow the existing conventions
+     (`pkgs.runCommand` + `makeWrapper`, `meta` with `mainProgram`).
 
-1. **Read `./instructions.txt`** — package the new script in
-   `./templeArtemisEphesus/scripts/`, test the packaging, write this
-   summary, and end with a `notify-send` notification including the branch.
+3. **Read the new script** `templeArtemisEphesus/scripts/prompt-to-bash/prompt-to-bash.py`:
+   a Python 3 program that pipes a voice-command transcript through the `pi`
+   coding agent, lets the user review the resulting bash commands with `vipe`,
+   and executes them. Runtime dependencies: `python3`, `pi`, `vipe` (moreutils).
 
-2. **Inspected the repository layout**:
-   - The flake's package set (`localPkgs`) is built by
-     `templeArtemisEphesus/default.nix`, which recursively imports each
-     subdirectory via `baseLib.importPairsOfDirPath`.
-   - `templeArtemisEphesus/scripts/default.nix` does the same for
-     `scripts/`, so each `scripts/<dir>/default.nix` automatically becomes
-     a package at `.#scripts.<dir>`.
-   - Studied sibling packages (`scan-and-connect`, `llm-gcm`,
-     `pi-json-span-processor`) as packaging models.
+4. **Wrote the package**
+   `templeArtemisEphesus/scripts/prompt-to-bash/default.nix`:
+   - `pkgs.runCommand "prompt-to-bash-1.0.0"` with `makeWrapper`.
+   - Installs the script to `share/prompt-to-bash.py` and creates
+     `bin/prompt-to-bash` wrapping `python3`.
+   - Wraps `PATH` with `pkgs.lib.makeBinPath [ localPkgs.pi pkgs.moreutils ]`
+     so the script's default `pi` / `vipe` lookups resolve in the store env.
+   - Added `meta` (description, `mainProgram = "prompt-to-bash"`, MIT, linux).
 
-3. **Read the new script** — a Python 3 stream ingester that reads JSON
-   lines from stdin, validates them, and calls the target database's
-   `pi_stream_ingest(jsonb)` function via `psycopg2` (span lines →
-   `pi_stream_spans`, session lines → `pi_stream_sessions`, everything
-   else echoed to stderr). It refuses to create a database and exits on
-   missing function/tables.
+5. **Registered the script** — it was automatically picked up by
+   `templeArtemisEphesus/scripts/default.nix` once the directory was
+   `git add`-ed (flakes only see tracked files; before adding, the attribute
+   `scripts.prompt-to-bash` did not exist).
 
-4. **Created the package**
-   `templeArtemisEphesus/scripts/pi-json-span-ingest/default.nix`:
-   - `pkgs.runCommand "pi-json-span-ingest-1.0.0"` with `makeWrapper`.
-   - Installs the script to `$out/share/pi-json-span-ingest.py`.
-   - Wraps a `python3.withPackages (ps: [ ps.psycopg2 ])` interpreter as
-     `$out/bin/pi-json-span-ingest`, so the dependency is hermetic.
-   - Added `meta` (description, `mainProgram`, license, platforms).
+6. **Built the package**:
+   `nix build .#scripts.prompt-to-bash` → success
+   (`result/bin/prompt-to-bash`, `result/share/prompt-to-bash.py`).
 
-5. **Built the package**:
-   - `git add`-ed the new `default.nix` (the flake only sees git-tracked
-     files).
-   - `nix build .#scripts.pi-json-span-ingest` — succeeded; `result/bin`
-     contains the wrapped executable.
+7. **Tested the packaging**:
+   - `result/bin/prompt-to-bash --version` → `prompt-to-bash 1.0.0` ✔
+   - `--help` output correct ✔
+   - Error handling: empty stdin → exit 2 with clear message ✔;
+     missing `pi` → exit 2 ✔; missing `vipe` → exit 2 ✔;
+     `pi` exiting non-zero → exit 2 ✔;
+     bad config file key via `PTB_CONFIG` → exit 2 ✔.
+   - End-to-end pipeline with stub `pi` / `vipe` executables (via the
+     supported `PTB_PI` / `PTB_VIPE` overrides): dry-run prints the reviewed
+     commands without executing ✔; real run executes the reviewed commands
+     (`mkdir -p scratch-dir`, `touch scratch-dir/scratch-file`) ✔;
+     vipe failure path prints "Discarded" and exits 0 ✔.
+   - Wrapper check: the installed wrapper's `PATH` contains the store
+     `pi` and `moreutils` (vipe) paths; the binary works even with an empty
+     parent environment (`env -i`) ✔.
 
-6. **Functional tests against the real local PostgreSQL (`pi` database)**:
-   - Confirmed the target database, `pi_stream_ingest(jsonb)` function,
-     and both `pi_stream_*` tables exist.
-   - Piped 5 test lines (2 span lines, 1 session line, 1 skipped object,
-     1 invalid JSON line) into `result/bin/pi-json-span-ingest`:
-     - Output: `ingested 3 line(s); 2 line(s) written to stderr`, exit
-       code `2` (as documented).
-     - The skipped and invalid lines were echoed verbatim to stderr.
-     - Verified via SQL that both spans landed in `pi_stream_spans` and
-       the session in `pi_stream_sessions`.
-   - Guard test: ran with a connection string for a non-existent database
-     → correctly failed with
-     `database 'nonexistent_pkgtest' does not exist; refusing to create it`,
-     exit code `1`.
+8. **Added the package to the dev shell**
+   `pyramidGiza/sieyes.nix` (`scripts.prompt-to-bash` in `buildInputs`) and
+   rebuilt `.#devShells.x86_64-linux.sieyes` successfully ✔.
 
-7. **Cleaned up** — deleted the `pkgtest*` rows from
-   `pi_stream_spans` and `pi_stream_sessions`.
-
-8. **Wrote this `SUMMARY.md`**.
-
-9. **Sent a `notify-send` notification** (last step) describing completion,
-   including the git branch `span-ingest-script`.
+9. **Wrote this `SUMMARY.md`**, git-added the new files, and (as the final
+   step) sent a `notify-send` notification describing task completion with the
+   branch name.

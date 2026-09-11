@@ -46,7 +46,7 @@ pkgs.mkShell {
       sesh #tmux session manager
       kitty #terminal emulator
       scripts.update-twc-fatp-input
-      scripts.compare-flake-pins 
+      scripts.compare-flake-pins
       scripts.llm-gcm
       pi-vm.run-pi-vm
       pi-vm.run-pi-microvm
