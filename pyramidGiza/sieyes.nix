@@ -48,6 +48,7 @@ pkgs.mkShell {
       scripts.update-twc-fatp-input
       scripts.compare-flake-pins 
       scripts.llm-gcm
+      pi-vm.run-pi-vm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # glm-5.3-flash generated note-making client for the `doc` db
