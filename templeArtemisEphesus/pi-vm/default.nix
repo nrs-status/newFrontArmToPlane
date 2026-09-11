@@ -11,7 +11,7 @@ inputs: rec {
   # JSON event output to stdout (or to a file with -o/-o FILE); shares host
   # directories with the VM over 9p (--workdir/-w, --read-write/-rw,
   # --read-only/-ro) and takes pi's prompt from stdin
-  runWserviceVm =
+  run-pi-vm =
     let
       vmScript = "${(wservice { mountHostNixStore = true; }).config.system.build.vm}/bin/run-pi-vm-vm";
     in
