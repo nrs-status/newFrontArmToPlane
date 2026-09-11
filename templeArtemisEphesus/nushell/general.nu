@@ -96,6 +96,7 @@ $env.config.abbreviations = {
     gs: "git status"
     gst: "git stash"
     gstp: "git stash push"
+    gsta: "git stash apply --index"
     gi: "git init"
     glast: "git log -1 --stat"
     gds: "git diff --staged"
