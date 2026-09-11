@@ -1,60 +1,34 @@
 { pkgs, ... }:
-let
-  exampleConfig = pkgs.writeText "example-tiles-config.toml" (builtins.readFile ./exampleConfig.toml);
-  tiles = pkgs.writeText "tiles.py" (builtins.readFile ./tiles.py);
-in
-pkgs.writeShellApplication {
-  name = "tiles";
-  text = ''
-        #!/usr/bin/env bash
-    # run.sh — launch the tiles TUI.
-    #
-    # Usage:
-    #   ./run.sh              # launch the TUI with example.toml
-    #   ./run.sh my.toml      # launch the TUI with a custom config
-    #   ./run.sh -h|--help    # show the help message
-    set -euo pipefail
+pkgs.stdenv.mkDerivation {
+  pname = "tiles";
+  version = "1.0.0";
 
+  src = ./.;
 
-    help() {
-        cat <<EOF
-    usage: run.sh [CONFIG.toml]
+  nativeBuildInputs = [ pkgs.makeWrapper ];
 
-    Launch the tiles TUI with a TOML configuration file.
-    Without an argument, example.toml is used.
+  dontConfigure = true;
+  dontBuild = true;
 
-      -h, --help    show this help and exit
-    EOF
-    }
+  installPhase = ''
+    runHook preInstall
 
-    if [[ $# -gt 1 ]]; then
-        help >&2
-        exit 1
-    fi
+    install -Dm444 tiles.py $out/share/tiles/tiles.py
+    install -Dm444 exampleConfig.toml $out/share/tiles/exampleConfig.toml
+    install -Dm555 launcher.sh $out/bin/tiles
 
-    case "''${1:-}" in
-        -h|--help)
-            help
-            exit 0
-            ;;
-        "")
-            CONFIG="${exampleConfig}"
-            ;;
-        -*)
-            help >&2
-            exit 1
-            ;;
-        *)
-            CONFIG="$1"
-            ;;
-    esac
+    wrapProgram $out/bin/tiles \
+      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.python3 ]} \
+      --set TILES_PY $out/share/tiles/tiles.py \
+      --set TILES_EXAMPLE_CONFIG $out/share/tiles/exampleConfig.toml
 
-    if [[ ! -f "$CONFIG" ]]; then
-        help >&2
-        exit 1
-    fi
-
-    exec ${pkgs.python3} ${tiles} -c "$CONFIG"
-
+    runHook postInstall
   '';
+
+  meta = with pkgs.lib; {
+    description = "Tiled terminal launcher: press a key to run a command in a full-screen tile grid";
+    mainProgram = "tiles";
+    license = licenses.mit;
+    platforms = platforms.linux;
+  };
 }
