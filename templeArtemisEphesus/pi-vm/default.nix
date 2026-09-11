@@ -1,10 +1,4 @@
-{
-  nixosSystem,
-  modulesPath,
-  pkgs,
-  localPkgs,
-  ...
-  }@inputs:
+inputs:
 {
   bare = import ./bare.nix inputs;
 
