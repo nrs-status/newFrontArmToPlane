@@ -23,7 +23,7 @@ inputs: rec {
   # memorySize) and takes pi's prompt from stdin
   run-pi-vm =
     let
-      vmScript = "${(wservice { mountHostNixStore = true; }).config.system.build.vm}/bin/run-pi-vm-vm";
+      vmScript = "${(wservice { mountHostNixStore = false; }).config.system.build.vm}/bin/run-pi-vm-vm";
     in
     inputs.pkgs.runCommand "run-pi-vm"
       {
@@ -48,10 +48,12 @@ inputs: rec {
   # micro-VM built by `microvm-wservice' via the microvm.nix runner
   # `microvm-run' (which picks up extra qemu options through the QEMU_OPTS
   # environment variable, see `microvm.extraArgsScript' in
-  # ./microvm/wservice-microvm.nix)
+  # ./microvm/wservice-microvm.nix). The microvm's /nix/store is a writable
+  # overlay (see ./microvm/wservice-microvm.nix): packages can be installed
+  # at run time, in an ephemeral overlay recreated on every run.
   run-pi-microvm =
     let
-      microvmConfig = microvm-wservice { mountHostNixStore = true; };
+      microvmConfig = microvm-wservice { mountHostNixStore = false; };
       declaredRunner = microvmConfig.config.microvm.declaredRunner;
       # The microvm.nix runner bakes the build-time `microvm.mem' (1536M)
       # into its qemu command line twice: as `-m 1536M' and as the size of

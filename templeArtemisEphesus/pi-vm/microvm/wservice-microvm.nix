@@ -1,4 +1,3 @@
-# A micro-VM variant of the wservice VM (../basic/wservice.nix).
 #
 # Like wservice.nix, this creates a NixOS configuration from a minimal base
 # (here: the microvm.nix modules, github.com/microvm-nix/microvm.nix, instead
@@ -58,7 +57,14 @@
 #   like for the non-microvm wservice VM;
 # - the host's /nix/store is shared as a static 9p share (tag `ro-store')
 #   when `mountHostNixStore' is true, instead of the qemu-vm.nix
-#   `virtualisation.mountHostNixStore' option.
+#   `virtualisation.mountHostNixStore' option;
+# - /nix/store is a writable overlayfs (see the `writableStoreOverlay'
+#   volume below): its read-only layers are the store disk (when
+#   `mountHostNixStore' is false) or the `ro-store' 9p share (when true),
+#   and its writable layer lives on the ext4 volume mounted at
+#   /nix/.rw-store. 9p/virtiofs shares do not work as the overlay's upper
+#   layer, so the docs resort to a volume for it (microvm.nix docs,
+#   "Writable /nix/store overlay" in doc/src/shares.md).
 {
   nixosSystem,
   pkgs,
@@ -132,11 +138,47 @@ let
       # the guest module). Without it, the microvm boots from a read-only
       # store disk instead (microvm.storeOnDisk defaults to that when no
       # /nix/store share is declared).
+      #
+      # With the writable store overlay below, /nix/store is an overlayfs
+      # whose lower (read-only) layer is exactly this share (mountPoint
+      # /nix/.ro-store) when `mountHostNixStore' is true, and the store disk
+      # (mounted read-only at /nix/.ro-store by the microvm.nix guest
+      # module) when it is false: the guest module sets the overlay's
+      # lowerdir to the host store share's mount point in the former case
+      # and to /nix/.ro-store (the ro store disk) in the latter.
       microvm.shares = lib.mkIf mountHostNixStore [
         {
           tag = "ro-store";
           source = "/nix/store";
           mountPoint = "/nix/.ro-store";
+        }
+      ];
+
+      # Writable /nix/store overlay (microvm.nix docs, doc/src/shares.md,
+      # "Writable /nix/store overlay"): setting `writableStoreOverlay' makes
+      # the guest module mount /nix/store as an overlayfs with lowerdir
+      # /nix/.ro-store (see above) and upperdir/workdir inside this path, so
+      # packages can be installed (nix build, nix-shell, nix profile, ...)
+      # at run time even though the lower layers are read-only.
+      #
+      # The overlay's upper layer must be on a writable filesystem: 9p and
+      # virtiofs shares do not work there, so the docs resort to a volume.
+      # The volume image path is relative: it is created (labeled and
+      # formatted, `autoCreate' is the default) by the microvm.nix runner's
+      # start script in its working directory, which run-pi-microvm's host
+      # runner sets to its own ephemeral temporary directory (deleted when
+      # the VM is done). The overlay is therefore recreated on every run,
+      # exactly as the microvm.nix docs recommend: the Nix database keeps
+      # only what the VM's NixOS system closure needs, so it forgets
+      # packages built in the overlay after every reboot anyway.
+      microvm.writableStoreOverlay = "/nix/.rw-store";
+      microvm.volumes = [
+        {
+          image = "nix-store-overlay.img";
+          # ext4 labels are limited to 16 bytes: keep this one short.
+          label = "rw-store";
+          mountPoint = "/nix/.rw-store";
+          size = 10240;
         }
       ];
 
