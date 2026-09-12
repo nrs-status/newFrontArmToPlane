@@ -78,6 +78,7 @@ $env.config.hooks.display_output = {
 $env.config.abbreviations = {
     g: git
     ga: "git add"
+    gA: "git add -A"
     gb: "git branch"
     gbd: "git branch -d"
     gbD: "git branch -D"
