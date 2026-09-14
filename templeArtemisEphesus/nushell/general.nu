@@ -89,6 +89,7 @@ $env.config.abbreviations = {
     glo: "git log --oneline"
     glg: "git log --graph --oneline --decorate --all"
     gpu: "git push --set-upstream origin"
+    grset: "git reset"
     grst: "git restore --staged"
     gss: "git status --short"
     gssb: "git status --short --branch"
