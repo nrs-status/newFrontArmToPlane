@@ -32,8 +32,8 @@ headless.overrideAttrs (old: {
     ]);
 
   shellHook = ''
-    export THATWATERCHARMANDER_PATH=$(cat /run/secrets/paths/wranHearst/thatWaterCharmander) #required for script that updates twc's fatp input
-    export FRONTARMTOPLANE_PATH=$(cat /run/secrets/paths/wranHearst/frontArmToPlane)
+    export THATWATERCHARMANDER_PATH=/home/sieyes/baghdadPlane/flakes/newThatWaterCharmander/ #required for script that updates twc's fatp input
+    export FRONTARMTOPLANE_PATH=/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane/
     exec ${pkgsLib.getExe localPkgs.nushell}
   '';
 })
