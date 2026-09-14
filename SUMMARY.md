@@ -1,65 +1,61 @@
-# SUMMARY: Adding the Bitwarden extension to the Firefox package
+# SUMMARY: Packaging the himalaya email client
 
-Branch: `vaultwarden-firefox`
+Branch: `add-himalaya`
 
 ## Goal
-Extend the existing Firefox package configuration (which force-installs
-uBlock Origin and Vimium via `extraPolicies.ExtensionSettings`) with the
-Bitwarden Password Manager extension.
+Package the `himalaya` email client in the repo's package tree
+(`templeArtemisEphesus/`), bundled with an example configuration, and test
+that it works.
 
 ## Steps
 
-1. **Read `instructions.txt`** — task: extend the Firefox package config with
-   Bitwarden, test that it works, write this summary, and send a
-   `notify-send` notification including the git branch.
+1. **Read `instructions.txt`** — task: package himalaya with an example
+   config at `./templeArtemisEphesus/himalaya`, test it, write this summary,
+   and send a `notify-send` notification including the git branch.
 
-2. **Explored the repo** (`flake.nix`, `templeArtemisEphesus/`, `pyramidGiza/`):
-   - Firefox is packaged in `templeArtemisEphesus/firefox/default.nix`.
-   - Extensions are pinned as `pkgs.fetchurl` of AMO `.xpi` files and
-     force-installed via the `ExtensionSettings` enterprise policy, with
-     everything else blocked by the `"*"` wildcard entry.
+2. **Explored the repo** (`flake.nix`, `templeArtemisEphesus/`,
+   `sandyFireworksBus/`):
+   - `templeArtemisEphesus/default.nix` auto-imports every subdirectory as a
+     package via `baseLib.importPairsOfDirPath`, so a new
+     `templeArtemisEphesus/himalaya/` directory with a `default.nix`
+     automatically becomes `.#himalaya`.
+   - Existing wrapper patterns reviewed: `newsboat`/`sesh` (mkDerivation +
+     makeWrapper) and `television` (`localLib.mkWrapperScript` from
+     `sandyFireworksBus/mkWrapperScript.nix`).
 
-3. **Looked up the Bitwarden extension metadata** from the
-   addons.mozilla.org API (`/api/v5/addons/addon/bitwarden-password-manager/`):
-   - Add-on GUID: `{446900e4-71c2-419f-a6a7-df9c091e268b}`
-   - Version: 2026.8.0
-   - xpi URL: `https://addons.mozilla.org/firefox/downloads/file/4970633/bitwarden_password_manager-2026.8.0.xpi`
-   - SHA256 (SRI format, as reported by AMO):
-     `sha256:989ee33f19329af1fc155dcebb7f90a517a7259cea4bfbdd660923d25a7d465a`
+3. **Checked himalaya in nixpkgs** — `nixpkgs#himalaya` is v2.0.0; verified
+   it supports the global `--config <PATH>` flag.
 
-4. **Edited `templeArtemisEphesus/firefox/default.nix`**:
-   - Added a `bitwarden = pkgs.fetchurl { ... }` pinned fetch (same pattern
-     as the existing uBlock Origin / Vimium entries).
-   - Added an `ExtensionSettings` entry for the Bitwarden GUID with
-     `installation_mode = "force_installed"` and
-     `install_url = "file://${bitwarden}"`.
+4. **Determined the example config format** by trial against the v2.0.0
+   binary: TOML with an `[accounts.<name>]` table (imap backend +
+   password auth via `pass`) and a `message.send.backend.*` SMTP section.
 
-5. **Built the package**:
+5. **Created `templeArtemisEphesus/himalaya/`**:
+   - `config.toml` — example config with a placeholder `personal` account;
+     no secrets stored (passwords fetched at runtime through `pass`).
+   - `default.nix` — installs the config into a `runCommand` output and
+     wraps `pkgs.himalaya` with `localLib.mkWrapperScript`:
+     - `--config <store-path>/config.toml` baked in (per-invocation
+       `--config` still wins, as it is passed last).
+     - `pkgs.pass` added to `runtimeInputs` so the example config's
+       `backend.auth.cmd` can resolve.
+
+6. **Built the package**:
    ```
-   nix build .#firefox --out-link result-firefox
+   nix build .#himalaya --out-link result-himalaya
    ```
-   Build succeeded; verified the generated
-   `.../lib/firefox/distribution/policies.json` now contains the Bitwarden
-   `force_installed` entry alongside uBlock Origin and Vimium.
+   (First needed `git add templeArtemisEphesus/himalaya` — untracked files
+   are invisible to the flake's git-tree source.) Build succeeded.
 
-6. **Tested that it works properly**:
-   - Launched the built Firefox headless with a fresh throwaway profile:
-     ```
-     firefox --headless --no-remote --profile /tmp/ff-test-profile2 about:blank
-     ```
-     (First attempt with `--screenshot` quit before the ~19 MB Bitwarden
-     xpi finished async-installing; running the browser persistently for
-     ~60 s let the policy-driven install complete.)
-   - Parsed the profile's `extensions.json`: all three policy extensions
-     present and `active: True`, including
-     `{446900e4-71c2-419f-a6a7-df9c091e268b}` → **Bitwarden Password
-     Manager**.
-   - Took a headless `--screenshot` of `about:addons` on the same profile:
-     the "Enabled" list shows **Bitwarden Password Manager**, **uBlock
-     Origin**, and **Vimium**. ✅
+7. **Tested that it works** (with an isolated `HOME=/tmp/hima-home`):
+   - `result-himalaya/bin/himalaya account list` → uses the bundled example
+     config and lists the `personal` account as default. ✅
+   - `result-himalaya/bin/himalaya --config /tmp/hima-test/config.toml
+     account list` → per-invocation `--config` override works. ✅
+   - `himalaya --version` → himalaya v2.0.0. ✅
 
-7. **Cleanup & wrap-up**:
-   - Removed the `result-firefox` build symlink.
+8. **Cleanup & wrap-up**:
+   - Removed the `result-himalaya` build symlink.
    - Wrote this `SUMMARY.md`.
    - Sent a `notify-send` desktop notification mentioning the
-     `vaultwarden-firefox` branch.
+     `add-himalaya` branch.

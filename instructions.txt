@@ -1,8 +1,8 @@
 You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it.
 
-extend the configuration of the Firefox package with the bitwarden extension.
+package the `himalaya` email client with an example config at ./templeArtemisEphesus/himalaya
 
-Test it works properly
+test that it works
 
 Once you are done: 
 - Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.

@@ -1,0 +1,22 @@
+# Example himalaya configuration
+# Full reference: https://pimalaya.org/himalaya/cli/configuration/
+#
+# NOTE: replace the placeholder account values with your own. The password
+# is fetched at runtime via `pass`, so no secret is stored in this file.
+
+[accounts.personal]
+default = true
+email = "me@example.org"
+backend.type = "imap"
+backend.host = "imap.example.org"
+backend.port = 993
+backend.login = "me@example.org"
+backend.auth.type = "password"
+backend.auth.cmd = "pass show email/me@example.org"
+
+message.send.backend.type = "smtp"
+message.send.backend.host = "smtp.example.org"
+message.send.backend.port = 465
+message.send.backend.login = "me@example.org"
+message.send.backend.auth.type = "password"
+message.send.backend.auth.cmd = "pass show email/me@example.org"
