@@ -1,8 +1,9 @@
 # img-builder — a CLI that takes a WiFi network (ssid + password) and a root
 # password, and builds a minimal non-graphical NixOS installer ISO that tries
-# to connect to that WiFi network at boot, boots into a shell that echoes the
-# WiFi connection state until it successfully connects, and has root's
-# password set to the given password.
+# to connect to that WiFi network at boot, logs the `nixos` user into a shell
+# that echoes the WiFi connection state until it successfully connects, and
+# has root's password set to the given password.  Root's shell is left
+# untouched so nixos-everywhere can use it to install NixOS.
 #
 # The CLI (bin/img-builder) hashes the passwords and calls `nix build` on
 # ./iso.nix, a very simple extension of the official minimal installer
@@ -17,7 +18,7 @@ pkgs.runCommand "img-builder"
     version = "1.0.0";
     nativeBuildInputs = [ pkgs.makeWrapper ];
     meta = {
-      description = "Build a minimal non-graphical NixOS installer ISO that auto-connects to a given WiFi network, boots into a shell echoing the WiFi connection state until connected, and sets root's password";
+      description = "Build a minimal non-graphical NixOS installer ISO that auto-connects to a given WiFi network, logs the nixos user into a shell echoing the WiFi connection state until connected, and sets root's password";
       mainProgram = "img-builder";
       platforms = pkgsLib.platforms.linux;
     };

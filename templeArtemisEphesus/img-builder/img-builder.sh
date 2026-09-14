@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # img-builder — build a minimal, non-graphical NixOS installer ISO that
 # tries to connect to a given WiFi network at boot and sets root's password.
+# The `nixos` user is logged in automatically into a shell that echoes the
+# state of the WiFi connection until connected; root's shell is left
+# untouched (it is used by nixos-everywhere to install NixOS).
 #
 # Usage:
 #   img-builder --ssid SSID --password PASSWORD [-o OUT] [--dry-run]
@@ -22,7 +25,9 @@ usage: img-builder --ssid SSID --password PASSWORD [-o OUT] [--dry-run]
        img-builder SSID PASSWORD [-o OUT] [--dry-run]
 
 Builds a minimal non-graphical NixOS installer ISO that tries to connect to
-the WiFi network SSID at boot, and on which root's password is set.
+the WiFi network SSID at boot, and on which root's password is set.  The
+`nixos` user autologins into a shell echoing the WiFi connection state;
+root's shell is left untouched (used by nixos-everywhere).
 
 --password (or the positional PASSWORD) is shorthand for using the same
 value as both the WiFi password and root's password; use --wifi-password

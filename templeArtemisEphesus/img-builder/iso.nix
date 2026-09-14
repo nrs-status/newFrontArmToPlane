@@ -2,15 +2,20 @@
 #
 #   - tries to connect to the given WiFi network at boot (wpa_supplicant
 #     with the given ssid/psk),
-#   - boots into a shell that echoes the state of the WiFi connection
-#     attempt until it successfully connects (after which an interactive
-#     shell is started), and
+#   - logs the `nixos` user in automatically on tty1 into a shell that
+#     echoes the state of the WiFi connection attempt until it
+#     successfully connects (after which an interactive shell is
+#     started), and
 #   - sets the root password on the installer to the given password
 #     (already hashed by the caller).
 #
+# Root's shell is deliberately left untouched: it must remain the stock
+# shell because it is used by nixos-everywhere to install NixOS.  Only
+# the `nixos` user's shell is replaced with the WiFi-echo script.
+#
 # It is a very simple extension of the official minimal installer
 # (modules/installer/cd-dvd/installation-cd-minimal.nix) with exactly those
-# two settings on top.
+# settings on top.
 #
 # Called by ./img-builder.sh as:
 #
@@ -53,10 +58,12 @@ in
     # initialHashedPassword set by the installation-device profile).
     users.users.root.hashedPassword = wifi.hashedPassword;
 
-    # Root is logged in automatically on tty1 and drops into a shell that
-    # echoes the state of the WiFi connection attempt until it succeeds.
-    services.getty.autologinUser = lib.mkForce "root";
-    users.users.root.shell = let
+    # The `nixos` user is logged in automatically on tty1 and drops into
+    # a shell that echoes the state of the WiFi connection attempt until
+    # it succeeds.  Root's shell is left as-is: nixos-everywhere uses it
+    # to install NixOS.
+    services.getty.autologinUser = lib.mkForce "nixos";
+    users.users.nixos.shell = let
       wifiEchoShellScript =
         pkgs.writeShellScript "wifi-echo-shell" ''
           export PATH="${pkgs.wpa_supplicant}/bin:${pkgs.iproute2}/bin:${pkgs.bashInteractive}/bin:/run/current-system/sw/bin:$PATH"
