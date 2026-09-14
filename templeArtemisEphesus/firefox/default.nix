@@ -8,6 +8,10 @@ let
     url = "https://addons.mozilla.org/firefox/downloads/file/4717567/vimium_ff-2.4.2.xpi";
     hash = "sha256:15nixab67dxah8kzqhdl8yn9yh31kqaq35xib89fjyhfb1kjl7hk";
   };
+  bitwarden = pkgs.fetchurl {
+    url = "https://addons.mozilla.org/firefox/downloads/file/4970633/bitwarden_password_manager-2026.8.0.xpi";
+    hash = "sha256:989ee33f19329af1fc155dcebb7f90a517a7259cea4bfbdd660923d25a7d465a";
+  };
 in
 pkgs.firefox.override {
   extraPrefsFiles = [ "${./bookmark-remap.js}" ]; #remap Ctrl+D to Ctrl+B
@@ -24,6 +28,10 @@ pkgs.firefox.override {
       "{d7742d87-e61d-4b78-b8a1-b469842139fa}" = {
         installation_mode = "force_installed";
         install_url = "file://${vimium}";
+      };
+      "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+        installation_mode = "force_installed";
+        install_url = "file://${bitwarden}";
       };
 
     };
