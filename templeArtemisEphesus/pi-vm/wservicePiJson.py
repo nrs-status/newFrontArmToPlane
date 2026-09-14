@@ -28,7 +28,7 @@ import sys
 #   trailing newlines are stripped below, like bash command substitution
 #   would.)
 # - name=opt/pi/api-key,file=<path-to-key-file>: (optional) provisions the
-#   guest's /run/secrets/OPENROUTER_API_KEY. A `file=` entry stores the file's
+#   guest's /run/secrets/keys/openrouter. A `file=` entry stores the file's
 #   exact bytes (no NUL terminator); passing the key as a file also keeps it
 #   off the qemu command line, where it would be visible in `ps` output.
 FW_CFG_PROMPT_RAW = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/json-prompt/raw"
@@ -51,8 +51,8 @@ VPORT_DEV = "/dev/virtio-ports/pi-json"
 MOUNTS_MANIFEST = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/mounts/raw"
 
 # The guest path localPkgs.pi provisions the openrouter key through
-# `! cat /run/secrets/OPENROUTER_API_KEY'.
-API_KEY_PATH = "/run/secrets/OPENROUTER_API_KEY"
+# `! cat /run/secrets/keys/openrouter'.
+API_KEY_PATH = "/run/secrets/keys/openrouter"
 
 # Binaries substituted at build time (see basic/wservice.nix and
 # microvm/wservice-microvm.nix).
@@ -90,7 +90,7 @@ def read_prompt():
 
 
 def provision_api_key():
-    """Provision /run/secrets/OPENROUTER_API_KEY from the opt/pi/api-key
+    """Provision /run/secrets/keys/openrouter from the opt/pi/api-key
     fw_cfg file if the host provided the key (and it is not there already).
     A fw_cfg `file=` entry holds the file's exact bytes: strip any NULs for
     good measure and drop surrounding whitespace like the xargs pipeline it

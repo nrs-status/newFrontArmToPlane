@@ -21,7 +21,7 @@
 # host must connect promptly.
 #
 # The shared ~/.pi/agent/auth.json resolves the openrouter key through
-# `! cat /run/secrets/OPENROUTER_API_KEY`; the service provisions it (mode
+# `! cat /run/secrets/keys/openrouter`; the service provisions it (mode
 # 0600) from the optional fw_cfg file `opt/pi/api-key` if the host passed
 # e.g. -fw_cfg name=opt/pi/api-key,file=<path-to-key-file>
 #
@@ -54,7 +54,7 @@ let
   # fw_cfg entries (contents decided by the host's later qemu command line):
   # - name=opt/pi/json-prompt,string=<contents>: prompt fed to `pi --mode json`
   # - name=opt/pi/api-key,file=<path-to-key-file>: (optional) provisions the
-  #   guest's /run/secrets/OPENROUTER_API_KEY from a host file. A `file=`
+  #   guest's /run/secrets/keys/openrouter from a host file. A `file=`
   #   entry stores the file's exact bytes (no NUL terminator), unlike a
   #   `string=` entry; passing the key as a file also keeps it off the
   #   qemu command line, where it would be visible in `ps` output.

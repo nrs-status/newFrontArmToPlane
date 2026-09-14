@@ -26,7 +26,7 @@ Precedence (highest wins):
      $OPENROUTER_MODEL, $OPENROUTER_API_URL)
   3. the configuration file (keys below)
   4. built-in defaults
-Without any override the API key is read from /run/secrets/OPENROUTER_API_KEY.
+Without any override the API key is read from /run/secrets/keys/openrouter.
 
 Optional configuration file (--config <file>, else searched in this order):
   $VOICE_INPUT_CONFIG
@@ -43,7 +43,7 @@ Config format ('key = value' lines; '#' comments and blank lines ignored):
       Example: model = openai/gpt-4o-audio-preview
   api_key_file = <path>
       File the OpenRouter API key is read from (single line).
-      Default: /run/secrets/OPENROUTER_API_KEY
+      Default: /run/secrets/keys/openrouter
       Example: api_key_file = /home/me/secrets/openrouter.key
   prompt = <text>
       Instruction sent to the model together with the audio.
@@ -68,7 +68,7 @@ import requests
 DEFAULTS = {
     "api_url": "https://openrouter.ai/api/v1/chat/completions",
     "model": "google/gemini-2.5-flash",  # supports audio input
-    "api_key_file": "/run/secrets/OPENROUTER_API_KEY",
+    "api_key_file": "/run/secrets/keys/openrouter",
     "prompt": "Transcribe this audio to plain text. Output only the transcription.",
     "pipe_command": None,
 }

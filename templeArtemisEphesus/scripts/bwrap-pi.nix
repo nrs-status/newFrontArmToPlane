@@ -8,7 +8,7 @@ ${localPkgs.scripts.bwrap-path} \
 	--ro-bind /usr /usr \
 	--ro-bind /etc /etc \
 	--ro-bind /bin /bin \
-	--ro-bind /run/secrets/OPENROUTER_API_KEY /run/secrets/OPENROUTER_API_KEY \
+	--ro-bind /run/secrets/keys/openrouter /run/secrets/keys/openrouter \
 	--bind $HOME/.pi $HOME/.pi \
 	--bind $PWD $PWD \
 	pi "read and execute $PWD/instructions.txt"

@@ -2,19 +2,19 @@
 # Test that the `pi` container connects to OpenRouter.
 #
 # The container reads its API key at runtime from
-# `/run/secrets/OPENROUTER_API_KEY` (bind-mounted by the caller), via the
-# `"! cat /run/secrets/OPENROUTER_API_KEY"` command-value in `auth.json`.
+# `/run/secrets/keys/openrouter` (bind-mounted by the caller), via the
+# `"! cat /run/secrets/keys/openrouter"` command-value in `auth.json`.
 # The key must never appear as a command argument (cmdline vulnerability),
 # which this script also asserts.
 #
-# Usage: sudo ./test.sh   (needs access to /run/secrets/OPENROUTER_API_KEY,
+# Usage: sudo ./test.sh   (needs access to /run/secrets/keys/openrouter,
 #                          docker/podman, and the nix flake)
 
 set -euo pipefail
 
 IMAGE="localhost/simple-pi-container:nixos"
 FLAKE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SECRET="/run/secrets/OPENROUTER_API_KEY"
+SECRET="/run/secrets/keys/openrouter"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
@@ -59,7 +59,7 @@ docker run --rm -v /run/secrets:/run/secrets:ro --entrypoint bash "$IMAGE" -c '
   while kill -0 "$pid" 2>/dev/null; do
     for c in /proc/[0-9]*/cmdline; do
       [ -r "$c" ] || continue
-      if tr "\0" "\n" < "$c" 2>/dev/null | grep -q "$(cat /run/secrets/OPENROUTER_API_KEY)"; then
+      if tr "\0" "\n" < "$c" 2>/dev/null | grep -q "$(cat /run/secrets/keys/openrouter)"; then
         leak=1
       fi
     done
@@ -86,5 +86,5 @@ rm -rf "$WS_DIR"
 
 echo
 echo "ALL TESTS PASSED: the container connects to OpenRouter, and the API key"
-echo "is read from /run/secrets/OPENROUTER_API_KEY without ever appearing in"
+echo "is read from /run/secrets/keys/openrouter without ever appearing in"
 echo "a process cmdline. The run script mounts the workspace and bind paths."

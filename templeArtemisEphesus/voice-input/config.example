@@ -19,7 +19,7 @@ model = google/gemini-2.5-flash
 
 # File the OpenRouter API key is read from (single line).
 # The key can also come from $OPENROUTER_API_KEY directly.
-api_key_file = /run/secrets/OPENROUTER_API_KEY
+api_key_file = /run/secrets/keys/openrouter
 
 # Instruction sent to the model together with the audio.
 prompt = Transcribe this audio to plain text. Output only the transcription.

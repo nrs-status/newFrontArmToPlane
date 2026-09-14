@@ -8,7 +8,7 @@
 #   start                 : start recording the default audio source with pw-record
 #   finish                : stop recording, transcribe the wav using the program at
 #                           ~/llmSessions/openrouter-audio-transcription.0 (OpenRouter, key read
-#                           from /run/secrets/OPENROUTER_API_KEY by that program), and type the
+#                           from /run/secrets/keys/openrouter by that program), and type the
 #                           transcription wherever the cursor is with wtype
 #   transcribe-file <path>: like finish but transcribes a given file instead of a recording
 #                           (useful for testing, e.g. with ~/baghdad_plane/rectest/out.wav)
@@ -37,7 +37,7 @@
 #       Default: google/gemini-2.5-flash
 #   api_key_file = <path>
 #       File the OpenRouter API key is read from.
-#       Default: /run/secrets/OPENROUTER_API_KEY
+#       Default: /run/secrets/keys/openrouter
 #   prompt = <text>
 #       Instruction sent to the model together with the audio.
 #   pipe_command = <shell command>

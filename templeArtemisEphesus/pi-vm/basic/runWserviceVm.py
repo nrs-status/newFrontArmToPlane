@@ -52,7 +52,7 @@ also reports on stderr the host locations of all the paths that were passed
 to it (via --workdir/-w, --read-write/-rw and --read-only/-ro) and shared
 with the VM.
 
-The host's /run/secrets/OPENROUTER_API_KEY, if it exists and is readable, is
+The host's /run/secrets/keys/openrouter, if it exists and is readable, is
 passed to the VM through the fw_cfg file `opt/pi/api-key' (see wservice.nix).
 """
 
@@ -75,7 +75,7 @@ VM_SCRIPT = "@vmScript@"
 FW_CFG_PROMPT = "opt/pi/json-prompt"
 FW_CFG_MOUNTS = "opt/pi/mounts"
 FW_CFG_API_KEY = "opt/pi/api-key"
-HOST_API_KEY_PATH = "/run/secrets/OPENROUTER_API_KEY"
+HOST_API_KEY_PATH = "/run/secrets/keys/openrouter"
 
 # 9p mount tags and the guest mount points the pi-json service mounts them at.
 TAG_WORKDIR = "pi-workdir"
@@ -341,7 +341,7 @@ def main():
             "-fw_cfg", "name={0},file={1}".format(FW_CFG_MOUNTS, manifest_path),
         ]
 
-        # Openrouter key for the guest's /run/secrets/OPENROUTER_API_KEY.
+        # Openrouter key for the guest's /run/secrets/keys/openrouter.
         if os.path.isfile(HOST_API_KEY_PATH) and os.access(HOST_API_KEY_PATH,
                                                            os.R_OK):
             qemu_opts += [
