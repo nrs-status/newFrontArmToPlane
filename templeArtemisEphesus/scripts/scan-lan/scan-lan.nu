@@ -4,22 +4,17 @@
 # through the router's DNS, and flag the target host (default: lanchamarcou).
 #
 # Usage:
-#   sudo nu scan-lan.nu                 # look for "lanchamarcou"
-#   sudo nu scan-lan.nu otherhost       # look for "otherhost"
-#   sudo nu scan-lan.nu --router 192.168.2.1
+#   scan-lan                 # look for "lanchamarcou"
+#   scan-lan otherhost       # look for "otherhost"
+#   scan-lan --router 192.168.2.1
 
 def main [
     target: string = "lanchamarcou"   # host name to detect
     --router: string = "192.168.2.1"  # router / DNS server IP
 ] {
-    # Locate a dig binary from nixpkgs (returned as its full store path,
-    # so we can call it directly without re-running nix for every lookup)
-    let dig = (nix shell nixpkgs#bind -c sh -c 'command -v dig'
-        | complete | get stdout | str trim)
-
     # ARP sweep of the local network (requires root)
     print $"Scanning local network via ARP..."
-    let raw = (sudo nix shell nixpkgs#arp-scan -c sh -c 'arp-scan --localnet --plain'
+    let raw = (sudo arp-scan --localnet --plain
         | complete)
 
     if $raw.exit_code != 0 {
@@ -39,7 +34,7 @@ def main [
 
     # Resolve each discovered IP through the router's DNS
     let with_names = ($hosts | each {|h|
-        let name = (run-external $dig +short +time=1 +tries=1 @($router) -- -x $h.ip
+        let name = (dig +short +time=1 +tries=1 @($router) -x $h.ip
             | complete | get stdout
             | lines | get 0? | default "" | str trim | str replace -r '\.$' '')
         {
