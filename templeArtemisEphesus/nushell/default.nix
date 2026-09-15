@@ -60,6 +60,13 @@ let
       sed -i '0,/name: atuin$/s//name: atuin_search/' $out/atuinConfig.nu
       sed -i '0,/name: atuin$/s//name: atuin_up_search/' $out/atuinConfig.nu
 
+      # The Up-arrow keybinding invokes `atuin search --shell-up-key-binding
+      # --interactive` via `_atuin_search_cmd`. By default that searches the
+      # *global* atuin history database; restrict it to the history of the
+      # *current session* (atuin's ATUIN_SESSION, set per-shell by the init
+      # hooks above) with `--filter-mode session`.
+      sed -i "s/_atuin_search_cmd '--shell-up-key-binding'/_atuin_search_cmd '--shell-up-key-binding' '--filter-mode' 'session'/" $out/atuinConfig.nu
+
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
       install -Dm644 starship.toml $out/starship.toml
