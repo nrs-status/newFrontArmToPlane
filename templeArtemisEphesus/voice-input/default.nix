@@ -1,4 +1,9 @@
-# voice-input: push-to-talk audio recording + OpenRouter transcription + insertion at cursor.
+{ pkgs, localPkgs, ... }:
+# voice-input: push-to-talk audio recording + transcription + insertion at cursor.
+#
+# This is the voice input script proper; all transcription work is delegated
+# to the `voice-transcribe' package (../voice-transcribe), the standalone
+# OpenRouter transcription program this package was split off from.
 #
 # notifications: transient notifications (-t 5000, max 5 s) are sent on recording
 # start and on transcription end (inserted / empty); error notifications are
@@ -6,9 +11,9 @@
 #
 # subcommands:
 #   start                 : start recording the default audio source with pw-record
-#   finish                : stop recording, transcribe the wav using the program at
-#                           ~/llmSessions/openrouter-audio-transcription.0 (OpenRouter, key read
-#                           from /run/secrets/keys/openrouter by that program), and type the
+#   finish                : stop recording, transcribe the wav using the
+#                           `voice-transcribe' program (OpenRouter, key read from
+#                           /run/secrets/keys/openrouter by that program), and type the
 #                           transcription wherever the cursor is with wtype
 #   transcribe-file <path>: like finish but transcribes a given file instead of a recording
 #                           (useful for testing, e.g. with ~/baghdad_plane/rectest/out.wav)
@@ -49,11 +54,10 @@
 #   OPENROUTER_API_KEY / OPENROUTER_API_KEY_FILE : API key / key file
 #   OPENROUTER_MODEL                             : model override
 #   OPENROUTER_API_URL                           : API endpoint override (testing)
-{ pkgs, ... }:
 
 let
-  pyScript = pkgs.writeText "voice-transcriber.py" (builtins.readFile ./transcribe.py);
-  pythonEnv = pkgs.python3.withPackages (ps: [ ps.requests ]);
+  #standalone, configurable transcription program (see ../voice-transcribe)
+  voiceTranscribe = localPkgs.voice-transcribe;
 in
 pkgs.writeShellScriptBin "voice-input" ''
   set -euo pipefail
@@ -69,12 +73,11 @@ pkgs.writeShellScriptBin "voice-input" ''
   #transcribeAndInsert <wav-file> [transcriber options...]
   transcribeAndInsert() {
     wavFile="$1"; shift
-    transcribeScript="${pyScript}"
     if [ ! -f "$wavFile" ]; then
       notify -u critical "voice-input" "no audio file to transcribe: $wavFile"
       return 1
     fi
-    if ! text="$(${pythonEnv}/bin/python "$transcribeScript" "$wavFile" "$@" 2>"$logFile")"; then
+    if ! text="$(${voiceTranscribe}/bin/voice-transcribe "$wavFile" "$@" 2>"$logFile")"; then
       notify -u critical "voice-input" "transcription failed, see $logFile"
       return 1
     fi
