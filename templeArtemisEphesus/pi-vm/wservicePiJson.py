@@ -33,6 +33,9 @@ import sys
 #   off the qemu command line, where it would be visible in `ps` output.
 FW_CFG_PROMPT_RAW = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/json-prompt/raw"
 FW_CFG_KEY_RAW = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/api-key/raw"
+# (optional) model name for `pi --model'; provisioned by the host runner's
+# -m/--model option through the fw_cfg file `opt/pi/model'
+FW_CFG_MODEL_RAW = "/sys/firmware/qemu_fw_cfg/by_name/opt/pi/model/raw"
 
 # The virtserialport the service streams pi's JSON output into. The host's
 # later qemu command line must bridge it to a host unix socket:
@@ -87,6 +90,19 @@ def read_prompt():
              "the host qemu command line pass "
              "-fw_cfg name=opt/pi/json-prompt,string=<contents>?")
     return raw.rstrip(b"\0").rstrip(b"\n").decode("utf-8", "replace")
+
+
+def read_model():
+    """Read the optional model name from the opt/pi/model fw_cfg file the
+    host passed later (stripping the file's trailing newline/NUL, like
+    read_prompt does for the prompt). Returns "" when the host passed no
+    model, in which case pi keeps the model baked into its wrapper."""
+    try:
+        with open(FW_CFG_MODEL_RAW, "rb") as f:
+            raw = f.read()
+    except OSError:
+        return ""
+    return raw.replace(b"\0", b"").decode("utf-8", "replace").strip()
 
 
 def provision_api_key():
@@ -172,12 +188,22 @@ def main():
         log(f"running pi from the workdir {workdir}")
         os.chdir(workdir)
 
+    # The host can override pi's model with its -m/--model option (fw_cfg
+    # opt/pi/model); the wrapper's baked-in `--model' appears earlier on the
+    # command line, so the last `--model' (ours) wins.
+    model = read_model()
+    if model:
+        log(f"using model {model} from {FW_CFG_MODEL_RAW}")
+
     # Stream pi's JSON event output into the virtserialport; qemu forwards it
     # to the host unix socket. qemu discards chardev writes while no client is
     # attached to the host socket: the host must connect promptly.
+    pi_command = [PI, "--mode", "json", "-p", "--no-session"]
+    if model:
+        pi_command += ["--model", model]
+    pi_command.append(prompt)
     with open(VPORT_DEV, "wb") as vport:
-        result = subprocess.run([PI, "--mode", "json", "-p", "--no-session",
-                                 prompt], stdout=vport)
+        result = subprocess.run(pi_command, stdout=vport)
     log(f"pi exited with status {result.returncode}; powering the VM off")
     # This vm exists only to run pi on the fw_cfg prompt and stream its
     # output: once pi is done there is nothing left to do, so power off.

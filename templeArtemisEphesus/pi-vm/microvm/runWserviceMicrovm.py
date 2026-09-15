@@ -90,6 +90,7 @@ VM_SCRIPT = "@vmScript@"
 FW_CFG_PROMPT = "opt/pi/json-prompt"
 FW_CFG_MOUNTS = "opt/pi/mounts"
 FW_CFG_API_KEY = "opt/pi/api-key"
+FW_CFG_MODEL = "opt/pi/model"
 HOST_API_KEY_PATH = "/run/secrets/keys/openrouter"
 
 # 9p mount tags and the guest mount points the pi-json service mounts them at.
@@ -210,6 +211,21 @@ def parse_args():
         "-ro", "--read-only", dest="read_only", metavar="PATH",
         action="append", default=[],
         help="host path mounted read-only to the VM (repeatable)",
+    )
+    parser.add_argument(
+        "-m", "--model", dest="model", metavar="MODEL",
+        default=None,
+        help="model name passed to the guest's `pi --model' option "
+             "(e.g. openrouter/z-ai/glm-5.3-flash). Optional: when it is "
+             "not given, pi keeps the model baked into its wrapper script.",
+    )
+    parser.add_argument(
+        "--api-key-file", dest="api_key_file", metavar="FILE",
+        default=None,
+        help="file whose contents are passed to the VM as the openrouter "
+             "API key (fw_cfg opt/pi/api-key). Optional: when it is not "
+             "given, the host key at " + HOST_API_KEY_PATH + " is used if "
+             "it exists and is readable.",
     )
     return parser.parse_args()
 
@@ -363,17 +379,30 @@ def main():
             "-fw_cfg", "name={0},file={1}".format(FW_CFG_MOUNTS, manifest_path),
         ]
 
-        # Openrouter key for the guest's /run/secrets/keys/openrouter.
-        if os.path.isfile(HOST_API_KEY_PATH) and os.access(HOST_API_KEY_PATH,
-                                                           os.R_OK):
+        # The model for the guest's `pi --model' option, passed through the
+        # opt/pi/model fw_cfg file (see wservicePiJson.py).
+        if args.model:
+            model_path = os.path.join(tmp, "model")
+            with open(model_path, "w") as f:
+                f.write(args.model)
+            qemu_opts += [
+                "-fw_cfg", "name={0},file={1}".format(FW_CFG_MODEL,
+                                                      model_path),
+            ]
+
+        # Openrouter key for the guest's /run/secrets/keys/openrouter: an
+        # explicitly given --api-key-file wins over the host key path.
+        api_key_path = args.api_key_file or HOST_API_KEY_PATH
+        if os.path.isfile(api_key_path) and os.access(api_key_path,
+                                                      os.R_OK):
             qemu_opts += [
                 "-fw_cfg", "name={0},file={1}".format(FW_CFG_API_KEY,
-                                                      HOST_API_KEY_PATH),
+                                                      api_key_path),
             ]
         else:
             print("run-pi-microvm: {0} not found or not readable: the VM "
                   "will run without an openrouter key".format(
-                      HOST_API_KEY_PATH), file=sys.stderr)
+                      api_key_path), file=sys.stderr)
 
         # RUN_PI_MICROVM_MEM makes the wrapped VM start script rewrite the
         # microvm.nix runner's baked-in memory size (see ../default.nix);

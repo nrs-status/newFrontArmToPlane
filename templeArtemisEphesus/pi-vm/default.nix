@@ -85,7 +85,8 @@ inputs: rec {
     in
       inputs.pkgs.runCommand "run-pi-microvm"
         {
-          nativeBuildInputs = [ inputs.pkgs.python3 ];
+          nativeBuildInputs =
+            [ inputs.pkgs.python3 inputs.pkgs.makeWrapper ];
           meta.mainProgram = "run-pi-microvm";
         }
         ''
@@ -94,5 +95,13 @@ inputs: rec {
             --subst-var-by vmScript ${vmScript}
           chmod +x $out/bin/run-pi-microvm
           patchShebangs $out/bin/run-pi-microvm
+          # The script creates the VM's disk image at run time with
+          # truncate and mkfs.ext4: make sure both are in PATH even when
+          # the caller's environment does not provide them.
+          wrapProgram $out/bin/run-pi-microvm \
+            --prefix PATH : ${inputs.pkgs.lib.makeBinPath [
+              inputs.pkgs.e2fsprogs
+              inputs.pkgs.util-linux
+            ]}
         '';
 }
