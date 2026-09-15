@@ -19,6 +19,9 @@
 --     default only the ones still ongoing or initializing; the @--status@
 --     option takes a string of status letters (o d i t) filtering which
 --     entries are displayed.
+--
+--   * @config-guide@: print a description of how to properly write the
+--     TOML configuration file consumed by the other subcommands.
 module Main (main) where
 
 import           Control.Concurrent          (threadDelay)
@@ -117,6 +120,7 @@ data Options
         { optConfigFile   :: FilePath
         , optStatusChars  :: Maybe String
         }
+    | OptConfigGuide
 
 -- ---------------------------------------------------------------------------
 -- CLI parsing
@@ -169,11 +173,17 @@ runParser = OptRun <$> configOpt <*> runPiMicrovmOpt <*> flakeArg
 listParser :: Parser Options
 listParser = OptList <$> configOpt <*> statusOpt
 
+configGuideParser :: Parser Options
+configGuideParser = pure OptConfigGuide
+
 optionsParser :: Parser Options
 optionsParser =
     hsubparser
         (  command "run"  (info runParser  (progDesc "run a flake runConfig in the pi microvm"))
         <> command "list" (info listParser (progDesc "list run entries in the database"))
+        <> command "config-guide"
+                   (info configGuideParser
+                         (progDesc "print how to write the TOML config file"))
         )
 
 main :: IO ()
@@ -182,6 +192,7 @@ main = do
     case opts of
         OptRun{..}  -> runCommand optConfigFile optRunPiMicrovm optFlakeArg
         OptList{..} -> listCommand optConfigFile optStatusChars
+        OptConfigGuide -> configGuideCommand
 
 -- ---------------------------------------------------------------------------
 -- Shared helpers
@@ -464,6 +475,57 @@ finishRun conn runId workdir exitCode = do
                               show code ++ "; run " ++ show runId ++
                               " marked terminated")
             exitWith (ExitFailure code)
+
+-- ---------------------------------------------------------------------------
+-- The `config-guide' subcommand
+-- ---------------------------------------------------------------------------
+
+-- | Print a description of how to properly write the TOML configuration
+-- file that the @run@ and @list@ subcommands consume.
+configGuideCommand :: IO ()
+configGuideCommand = TIO.putStr configGuideText
+
+configGuideText :: Text
+configGuideText = T.unlines
+    [ "arunman configuration guide"
+    , "==========================="
+    , ""
+    , "The `run' and `list' subcommands both take a required --config (-c)"
+    , "option pointing at a TOML configuration file. The file must contain"
+    , "two top-level string keys:"
+    , ""
+    , "  databaseUrl"
+    , "      A URL to a postgresql server holding the `run' table, using the"
+    , "      postgresql-simple connection syntax; both connection URIs and"
+    , "      keyword strings work, e.g."
+    , ""
+    , "          databaseUrl = \"postgres://user:password@localhost:5432/runs\""
+    , ""
+    , "      or"
+    , ""
+    , "          databaseUrl = \"host=localhost dbname=runs user=user\""
+    , ""
+    , "  openrouterApiKey"
+    , "      An OpenRouter API key string handed to the VM; it is written to a"
+    , "      mode-0600 temporary file and passed to run-pi-microvm with"
+    , "      --api-key-file. It may be an empty string (a warning is printed),"
+    , "      in which case no key file is passed."
+    , ""
+    , "A minimal, complete example config file:"
+    , ""
+    , "  databaseUrl = \"postgres:///runs\""
+    , "  openrouterApiKey = \"sk-or-v1-...\""
+    , ""
+    , "Notes:"
+    , ""
+    , "  * The file must be valid TOML and both keys must be plain strings."
+    , "  * The path is checked for existence before it is decoded; a missing"
+    , "    file is a hard error."
+    , "  * The postgresql server does not need to exist yet for `run' to"
+    , "    validate the flake, but the connection is opened before anything is"
+    , "    inserted, so it must be reachable when a run starts."
+    , ""
+    ]
 
 -- ---------------------------------------------------------------------------
 -- The `list' subcommand
