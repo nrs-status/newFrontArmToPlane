@@ -23,6 +23,8 @@
 #   --api-key-file <path> override the 'api_key_file' config parameter
 #   --prompt <text>       override the 'prompt' config parameter
 #   --pipe-command <cmd>  override the 'pipe_command' config parameter
+#   --save-directory <dir>  override the 'save_directory' config parameter
+#   --save-limit <n>      override the 'save_limit' config parameter
 #
 # precedence (highest wins): CLI options > environment variables > config file
 # > built-in defaults; without any override the API key is read from

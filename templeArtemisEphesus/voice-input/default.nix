@@ -153,6 +153,7 @@ pkgs.writeShellScriptBin "voice-input" ''
       if [ -z "$file" ]; then
         echo "usage: voice-input [--config FILE] [--api-url URL] [--model ID]" \
              "[--api-key-file FILE] [--prompt TEXT] [--pipe-command CMD]" \
+             "[--save-directory DIR] [--save-limit N]" \
              "start|finish|transcribe-file <path>" >&2
         exit 1
       fi
@@ -161,6 +162,7 @@ pkgs.writeShellScriptBin "voice-input" ''
     *)
       echo "usage: voice-input [--config FILE] [--api-url URL] [--model ID]" \
            "[--api-key-file FILE] [--prompt TEXT] [--pipe-command CMD]" \
+           "[--save-directory DIR] [--save-limit N]" \
            "start|finish|transcribe-file <path>" >&2
       exit 1
       ;;

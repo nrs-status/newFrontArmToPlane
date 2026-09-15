@@ -16,14 +16,17 @@ Command line options:
   --prompt <text>       override the 'prompt' config parameter
   --pipe-command <cmd>  override the 'pipe_command' config parameter
                         (an empty value disables the pipe entirely)
+  --save-directory <dir>  override the 'save_directory' config parameter
+  --save-limit <n>      override the 'save_limit' config parameter
 
 The API call to OpenRouter is configurable via command line options,
 environment variables and the optional configuration file.
 Precedence (highest wins):
   1. command line options (--config, --api-url, --model, --api-key-file,
-     --prompt, --pipe-command)
+     --prompt, --pipe-command, --save-directory, --save-limit)
   2. environment variables ($OPENROUTER_API_KEY, $OPENROUTER_API_KEY_FILE,
-     $OPENROUTER_MODEL, $OPENROUTER_API_URL)
+     $OPENROUTER_MODEL, $OPENROUTER_API_URL, $VOICE_INPUT_SAVE_DIRECTORY,
+     $VOICE_INPUT_SAVE_LIMIT)
   3. the configuration file (keys below)
   4. built-in defaults
 Without any override the API key is read from /run/secrets/keys/openrouter.
@@ -54,6 +57,22 @@ Config format ('key = value' lines; '#' comments and blank lines ignored):
       (text on stdin, transformed text read from stdout) before it is
       printed and ultimately inputted (typed) at the cursor. Example:
         pipe_command = sed -e 's/um //g' -e 's/uh //g'
+  save_directory = <path>
+      Directory transcriptions are automatically archived to: the raw audio
+      is saved as <name>.wav and the transcription as <name>.txt, where
+      <name> corresponds to the moment the recording began (for file input
+      the file's mtime is used as the best available approximation; for
+      stdin input the current time). The directory is created if it does
+      not exist. Errors in this stage are fatal and abort the program.
+      Default: unset (no archiving)
+      Example: save_directory = /home/me/voice-logs
+  save_limit = <n>
+      Maximum number of voice recordings kept in 'save_directory'. When the
+      limit is reached the most recent recordings are kept (including the
+      newest one). 0 disables the archive entirely ('save_directory' is
+      ignored). Must be a non-negative integer.
+      Default: 0
+      Example: save_limit = 50
 """
 
 import argparse
@@ -62,6 +81,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 import requests
 
@@ -71,7 +91,13 @@ DEFAULTS = {
     "api_key_file": "/run/secrets/keys/openrouter",
     "prompt": "Transcribe this audio to plain text. Output only the transcription.",
     "pipe_command": None,
+    "save_directory": None,
+    "save_limit": "0",
 }
+
+#file name extensions of the archived recording (.wav) and its transcription (.txt)
+AUDIO_EXT = ".wav"
+TEXT_EXT = ".txt"
 
 # all keys accepted in the config file
 CONFIG_KEYS = set(DEFAULTS)
@@ -81,6 +107,8 @@ ENV_OVERRIDES = {
     "OPENROUTER_API_URL": "api_url",
     "OPENROUTER_MODEL": "model",
     "OPENROUTER_API_KEY_FILE": "api_key_file",
+    "VOICE_INPUT_SAVE_DIRECTORY": "save_directory",
+    "VOICE_INPUT_SAVE_LIMIT": "save_limit",
 }
 
 # command line option -> config key it overrides
@@ -90,6 +118,8 @@ CLI_OPTIONS = {
     "--api-key-file": "api_key_file",
     "--prompt": "prompt",
     "--pipe-command": "pipe_command",
+    "--save-directory": "save_directory",
+    "--save-limit": "save_limit",
 }
 
 
@@ -197,6 +227,63 @@ def pipe_through(text: str, command: str) -> str:
     return proc.stdout
 
 
+def parse_save_limit(value: str) -> int:
+    """Validate and convert the 'save_limit' value (non-negative integer)."""
+    try:
+        limit = int(value)
+    except ValueError:
+        sys.exit(f"voice-input: 'save_limit' must be a non-negative integer, got {value!r}")
+    if limit < 0:
+        sys.exit(f"voice-input: 'save_limit' must be a non-negative integer, got {value!r}")
+    return limit
+
+
+def prune_recordings(directory: str, limit: int) -> None:
+    """Keep only the `limit' most recent recordings (and their transcriptions)."""
+    try:
+        stamps: dict[str, int] = {}
+        for name in os.listdir(directory):
+            stem, ext = os.path.splitext(name)
+            if ext == AUDIO_EXT:
+                stamps[stem] = os.stat(os.path.join(directory, name)).st_mtime_ns
+        if len(stamps) <= limit:
+            return
+        keep = sorted(stamps, key=stamps.get, reverse=True)[:limit]
+        for stem in sorted(set(stamps) - set(keep)):
+            for ext in (AUDIO_EXT, TEXT_EXT):
+                path = os.path.join(directory, stem + ext)
+                if os.path.exists(path):
+                    os.remove(path)
+    except OSError as e:
+        sys.exit(f"voice-input: cannot prune recordings in {directory!r}: {e}")
+
+
+def save_recording(audio: bytes, text: str, directory: str, started: float, limit: int) -> None:
+    """Archive the recording and its transcription in `directory'.
+
+    The files are named after the moment the recording began (`started').
+    The directory is created if needed; any error here is fatal.
+    """
+    try:
+        os.makedirs(directory, exist_ok=True)
+    except OSError as e:
+        sys.exit(f"voice-input: cannot create save directory {directory!r}: {e}")
+    stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(started))
+    base = os.path.join(directory, stamp)
+    n = 1
+    while os.path.exists(base + AUDIO_EXT) or os.path.exists(base + TEXT_EXT):
+        base = os.path.join(directory, f"{stamp}-{n}")
+        n += 1
+    try:
+        with open(base + AUDIO_EXT, "wb") as f:
+            f.write(audio)
+        with open(base + TEXT_EXT, "w") as f:
+            f.write(text)
+    except OSError as e:
+        sys.exit(f"voice-input: cannot save recording in {directory!r}: {e}")
+    prune_recordings(directory, limit)
+
+
 def transcribe(audio: bytes, fmt: str, key: str, model: str, api_url: str, prompt: str) -> str:
     payload = {
         "model": model,
@@ -237,8 +324,8 @@ def main() -> None:
     args = parse_args(sys.argv[1:])
     if args.audio is None:
         sys.exit("transcribe.py: no audio file given (usage: transcribe.py <file> | -)"
-                 " [--config FILE] [--api-url URL] [--model ID]"
-                 " [--api-key-file FILE] [--prompt TEXT] [--pipe-command CMD]")
+                 " [--config FILE] [--api-url URL] [--model ID] [--api-key-file FILE]"
+                 " [--prompt TEXT] [--pipe-command CMD] [--save-directory DIR] [--save-limit N]")
     path = args.audio
 
     #parse the config first so config errors fail fast, before reading/transcribing
@@ -258,10 +345,21 @@ def main() -> None:
     if path == "-":
         audio = sys.stdin.buffer.read()
         fmt = detect_format(audio, "stream")
+        #recording start time unknown for a stream: use the current moment
+        started = time.time()
     else:
         with open(path, "rb") as f:
             audio = f.read()
         fmt = detect_format(audio, path)
+        #best available approximation of when the recording began: the file's
+        #modification time (when its recording was finalized)
+        try:
+            started = os.stat(path).st_mtime
+        except OSError as e:
+            sys.exit(f"voice-input: cannot stat {path!r}: {e}")
+
+    #'save_limit' must be validated even when 'save_directory' is unset
+    save_limit = parse_save_limit(config["save_limit"])
 
     key = load_key(config["api_key_file"])
     text = transcribe(
@@ -281,6 +379,13 @@ def main() -> None:
             text = pipe_through(text, command)
         except RuntimeError as e:
             sys.exit(f"voice-input: {e}")
+
+    #optionally archive the recording and its transcription (save_limit == 0
+    #disables the archive); errors here are fatal and abort the program
+    save_directory = config["save_directory"]
+    if save_directory and save_limit > 0:
+        save_recording(audio, text, save_directory, started, save_limit)
+
     print(text)
 
 

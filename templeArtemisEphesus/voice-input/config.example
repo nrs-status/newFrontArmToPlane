@@ -31,3 +31,14 @@ prompt = Transcribe this audio to plain text. Output only the transcription.
 # inputted (typed) at the cursor. Comment out to disable.
 #pipe_command = sed -e 's/um //g' -e 's/uh //g'
 #pipe_command = tr a-z A-Z
+
+# --- Recording archive ----------------------------------------------------
+
+# Directory recordings are automatically archived to: <name>.wav audio plus
+# <name>.txt transcription, named after the moment the recording began.
+# The directory is created if it does not exist; errors here are fatal.
+#save_directory = /home/me/voice-logs
+
+# Maximum number of recordings kept in 'save_directory' (the most recent ones
+# are kept, including the newest). 0 disables the archive entirely.
+save_limit = 0
