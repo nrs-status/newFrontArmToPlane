@@ -21,6 +21,7 @@ headless.overrideAttrs (old: {
       google-chrome
       qimgv # image viewer
       vlc
+      bitwarden-cli
 
       #testing these for a workflow for querying the psql server
       visidata
