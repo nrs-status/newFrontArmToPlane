@@ -22,6 +22,8 @@ pkgs.mkShell {
       atuin # terminal history manager
       jless # interactive json navigator
 
+      gopass # password manager
+
       gum #testing it out to make quick TUIs
       tree-sitter #testing out whether I can use it to extract substrings
       pet # testing out, snippet manager
