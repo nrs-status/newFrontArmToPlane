@@ -77,13 +77,153 @@ Config format ('key = value' lines; '#' comments and blank lines ignored):
 
 import argparse
 import base64
+import errno
 import json
 import os
+import selectors
+import socket
 import subprocess
 import sys
 import time
 
 import requests
+import urllib3.util.connection as urllib3_connection
+from urllib3.exceptions import LocationParseError
+
+# How long to wait for the TCP connection to be established (as an overall
+# budget for one address family race, not per address) and how long to wait
+# for the model's response once connected.
+CONNECT_TIMEOUT = 10
+READ_TIMEOUT = 120
+
+# Happy Eyeballs (RFC 8305): connect to the resolved IPv6 and IPv4 candidates
+# in parallel, starting each next candidate this many seconds after the
+# previous one, and keep whichever connects first.
+#
+# urllib3's stock create_connection tries every address strictly one after
+# another with the full connect timeout. On a host whose IPv6 is blackholed
+# -- a router that keeps advertising a global prefix it no longer routes
+# upstream, so TCP SYNs are silently dropped instead of answered with an
+# ICMPv6 error -- the IPv6 addresses come first and each one stalled the whole
+# connect timeout before IPv4 was even attempted, so a transcription took
+# minutes instead of seconds. Racing the candidates fixes that without
+# preferring one family over the other: on a healthy dual-stack network IPv6
+# still wins, on a blackholed one IPv4 wins almost immediately, and on an
+# IPv6-only host the IPv6 attempt wins.
+HAPPY_EYEBALLS_DELAY = 0.25
+
+
+def happy_eyeballs_create_connection(
+    address,
+    timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+    source_address=None,
+    socket_options=None,
+):
+    """Drop-in replacement for urllib3.util.connection.create_connection."""
+    host, port = address
+    if host.startswith("["):
+        host = host.strip("[]")
+    try:
+        host.encode("idna")
+    except UnicodeError:
+        raise LocationParseError(f"'{host}', label empty or too long") from None
+
+    candidates = []
+    seen = set()
+    for af, socktype, proto, _canonname, sa in socket.getaddrinfo(
+        host, port, urllib3_connection.allowed_gai_family(), socket.SOCK_STREAM
+    ):
+        if sa not in seen:
+            seen.add(sa)
+            candidates.append((af, socktype, proto, sa))
+    if not candidates:
+        raise OSError("getaddrinfo returns an empty list")
+
+    numeric_timeout = isinstance(timeout, (int, float))
+    deadline = time.monotonic() + timeout if numeric_timeout else None
+
+    selector = selectors.DefaultSelector()
+    last_error = None
+    next_candidate = 0
+    start_next_at = time.monotonic()
+
+    def start(candidate):
+        """Start a non-blocking connect and register the socket, or save the failure."""
+        nonlocal last_error
+        af, socktype, proto, sa = candidate
+        sock = socket.socket(af, socktype, proto)
+        for option in socket_options or ():
+            sock.setsockopt(*option)
+        sock.setblocking(False)
+        if source_address:
+            sock.bind(source_address)
+        code = sock.connect_ex(sa)
+        if code not in (0, errno.EINPROGRESS, errno.EAGAIN, errno.EWOULDBLOCK):
+            last_error = OSError(code, os.strerror(code))
+            sock.close()
+            return
+        selector.register(sock, selectors.EVENT_WRITE, sa)
+
+    def finish(sock, connected):
+        """Unregister a socket; return it (blocking, with the caller's timeout) if connected."""
+        selector.unregister(sock)
+        if not connected:
+            sock.close()
+            return None
+        sock.setblocking(True)
+        if numeric_timeout:
+            sock.settimeout(timeout)
+        return sock
+
+    def close_pending():
+        for key in list(selector.get_map().values()):
+            key.fileobj.close()
+        selector.close()
+
+    while True:
+        if deadline is not None and time.monotonic() >= deadline:
+            break
+        # start every candidate whose staggered turn has arrived
+        now = time.monotonic()
+        while next_candidate < len(candidates) and now >= start_next_at:
+            start(candidates[next_candidate])
+            next_candidate += 1
+            start_next_at = time.monotonic() + HAPPY_EYEBALLS_DELAY
+            now = time.monotonic()
+
+        waits = []
+        if next_candidate < len(candidates):
+            waits.append(max(0.0, start_next_at - time.monotonic()))
+        if deadline is not None:
+            waits.append(max(0.0, deadline - time.monotonic()))
+        pending = selector.get_map()
+        if not pending and not waits:
+            break
+        if not pending:
+            time.sleep(min(waits))
+            continue
+
+        for key, _events in selector.select(min(waits) if waits else None):
+            sock = key.fileobj
+            error = sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+            if error == 0:
+                winner = finish(sock, True)
+                close_pending()
+                return winner
+            last_error = OSError(error, os.strerror(error))
+            finish(sock, False)
+
+    close_pending()
+    if deadline is not None and time.monotonic() >= deadline:
+        raise socket.timeout(f"timed out connecting to {host}:{port}")
+    if last_error is not None:
+        raise last_error
+    raise OSError(f"could not connect to {host}:{port}")
+
+
+#race IPv4/IPv6 candidates for every connection requests/urllib3 makes
+urllib3_connection.create_connection = happy_eyeballs_create_connection
+
 
 DEFAULTS = {
     "api_url": "https://openrouter.ai/api/v1/chat/completions",
@@ -310,7 +450,7 @@ def transcribe(audio: bytes, fmt: str, key: str, model: str, api_url: str, promp
             "Content-Type": "application/json",
         },
         json=payload,
-        timeout=120,
+        timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
     )
     if resp.status_code != 200:
         sys.exit(f"OpenRouter API error {resp.status_code}: {resp.text[:2000]}")
