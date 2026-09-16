@@ -8,9 +8,9 @@ let
     url = "https://addons.mozilla.org/firefox/downloads/file/4717567/vimium_ff-2.4.2.xpi";
     hash = "sha256:15nixab67dxah8kzqhdl8yn9yh31kqaq35xib89fjyhfb1kjl7hk";
   };
-  bitwarden = pkgs.fetchurl {
-    url = "https://addons.mozilla.org/firefox/downloads/file/4970633/bitwarden_password_manager-2026.8.0.xpi";
-    hash = "sha256:989ee33f19329af1fc155dcebb7f90a517a7259cea4bfbdd660923d25a7d465a";
+  gopass-bridge = pkgs.fetchurl {
+    url = "https://addons.mozilla.org/firefox/downloads/file/4630675/gopass_bridge-2.1.1.xpi";
+    hash = "sha256:e8ac742baf8fd9954672b778440acf9d87666d93df470d8d7be53e2cb051141f";
   };
 in
 pkgs.firefox.override {
@@ -46,9 +46,10 @@ pkgs.firefox.override {
         installation_mode = "force_installed";
         install_url = "file://${vimium}";
       };
-      "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+      # gopass Password Manager bridge (https://github.com/gopasspw/gopassbridge)
+      "{eec37db0-22ad-4bf1-9068-5ae08df8c7e9}" = {
         installation_mode = "force_installed";
-        install_url = "file://${bitwarden}";
+        install_url = "file://${gopass-bridge}";
       };
 
     };
