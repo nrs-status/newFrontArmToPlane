@@ -22,20 +22,37 @@ let
   # everything the chain needs. Without this, stores backed by
   # passphrase-protected GPG keys cannot be used from Firefox (the tools are
   # missing or pinentry cannot be found).
+  # Patched gopass-jsonapi: upstream main.go reports startup failures (e.g.
+  # "password store not initialized") via fmt.Printf, i.e. on stdout. In
+  # native-messaging mode stdout is the length-prefixed JSON protocol pipe,
+  # so the browser reads the ASCII "Fail" as a message length of 1818845510
+  # and errors with "exceeds the limit of 1048576 bytes". The patch sends the
+  # error to stderr and answers with a framed JSON error response instead.
+  gopassJsonapiPatched = pkgs.gopass-jsonapi.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./gopass-jsonapi-init-error.patch ];
+  });
+
   gopassJsonapiWrapped = pkgs.runCommand "gopass-jsonapi-wrapped"
     {
       nativeBuildInputs = [ pkgs.makeWrapper ];
     }
     ''
       mkdir -p $out/bin
-      makeWrapper ${pkgs.gopass-jsonapi}/bin/gopass-jsonapi $out/bin/gopass-jsonapi \
+      # --add-flags listen: Firefox spawns the manifest path with NO
+      # arguments. gopass-jsonapi only serves the JSON API when invoked as
+      # `gopass-jsonapi listen` (or when its argv[0] ends in native_host);
+      # without the flag it would print its help text onto the protocol
+      # pipe. Upstream's own generated manifest uses a wrapper script that
+      # execs `gopass-jsonapi listen` for the same reason.
+      makeWrapper ${gopassJsonapiPatched}/bin/gopass-jsonapi $out/bin/gopass-jsonapi \
         --prefix PATH : ${pkgsLib.makeBinPath [
           pkgs.gopass # the password manager itself
           pkgs.gnupg # gpg / gpg-agent: decrypt the password store
           pkgs.git # gopass stores may be git-backed
           pkgs.pinentry-qt # GUI passphrase prompt (X11/Wayland), spawned by gpg-agent from Firefox's environment
           pkgs.pinentry-curses # terminal passphrase prompt fallback
-        ]}
+        ]} \
+        --add-flags "listen"
     '';
 
   # Native messaging manifest as Firefox expects it (see

@@ -1,0 +1,26 @@
+--- a/main.go
++++ b/main.go
+@@ -8,6 +8,8 @@
+ 	"os/signal"
+ 	"strings"
+ 
++	"github.com/blang/semver"
++	"github.com/gopasspw/gopass-jsonapi/internal/jsonapi"
+ 	"github.com/gopasspw/gopass/pkg/gopass/api"
+ 	"github.com/urfave/cli/v2"
+ )
+@@ -40,7 +42,13 @@
+ 
+ 	gp, err := api.New(ctx)
+ 	if err != nil {
+-		fmt.Printf("Failed to initialize gopass API: %s\n", err)
++		// stderr: stdout is the native-messaging protocol pipe; writing
++		// plaintext to it makes the browser read "Fail" as a bogus
++		// message-length header (e.g. "exceeds the limit of 1048576 bytes").
++		fmt.Fprintf(os.Stderr, "Failed to initialize gopass API: %s\n", err)
++		// Also answer with a framed JSON error so the browser displays the
++		// real cause (SendErrorResponse only uses the writer, not the store).
++		_ = jsonapi.New(nil, stdin, stdout, semver.Version{}).SendErrorResponse(err)
+ 		os.Exit(1)
+ 	}
+ 

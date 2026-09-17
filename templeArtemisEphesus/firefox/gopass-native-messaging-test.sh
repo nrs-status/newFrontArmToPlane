@@ -3,9 +3,13 @@
 # templeArtemisEphesus/firefox/default.nix.
 #
 # Verifies that the gopass-jsonapi binary that Firefox spawns (as declared in
-# the native messaging manifest) has the tools on its PATH that are needed to
-# use GPG keys protected by a passphrase: gopass, gpg, gpg-agent, a pinentry
-# program and git.
+# the native messaging manifest):
+#   1. has the tools on its PATH that are needed to use GPG keys protected by
+#      a passphrase: gopass, gpg, gpg-agent, a pinentry program and git,
+#   2. answers the JSON API when spawned the way Firefox does (argument-less
+#      -- the wrapper appends `listen`), and
+#   3. reports startup failures as framed JSON errors instead of plaintext on
+#      the protocol pipe (the "exceeds the limit of 1048576 bytes" bug).
 #
 # Usage (from the flake root, after `nix build .#firefox`):
 #   bash templeArtemisEphesus/firefox/gopass-native-messaging-test.sh
@@ -95,19 +99,47 @@ else
   exit 1
 fi
 
-# 6. Also verify the wrapped gopass-jsonapi itself runs and speaks the JSON
-#    API that gopass-bridge uses (messages are 4-byte little-endian length
-#    prefixed, as per Firefox's native messaging spec)
+# 6. Verify the host responds when invoked exactly the way Firefox does:
+#    with NO arguments (the manifest path is spawned argument-less). This
+#    exercises the makeWrapper `--add-flags listen` fix: without it
+#    gopass-jsonapi would print its help text onto the protocol pipe.
+#    Responses are 4-byte little-endian length prefixed, as per Firefox's
+#    native messaging spec.
 MSG='{"type":"getVersion"}'
 LENS=$(printf '%08x' ${#MSG})
 REQFILE=$(mktemp)
 printf "\\x${LENS:6:2}\\x${LENS:4:2}\\x${LENS:2:2}\\x${LENS:0:2}" > "$REQFILE"
 printf '%s' "$MSG" >> "$REQFILE"
-RESP=$(timeout 10 "$WRAPPED" listen < "$REQFILE" 2>/dev/null | head -c 500) || true
+RESPFILE=$(mktemp)
+timeout 10 "$WRAPPED" < "$REQFILE" > "$RESPFILE" 2>/dev/null
 rm -f "$REQFILE"
+RESP=$(tail -c +5 "$RESPFILE" | head -c 500) || true
+rm -f "$RESPFILE"
 echo "JSON API response: $RESP"
 echo "$RESP" | grep -q '"version"' || { echo "FAIL: JSON API"; exit 1; }
-echo "PASS: wrapped gopass-jsonapi answers the gopass-bridge JSON API"
+echo "PASS: wrapped gopass-jsonapi answers the gopass-bridge JSON API when spawned argument-less (as Firefox does)"
+
+# 7. Regression test for the "exceeds the limit of 1048576 bytes" corruption
+#    bug. When gopass store initialization fails, upstream gopass-jsonapi
+#    printed "Failed to initialize gopass API: ..." as plaintext to stdout,
+#    which IS the native-messaging protocol pipe; the browser then read the
+#    ASCII "Fail" (0x6C696146 LE) as a message length of 1818845510 bytes.
+#    The flake patches gopass-jsonapi to report the failure on stderr and to
+#    send a properly framed JSON error response instead.
+#    Verify: with an UNINITIALIZED store, the host must respond with a small
+#    framed JSON error (readable in the browser), never raw text.
+T2=$(mktemp -d)
+HOME="$T2" XDG_CONFIG_HOME="$T2/.config" XDG_DATA_HOME="$T2/.local/share" \
+  timeout 10 "$WRAPPED" >"$T2/out" 2>"$T2/err" && true
+LEN=$(head -c 4 "$T2/out" | od -An -tu4 | awk '{print $1}')
+[ -n "$LEN" ] || { echo "FAIL: no response on stdout for uninitialized store"; exit 1; }
+BODY=$(tail -c +5 "$T2/out" | head -c "$LEN")
+rm -rf "$T2"
+echo "Uninitialized-store response: $BODY"
+# the length must be a sane JSON size, not bytes of text misread as a length
+[ "$LEN" -lt 4096 ] || { echo "FAIL: length header $LEN looks like misread plaintext"; exit 1; }
+echo "$BODY" | grep -q '"error"' || { echo "FAIL: expected framed JSON error"; exit 1; }
+echo "PASS: startup failures are framed JSON errors, not raw stdout text (no more 1818845510-byte garbage)"
 
 rm -rf "$T"
 echo "ALL TESTS PASSED"
