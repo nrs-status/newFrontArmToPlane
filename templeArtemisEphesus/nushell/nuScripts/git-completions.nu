@@ -66,10 +66,19 @@ module git-completion-utils {
     $result
   }
 
-  # Get changed files which can be restored by `git checkout --`
+  # Get files which have been changed in the working tree but are not staged
+  # (second status column is M or D, i.e. the index differs from the work tree;
+  # this covers .M, MM, .D and MD). These can be restored by `git checkout --`
+  # or `git restore` without options.
   export def get-changed-files []: nothing -> list<string> {
     ^git status -uno --porcelain=2 | lines
-    | where $it =~ '^1 [.MD]{2}'
+    | where $it =~ '^1 .[MD]'
+    | each { split row ' ' -n 9 | last }
+  }
+
+  export def get-staged-files []: nothing -> list<string> {
+    ^git status -uno --porcelain=2 | lines
+    | where $it =~ '^1 [ACDMRTU]'
     | each { split row ' ' -n 9 | last }
   }
 
@@ -279,6 +288,62 @@ def "nu-complete git files-or-refs" [] {
       | append (nu-complete git remotes | get 'value' | parse '{value}' | insert description 'Remote branch')
     )
   }
+}
+
+# Complete pathspecs for `git restore`. Without any options, `git restore`
+# restores the working tree files from the index, so it only makes sense for
+# files that have been changed but are not (fully) staged yet. Only fall back
+# to the generic file completion once the user has typed an option (e.g.
+# `--staged` or `--source`, which restore from HEAD or another tree instead).
+def "nu-complete git restore" [context: string, position?: int] {
+  use git-completion-utils *
+  let preceding = $context | str substring ..$position
+  let tokens = $preceding | str trim | args-split | skip 2
+  # The word currently being typed (empty when the line ends with a space).
+  let current = if ($preceding | str ends-with ' ') { "" } else { $tokens | last }
+  # The token right before the word currently being typed.
+  let before = if ($current | is-empty) {
+    if ($tokens | is-empty) { "" } else { $tokens | last }
+  } else if ($tokens | length) > 1 {
+    $tokens | get (($tokens | length) - 2)
+  } else {
+    ""
+  }
+  # The word being typed starts with `-`: let nushell complete the flags themselves.
+  if ($current | str starts-with '-') {
+    return []
+  }
+  # The value of -s/--source is a tree-ish: complete refs (like fish).
+  if $before in ['-s' '--source'] {
+    return (nu-complete git refs)
+  }
+  if '--source' in $tokens or '-s' in $tokens {
+    # With --source, any path in the tree can be restored: complete plain
+    # filesystem paths (like fish's plain file completion). Hidden files are
+    # only suggested when the user asked for them explicitly.
+    let escaped = ($current
+      | str replace -a '\\' '\\\\'
+      | str replace -a '[' '\\['
+      | str replace -a ']' '\\]'
+      | str replace -a '*' '\\*'
+      | str replace -a '?' '\\?')
+    let matches = (glob $"($escaped)*" | path relative-to $env.PWD)
+    if ($current | str starts-with '.') or ($current | str contains '/') {
+      return $matches
+    }
+    return ($matches | where not ($it | path basename | str starts-with '.'))
+  }
+  if ($tokens | where $it starts-with '-' | is-empty) {
+    # No options typed: suggest files changed but not staged.
+    return (get-changed-files)
+  }
+  if '--staged' in $tokens or '-S' in $tokens {
+    # `git restore --staged` restores the index from HEAD, so it is relevant
+    # for files with staged changes (like fish's completion does).
+    return (get-staged-files)
+  }
+  # Other options (e.g. --patch): fall back to the generic file completion.
+  nu-complete git files
 }
 
 def "nu-complete git aliases" [] {
@@ -979,7 +1044,7 @@ export extern "git restore" [
   --no-overlay                                  # Remove files that don't exist when restoring from tree with --source (default)
   --pathspec-from-file: string                  # Read pathspec from file
   --pathspec-file-nul                           # Separate pathspec elements with NUL character when reading from file
-  ...pathspecs: string@"nu-complete git files"  # Target pathspecs to restore
+  ...pathspecs: string@"nu-complete git restore"  # Target pathspecs to restore
 ]
 
 # Print lines matching a pattern
