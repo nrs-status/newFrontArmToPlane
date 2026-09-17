@@ -48,6 +48,7 @@ pkgs.mkShell {
       broot # dir navigator
       television #testing it out, alternative to fzf
       gopass # user password manager
+      gnupg # shadows current twc package with one that declares a pinentry program
     ]);
 
   shellHook = ''
