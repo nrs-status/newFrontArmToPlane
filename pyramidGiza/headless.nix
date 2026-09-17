@@ -22,7 +22,6 @@ pkgs.mkShell {
       atuin # terminal history manager
       jless # interactive json navigator
 
-      gopass # password manager
 
       gum #testing it out to make quick TUIs
       tree-sitter #testing out whether I can use it to extract substrings
@@ -48,6 +47,7 @@ pkgs.mkShell {
       pi-json-span-processor # aggregates `pi --mode json' event streams into spans
       broot # dir navigator
       television #testing it out, alternative to fzf
+      gopass # user password manager
     ]);
 
   shellHook = ''
