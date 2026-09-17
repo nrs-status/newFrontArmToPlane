@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
-"""Run the pi `wservice' microvm (templeArtemisEphesus/pi-vm/microvm/
-wservice-microvm.nix, built with the microvm.nix modules) and stream its
-`pi --mode json' JSON event output to stdout or to a file.
-
-This is the micro-VM twin of run-wservice-vm
-(../basic/runWserviceVm.py): it has the exact same capabilities and behavior, with
-the difference that the VM is a microvm.nix microvm (the qemu hypervisor
-boots the kernel directly with the QEMU `microvm' machine type).
+"""Run the pi `wservice' VM (irc-phoneFan/pi-vm/basic/wservice.nix) and
+stream its `pi --mode json' JSON event output to stdout or to a file.
 
 The prompt fed to `pi' is read from stdin: pipe it in, or type it in a
 terminal and finish with Ctrl-D.
@@ -14,32 +8,33 @@ terminal and finish with Ctrl-D.
 Host directories are shared with the VM through qemu 9p shares:
 
   --workdir/-w        mounted read-write, used as pi's working directory
-                      (default: a fresh /tmp/run-pi-microvm-<timestamp>-XXXX
+                      (default: a fresh /tmp/run-wservice-vm-<timestamp>-XXXX
                       directory whose name records when the program ran)
   --read-write/-rw    mounted read-write (repeatable)
   --read-only/-ro     mounted read-only (repeatable)
 
   --disk-size/-d      disk space allocated to the virtual machine, i.e. the
-                      size of the disk image attached to the VM as a
-                      virtio-blk drive (e.g. 8G, 2048M, or a plain byte
-                      count). Optional: falls back to the PI_VM_DISK_SIZE
-                      environment variable and then to 10G.
+                      size of the VM's root disk image (e.g. 8G, 2048M, or a
+                      plain byte count). Optional: falls back to the
+                      PI_VM_DISK_SIZE environment variable and then to 10G.
 
   --ram/-r            RAM allocated to the virtual machine (e.g. 2G, 2048M,
                       or a plain byte count). Optional: falls back to the
                       PI_VM_RAM environment variable and then to the build-
-                      time default (1536M, see wservice-microvm.nix).
+                      time default (2048M, see bare.nix).
 
 The 9p shares and the mount manifest (fw_cfg file `opt/pi/mounts') that the
-guest service reads to mount them are set up here; see wservice-microvm.nix.
+guest service reads to mount them are set up here; see wservice.nix.
 
-The disk space allocated to the VM is set at run time with the obligatory
-option --disk-size/-d: this program creates an ext4-formatted sparse raw disk
-image of the requested size in its temporary directory (labeled
-`pi-microvm-data') and attaches it to the qemu command line (passed through
-QEMU_OPTS, like every other dynamic option) as a virtio-blk drive; the guest
-sees it as /dev/vda. The image is ephemeral: it lives in this program's
-temporary directory and is deleted when the VM is done.
+The VM's root disk is sized at run time with the obligatory option
+--disk-size/-d: this program creates the disk image itself (an ext4-
+formatted sparse raw file of the requested size, labeled `nixos' exactly
+like the image the VM's runner script would create) and passes it to the VM
+script through the NIX_DISK_IMAGE environment variable; the script only
+creates its own (build-time-sized) image when that file does not exist
+already, so the requested size takes effect. The image is ephemeral: it
+lives in this program's temporary directory and is deleted when the VM is
+done.
 
 The JSON event stream crosses the VM boundary through a virtio-serial port
 that qemu bridges to a host unix socket (-chardev socket,server=on,wait=off);
@@ -58,15 +53,7 @@ to it (via --workdir/-w, --read-write/-rw and --read-only/-ro) and shared
 with the VM.
 
 The host's /run/secrets/keys/openrouter, if it exists and is readable, is
-passed to the VM through the fw_cfg file `opt/pi/api-key' (see
-wservice-microvm.nix).
-
-The microvm.nix runner (`microvm-run') has no mechanism for extra qemu
-options of its own, but the configuration (wservice-microvm.nix) sets
-`microvm.extraArgsScript' to a script that echoes the QEMU_OPTS environment
-variable; this program passes all of its dynamic qemu options (9p shares,
-virtio-serial chardev, fw_cfg entries) through that variable, word-split like
-the non-microvm `run-pi-vm-vm' script does.
+passed to the VM through the fw_cfg file `opt/pi/api-key' (see wservice.nix).
 """
 
 import argparse
@@ -79,18 +66,15 @@ import tempfile
 import time
 from datetime import datetime
 
-# Substituted at build time (see ../default.nix): the microvm.nix runner of
-# the wservice-microvm configuration, e.g. .../bin/microvm-run. It runs qemu
-# with extra options taken from the QEMU_OPTS environment variable (see
-# `microvm.extraArgsScript' in wservice-microvm.nix).
+# Substituted at build time (see runWserviceVm.nix): the NixOS vm script of
+# the wservice configuration, e.g. .../bin/run-pi-vm-vm. It execs qemu with
+# extra options taken from the QEMU_OPTS environment variable.
 VM_SCRIPT = "@vmScript@"
 
-# fw_cfg names expected by the guest's pi-json service (see
-# wservice-microvm.nix).
+# fw_cfg names expected by the guest's pi-json service (see wservice.nix).
 FW_CFG_PROMPT = "opt/pi/json-prompt"
 FW_CFG_MOUNTS = "opt/pi/mounts"
 FW_CFG_API_KEY = "opt/pi/api-key"
-FW_CFG_MODEL = "opt/pi/model"
 HOST_API_KEY_PATH = "/run/secrets/keys/openrouter"
 
 # 9p mount tags and the guest mount points the pi-json service mounts them at.
@@ -105,24 +89,17 @@ GUEST_RO_FMT = "/mnt/ro-{0}"
 SOCKET_CONNECT_TIMEOUT = 300
 
 # Disk size resolution (CLI option --disk-size/-d > PI_VM_DISK_SIZE > this
-# default): the size of the disk image attached to the VM.
+# default): the size of the VM's root disk image.
 DISK_SIZE_ENV = "PI_VM_DISK_SIZE"
 DEFAULT_DISK_SIZE = "10G"
 
 # RAM size resolution (CLI option --ram/-r > PI_VM_RAM > no override, i.e.
-# the microvm's build-time mem from wservice-microvm.nix). The resolved
-# size is passed to the wrapped VM start script through the
-# RUN_PI_MICROVM_MEM environment variable (see ../default.nix): the
-# microvm.nix runner bakes its build-time memory into its qemu command line
-# (`-m' plus a matching memory-backend-memfd needed by its 9p-share NUMA
-# options), so a second `-m' appended through QEMU_OPTS would be rejected
-# by qemu; the wrapper script rewrites the baked-in memory size instead.
+# the VM's build-time memorySize from bare.nix): passed to qemu as -m.
 RAM_ENV = "PI_VM_RAM"
-RUNNER_MEM_ENV = "RUN_PI_MICROVM_MEM"
 
 
 def fail(message):
-    print(f"run-pi-microvm: {message}", file=sys.stderr)
+    print(f"run-wservice-vm: {message}", file=sys.stderr)
     sys.exit(1)
 
 
@@ -131,7 +108,7 @@ def share_path(path, flag):
     real = os.path.realpath(path)
     if not os.path.isdir(real):
         fail(f"{flag}: not a directory: {path}")
-    # QEMU_OPTS is word-split by the microvm's extraArgsScript, so paths with
+    # QEMU_OPTS is word-split by the VM's shell script, so paths with
     # whitespace would produce broken qemu command lines.
     if any(c.isspace() for c in real):
         fail(f"{flag}: path contains whitespace, which the VM start script "
@@ -142,8 +119,13 @@ def share_path(path, flag):
 def create_disk_image(path, size, label):
     """Create an ext4-formatted sparse raw disk image of the requested size
     (e.g. 8G, 2048M, or a plain byte count) at path, with the filesystem
-    label `label'. The image is attached to the VM with --disk-size/-d
-    semantics: it is the disk space allocated to the virtual machine.
+    label `label'.
+
+    The VM's runner script creates its root disk image (labeled `nixos', the
+    label the guest's initrd mounts the root filesystem by) only when the
+    NIX_DISK_IMAGE file does not exist yet, so creating it here with the
+    --disk-size/-d size is how the disk space chosen at run time takes
+    effect.
     """
     for tool in ("truncate", "mkfs.ext4"):
         if shutil.which(tool) is None:
@@ -163,15 +145,15 @@ def create_disk_image(path, size, label):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        prog="run-pi-microvm",
-        description="Run the pi wservice microvm and stream its "
-                    "`pi --mode json' JSON event output to stdout (or to a "
-                    "file with -o). The prompt for pi is read from stdin.",
+        prog="run-wservice-vm",
+        description="Run the pi wservice VM and stream its `pi --mode json' "
+                    "JSON event output to stdout (or to a file with -o). "
+                    "The prompt for pi is read from stdin.",
         epilog="The disk space allocated to the VM is set with "
                "--disk-size/-d (default: the PI_VM_DISK_SIZE environment "
                "variable, then 10G). RAM usage is set with --ram/-r "
                "(default: the PI_VM_RAM environment variable, then the "
-               "microvm's build-time mem). Host directories are shared "
+               "VM's build-time memorySize). Host directories are shared "
                "with the VM over 9p: --workdir read-write (pi's working "
                "directory), --read-write read-write, --read-only "
                "read-only.",
@@ -183,17 +165,16 @@ def parse_args():
     parser.add_argument(
         "-d", "--disk-size", dest="disk_size", metavar="SIZE",
         default=None,
-        help="disk space allocated to the VM, i.e. the size of the disk "
-             "image attached to it as a virtio-blk drive, e.g. 8G, 2048M or "
-             "a plain byte count (default: the PI_VM_DISK_SIZE environment "
-             "variable, then 10G)",
+        help="disk space allocated to the VM, i.e. the size of its root disk "
+             "image, e.g. 8G, 2048M or a plain byte count (default: the "
+             "PI_VM_DISK_SIZE environment variable, then 10G)",
     )
     parser.add_argument(
         "-r", "--ram", dest="ram", metavar="SIZE",
         default=None,
         help="RAM allocated to the VM, e.g. 2G, 2048M or a plain byte count "
-             "(default: the PI_VM_RAM environment variable, then the "
-             "microvm's build-time mem)",
+             "(default: the PI_VM_RAM environment variable, then the VM's "
+             "build-time memorySize)",
     )
     parser.add_argument(
         "-w", "--workdir", metavar="DIR",
@@ -212,21 +193,6 @@ def parse_args():
         action="append", default=[],
         help="host path mounted read-only to the VM (repeatable)",
     )
-    parser.add_argument(
-        "-m", "--model", dest="model", metavar="MODEL",
-        default=None,
-        help="model name passed to the guest's `pi --model' option "
-             "(e.g. openrouter/z-ai/glm-5.3-flash). Optional: when it is "
-             "not given, pi keeps the model baked into its wrapper script.",
-    )
-    parser.add_argument(
-        "--api-key-file", dest="api_key_file", metavar="FILE",
-        default=None,
-        help="file whose contents are passed to the VM as the openrouter "
-             "API key (fw_cfg opt/pi/api-key). Optional: when it is not "
-             "given, the host key at " + HOST_API_KEY_PATH + " is used if "
-             "it exists and is readable.",
-    )
     return parser.parse_args()
 
 
@@ -242,8 +208,7 @@ def add_9p_share(qemu_opts, index, host_path, tag, read_only):
 
 def write_mounts_manifest(path, workdir, read_write, read_only):
     """One line per share: <workdir|rw|ro> <TAB> <mount tag> <TAB> <guest
-    mountpoint>; parsed by the guest's pi-json service (see
-    wservice-microvm.nix)."""
+    mountpoint>; parsed by the guest's pi-json service (see wservice.nix)."""
     lines = ["workdir\t{0}\t{1}".format(TAG_WORKDIR, GUEST_WORKDIR)]
     for i, _ in enumerate(read_write):
         lines.append("rw\t{0}\t{1}".format(TAG_RW_FMT.format(i),
@@ -276,17 +241,16 @@ def connect_to_stream_socket(sock_path, vm_process, timeout):
 def resolve_sizes(args):
     """Resolve the disk and RAM sizes: a command line option wins over the
     matching environment variable, and the disk size finally falls back to
-    DEFAULT_DISK_SIZE (10G); the RAM size has no further default, so the
-    microvm keeps its build-time mem when neither option nor variable is
-    set. Returns (disk_size, ram_size_or_None)."""
+    DEFAULT_DISK_SIZE (10G); the RAM size has no further default, so the VM
+    keeps its build-time memorySize when neither option nor variable is set.
+    Returns (disk_size, ram_size_or_None)."""
     disk_size = args.disk_size or os.environ.get(DISK_SIZE_ENV) or \
         DEFAULT_DISK_SIZE
     ram_size = args.ram or os.environ.get(RAM_ENV)
     if ram_size is not None:
-        # The RAM size is passed to the wrapped VM start script through the
-        # RUN_PI_MICROVM_MEM environment variable, which the start script
-        # substitutes into its qemu command line: values with whitespace
-        # would produce broken qemu command lines.
+        # The RAM size becomes part of QEMU_OPTS, which the VM's start script
+        # word-splits: values with whitespace would produce broken qemu
+        # command lines.
         if any(c.isspace() for c in ram_size):
             fail("RAM size must not contain whitespace: {0!r}".format(
                 ram_size))
@@ -301,27 +265,27 @@ def main():
         # Create the default workdir: a fresh directory under /tmp whose name
         # records the time at which this program was run.
         args.workdir = tempfile.mkdtemp(
-            prefix="run-pi-microvm-{0}-".format(
+            prefix="run-wservice-vm-{0}-".format(
                 datetime.now().strftime("%Y%m%dT%H%M%S")),
             dir="/tmp",
         )
-        print("run-pi-microvm: no --workdir given, using {0}".format(
+        print("run-wservice-vm: no --workdir given, using {0}".format(
             args.workdir), file=sys.stderr)
 
     workdir = share_path(args.workdir, "--workdir")
     read_write = [share_path(p, "--read-write") for p in args.read_write]
     read_only = [share_path(p, "--read-only") for p in args.read_only]
 
-    with tempfile.TemporaryDirectory(prefix="run-pi-microvm-") as tmp:
-        # qemu runs with cwd=tmp so its QMP control socket and other VM temp
-        # data stay out of the caller's directory.
+    with tempfile.TemporaryDirectory(prefix="run-wservice-vm-") as tmp:
+        # qemu runs with cwd=tmp so its default ./pi-vm.qcow2 disk image and
+        # other VM temp data stay out of the caller's directory.
         sock_path = os.path.join(tmp, "pi-json.sock")
         prompt_path = os.path.join(tmp, "prompt")
         manifest_path = os.path.join(tmp, "mounts-manifest")
 
         prompt = sys.stdin.buffer.read()
         if not prompt and sys.stdin.isatty():
-            print("run-pi-microvm: type the prompt for pi and finish with "
+            print("run-wservice-vm: type the prompt for pi and finish with "
                   "Ctrl-D", file=sys.stderr)
             prompt = sys.stdin.buffer.read()
         with open(prompt_path, "wb") as f:
@@ -329,20 +293,28 @@ def main():
 
         write_mounts_manifest(manifest_path, workdir, read_write, read_only)
 
-        # The VM's disk, sized by --disk-size/-d (or PI_VM_DISK_SIZE, or
-        # the 10G default).
-        disk_image = os.path.join(tmp, "pi-microvm-disk.img")
-        create_disk_image(disk_image, disk_size, "pi-microvm-data")
-        print("run-pi-microvm: disk image ({0}) at {1}".format(
+        # The VM's root disk, sized by --disk-size/-d (or PI_VM_DISK_SIZE,
+        # or the 10G default): created here so the VM start script (which
+        # only creates its own, build-time-sized image when the
+        # NIX_DISK_IMAGE file is missing) uses the requested size.
+        disk_image = os.path.join(tmp, "pi-vm-disk.img")
+        create_disk_image(disk_image, disk_size, "nixos")
+        print("run-wservice-vm: root disk image ({0}) at {1}".format(
             disk_size, disk_image), file=sys.stderr)
         if ram_size is not None:
-            print("run-pi-microvm: RAM size {0}".format(ram_size),
+            print("run-wservice-vm: RAM size {0}".format(ram_size),
                   file=sys.stderr)
         else:
-            print("run-pi-microvm: no RAM size given: using the microvm's "
-                  "build-time mem", file=sys.stderr)
+            print("run-wservice-vm: no RAM size given: using the VM's "
+                  "build-time memorySize", file=sys.stderr)
 
         qemu_opts = []
+
+        # RAM override (from --ram/-r or PI_VM_RAM): qemu takes the last -m
+        # option, and the VM start script puts $QEMU_OPTS after its own
+        # build-time -m, so this overrides that default.
+        if ram_size is not None:
+            qemu_opts += ["-m", ram_size]
 
         add_9p_share(qemu_opts, 0, workdir, TAG_WORKDIR, read_only=False)
         for i, host_path in enumerate(read_write):
@@ -353,18 +325,8 @@ def main():
             add_9p_share(qemu_opts, base + i, host_path, TAG_RO_FMT.format(i),
                          read_only=True)
 
-        # Attach the disk created above (sized with --disk-size/-d) as a
-        # virtio-blk drive: the guest sees it as /dev/vda. (The statically
-        # built microvm has no volumes and boots with the /nix/store 9p share
-        # instead of a store disk, so /dev/vda is free.)
-        qemu_opts += [
-            "-drive", "file={0},format=raw,if=none,id=pi-disk".format(
-                disk_image),
-            "-device", "virtio-blk-pci,drive=pi-disk",
-        ]
-
         # Bridge the guest's pi-json virtserialport to a host unix socket
-        # this program reads the JSON stream from (see wservice-microvm.nix).
+        # this program reads the JSON stream from (see wservice.nix).
         qemu_opts += [
             "-chardev",
             "socket,id=pi-json,path={0},server=on,wait=off".format(sock_path),
@@ -379,38 +341,23 @@ def main():
             "-fw_cfg", "name={0},file={1}".format(FW_CFG_MOUNTS, manifest_path),
         ]
 
-        # The model for the guest's `pi --model' option, passed through the
-        # opt/pi/model fw_cfg file (see wservicePiJson.py).
-        if args.model:
-            model_path = os.path.join(tmp, "model")
-            with open(model_path, "w") as f:
-                f.write(args.model)
-            qemu_opts += [
-                "-fw_cfg", "name={0},file={1}".format(FW_CFG_MODEL,
-                                                      model_path),
-            ]
-
-        # Openrouter key for the guest's /run/secrets/keys/openrouter: an
-        # explicitly given --api-key-file wins over the host key path.
-        api_key_path = args.api_key_file or HOST_API_KEY_PATH
-        if os.path.isfile(api_key_path) and os.access(api_key_path,
-                                                      os.R_OK):
+        # Openrouter key for the guest's /run/secrets/keys/openrouter.
+        if os.path.isfile(HOST_API_KEY_PATH) and os.access(HOST_API_KEY_PATH,
+                                                           os.R_OK):
             qemu_opts += [
                 "-fw_cfg", "name={0},file={1}".format(FW_CFG_API_KEY,
-                                                      api_key_path),
+                                                      HOST_API_KEY_PATH),
             ]
         else:
-            print("run-pi-microvm: {0} not found or not readable: the VM "
+            print("run-wservice-vm: {0} not found or not readable: the VM "
                   "will run without an openrouter key".format(
-                      api_key_path), file=sys.stderr)
+                      HOST_API_KEY_PATH), file=sys.stderr)
 
-        # RUN_PI_MICROVM_MEM makes the wrapped VM start script rewrite the
-        # microvm.nix runner's baked-in memory size (see ../default.nix);
-        # without it, the microvm keeps its build-time mem.
+        # NIX_DISK_IMAGE makes the VM start script use the disk image created
+        # above (with the --disk-size/-d size) instead of creating its own.
         env = dict(os.environ,
-                   QEMU_OPTS=" ".join(qemu_opts))
-        if ram_size is not None:
-            env[RUNNER_MEM_ENV] = ram_size
+                   QEMU_OPTS=" ".join(qemu_opts),
+                   NIX_DISK_IMAGE=disk_image)
         # The VM's serial console (kernel messages, getty) is sent entirely to
         # our stderr, and the console is non-interactive: the subprocess's
         # stdin is /dev/null, so running this program never drops the shell it
@@ -459,15 +406,15 @@ def print_host_paths(workdir, read_write, read_only):
     """Report on stderr the host locations of the paths this program was
     given (options --workdir/-w, --read-write/-rw, --read-only/-ro) and
     shared with the VM."""
-    print("run-pi-microvm: host locations of the paths passed to this "
+    print("run-wservice-vm: host locations of the paths passed to this "
           "program:", file=sys.stderr)
-    print("run-pi-microvm:   workdir (read-write): {0}".format(workdir),
+    print("run-wservice-vm:   workdir (read-write): {0}".format(workdir),
           file=sys.stderr)
     for path in read_write:
-        print("run-pi-microvm:   read-write: {0}".format(path),
+        print("run-wservice-vm:   read-write: {0}".format(path),
               file=sys.stderr)
     for path in read_only:
-        print("run-pi-microvm:   read-only: {0}".format(path),
+        print("run-wservice-vm:   read-only: {0}".format(path),
               file=sys.stderr)
 
 

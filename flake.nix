@@ -39,7 +39,12 @@
           ;
       };
       localPkgs = pkgs.lib.fix (
-        self: import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; })
+        self:
+        let
+          configPackagings = import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; });
+          newPkgs = import ./irc-phoneFan (localPkgsArgs // { localPkgs = self; });
+        in
+        configPackagings // newPkgs
       );
     in
     {
