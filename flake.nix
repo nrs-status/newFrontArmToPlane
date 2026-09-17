@@ -41,10 +41,11 @@
       localPkgs = pkgs.lib.fix (
         self:
         let
-          configPackagings = import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; });
-          newPkgs = import ./irc-phoneFan (localPkgsArgs // { localPkgs = self; });
+          wrappers = import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; });
+          inductedPkgs = import ./colossusRhodes (localPkgsArgs // { localPkgs = self; });
+          newPkgs = import ./lighthouseAlexandria (localPkgsArgs // { localPkgs = self; });
         in
-        configPackagings // newPkgs
+        wrappers // inductedPkgs // newPkgs
       );
     in
     {
