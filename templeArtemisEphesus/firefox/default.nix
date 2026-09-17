@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgsLib, ... }:
 let
   ublock-origin = pkgs.fetchurl {
     url = "https://addons.mozilla.org/firefox/downloads/file/4940584/ublock_origin-1.73.0.xpi";
@@ -12,8 +12,53 @@ let
     url = "https://addons.mozilla.org/firefox/downloads/file/4630675/gopass_bridge-2.1.1.xpi";
     hash = "sha256:e8ac742baf8fd9954672b778440acf9d87666d93df470d8d7be53e2cb051141f";
   };
+
+  # The gopass-bridge extension talks to gopass over Firefox's native
+  # messaging API: Firefox spawns the `gopass-jsonapi` binary declared in a
+  # native messaging manifest. `gopass-jsonapi` in turn spawns `gopass`,
+  # which spawns `gpg`, which spawns a pinentry program to ask for the GPG
+  # key passphrase. All of those are looked up in PATH inherited from the
+  # Firefox process, so we wrap `gopass-jsonapi` with a PATH containing
+  # everything the chain needs. Without this, stores backed by
+  # passphrase-protected GPG keys cannot be used from Firefox (the tools are
+  # missing or pinentry cannot be found).
+  gopassJsonapiWrapped = pkgs.runCommand "gopass-jsonapi-wrapped"
+    {
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+    }
+    ''
+      mkdir -p $out/bin
+      makeWrapper ${pkgs.gopass-jsonapi}/bin/gopass-jsonapi $out/bin/gopass-jsonapi \
+        --prefix PATH : ${pkgsLib.makeBinPath [
+          pkgs.gopass # the password manager itself
+          pkgs.gnupg # gpg / gpg-agent: decrypt the password store
+          pkgs.git # gopass stores may be git-backed
+          pkgs.pinentry-qt # GUI passphrase prompt (X11/Wayland), spawned by gpg-agent from Firefox's environment
+          pkgs.pinentry-curses # terminal passphrase prompt fallback
+        ]}
+    '';
+
+  # Native messaging manifest as Firefox expects it (see
+  # https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging).
+  # The name/file name must match what gopass-bridge connects to
+  # (`com.justwatch.gopass`), the path must point at our wrapped binary, and
+  # the extension id must match the gopass-bridge xpi installed above.
+  gopassNativeMessagingHost = pkgs.runCommand "gopass-firefox-native-messaging-host" { } ''
+    mkdir -p $out/lib/mozilla/native-messaging-hosts
+    ${pkgs.jq}/bin/jq -n \
+      --arg path "${gopassJsonapiWrapped}/bin/gopass-jsonapi" \
+      '{
+        name: "com.justwatch.gopass",
+        description: "Gopass wrapper to search and return passwords",
+        path: $path,
+        type: "stdio",
+        allowed_extensions: ["{eec37db0-22ad-4bf1-9068-5ae08df8c7e9}"]
+      }' \
+      > $out/lib/mozilla/native-messaging-hosts/com.justwatch.gopass.json
+  '';
 in
 pkgs.firefox.override {
+  nativeMessagingHosts = [ gopassNativeMessagingHost ];
   extraPrefsFiles = [ "${./bookmark-remap.js}" ]; #remap Ctrl+D to Ctrl+B
   extraPolicies = {
     # Start Firefox in dark mode on every launch. These prefs are what the
