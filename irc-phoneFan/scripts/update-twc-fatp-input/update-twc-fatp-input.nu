@@ -1,4 +1,4 @@
-def main [--push-fatp, --rebuild] {
+def main [--push-twc --push-fatp, --rebuild] {
     let initialPath = $env.PWD
     if $push_fatp {
         cd $env.FRONTARMTOPLANE_PATH
@@ -8,9 +8,12 @@ def main [--push-fatp, --rebuild] {
     nix flake update frontArmToPlane
     git add ./flake.lock
     try { git commit -m "updating lockfile's frontArmToPlane input" ./flake.lock }
+    if $push_twc {
+        git push -u origin main
+    }
     if $rebuild {
         sudo nixos-rebuild switch --flake .#wranHearst
     }
-    systemctl --user start cachesieyesShellShell.service #re-cached sieyesShell
+    systemctl --user start shellCacher-sieyesShell.service #re-cache sieyesShell
     cd $initialPath
 }
