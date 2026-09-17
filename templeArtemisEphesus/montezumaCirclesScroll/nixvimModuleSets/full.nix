@@ -3,4 +3,5 @@
   "./plugins/lspExtra.nix"
   "./plugins/snacks.nix"
   "./plugins/neoclip.nix"
+  "./plugins/image.nix"
 ]
