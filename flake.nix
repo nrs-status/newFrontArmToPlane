@@ -13,6 +13,7 @@
     inputs:
     let
       pkgs = inputs.mcEatBurg.pkgs;
+	nixpkgs = inputs.mcEatBurg.nixpkgs;
       pkgsLib = inputs.peachRampSkateboard.pkgsLib; # pkgsLib is distinguished from pkgs because logically they are independent: pkgsLib is used to provide glue code to make the repository work, pkgs provides actual build components
       baseLib = inputs.peachRampSkateboard.baseLib;
       localLib = import ./sandyFireworksBus {
@@ -21,7 +22,7 @@
       };
       modulesPath = "${inputs.nixpkgs}/nixos/modules";
       microvmFlake = inputs.microvm;
-      nixosSystem = inputs.nixpkgs.lib.nixosSystem;
+      nixosSystem = nixpkgs.nixosSystem;
       localPkgsArgs = {
         # abstracting this out is useful for debugging sessions
         inherit
