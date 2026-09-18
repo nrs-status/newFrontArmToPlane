@@ -22,7 +22,7 @@
       };
       modulesPath = "${inputs.nixpkgs}/nixos/modules";
       microvmFlake = inputs.microvm;
-      nixosSystem = nixpkgs.nixosSystem;
+      nixosSystem = nixpkgs.lib.nixosSystem;
       localPkgsArgs = {
         # abstracting this out is useful for debugging sessions
         inherit
