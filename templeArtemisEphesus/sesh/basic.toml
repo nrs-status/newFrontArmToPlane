@@ -10,4 +10,11 @@ startup_command = "nvim ~/baghdad_plane/flakes/newFrontArmToPlane/pyramidGiza/si
 name = "chat0"
 startup_command = "pi"
 
+# Rebuild wranHearst with the build happening on soc7099@augtibcalcla, while
+# watching that host's resources with btop in a second pane.
+[[session]]
+name = "wranHearst remote build"
+path = "~/baghdadPlane/sessions/remote-build"
+startup_command = "cd ~/baghdadPlane/flakes/newFrontArmToPlane.soc7099-remote-build-sesh; tmux split-window -v \"ssh soc7099@augtibcalcla btop\"; sudo nushell -c 'NIX_SSHOPTS=\"-o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/root/.ssh/known_hosts\" nixos-rebuild switch -j2 --cores 4 --log-format internal-json -v --flake .#wranHearst --build-host soc7099@augtibcalcla o+e>| nom --json'"
+
 
