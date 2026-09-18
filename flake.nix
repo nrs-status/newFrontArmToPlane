@@ -20,7 +20,7 @@
         nixvimFlake = inputs.nixvimFlake;
         inherit baseLib pkgsLib pkgs;
       };
-      modulesPath = "${inputs.nixpkgs}/nixos/modules";
+      modulesPath = "${nixpkgs}/nixos/modules";
       microvmFlake = inputs.microvm;
       nixosSystem = nixpkgs.lib.nixosSystem;
       localPkgsArgs = {
