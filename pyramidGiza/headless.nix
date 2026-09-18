@@ -14,7 +14,10 @@ pkgs.mkShell {
       rgx # explain what a regex pattern does
       tldr # community cheatsheet for commands
       navi # personal commandline cheatsheet manager
+
       nix-index # provides nix-locate, which can find which package provides a given command
+      nix-output-monitor # monitor nix builds
+
       worktrunk # wrapper for git worktrees
       bubblewrap # unpriviledged containerization tool
       delta # git diff pretty printer
