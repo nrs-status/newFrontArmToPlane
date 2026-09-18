@@ -42,9 +42,8 @@ pkgs.mkShell {
       scripts.compare-flake-pins
       scripts.llm-gcm
 
-      #commented while I figure out how the kernel building works/why it is happening
-      # pi-vm.run-pi-vm
-      # pi-vm.run-pi-microvm
+      pi-vm.run-pi-vm
+      pi-vm.run-pi-microvm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
       tell # note-making client for the `doc` db (internalized from the former `tell' flake)
