@@ -70,6 +70,7 @@ let
       install -Dm644 general.nu $out/general.nu
       install -Dm644 workTrunkConfig.nu $out/workTrunkConfig.nu
       install -Dm644 starship.toml $out/starship.toml
+      install -Dm644 direnv.nu $out/direnv.nu
 
       # nu modules `use`d by general.nu (relative paths must sit next to it)
       install -Dm644 nuScripts/jc.nu $out/jc.nu
@@ -85,6 +86,8 @@ let
       source $out/general.nu
       source $out/workTrunkConfig.nu
       source $out/zoxideConfig.nu
+      source $out/direnv.nu
+      
 
       # starship prompt (config location set explicitly, since starship's
       # default would be ~/.config/starship.toml, outside this tree)
