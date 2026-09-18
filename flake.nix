@@ -1,22 +1,18 @@
 {
   inputs = {
     nixvimFlake.url = "github:nix-community/nixvim";
-    nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
+    mcEatBurg.url = "github:nrs-status/mcEatBurg";
     peachRampSkateboard.url = "github:nrs-status/newPeachRampSkateboard";
     # microvm.nix: modules to run NixOS configurations as micro-VMs
     microvm = {
       url = "github:microvm-nix/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs =
     inputs:
     let
-      pkgs = import inputs.nixpkgs {
-        system = "x86_64-linux";
-        config.allowUnfree = true;
-      };
+      pkgs = inputs.mcEatBurg.pkgs;
       pkgsLib = inputs.peachRampSkateboard.pkgsLib; # pkgsLib is distinguished from pkgs because logically they are independent: pkgsLib is used to provide glue code to make the repository work, pkgs provides actual build components
       baseLib = inputs.peachRampSkateboard.baseLib;
       localLib = import ./sandyFireworksBus {
@@ -42,10 +38,9 @@
         self:
         let
           wrappers = import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; });
-          inductedPkgs = import ./colossusRhodes (localPkgsArgs // { localPkgs = self; });
           newPkgs = import ./lighthouseAlexandria (localPkgsArgs // { localPkgs = self; });
         in
-        wrappers // inductedPkgs // newPkgs
+        wrappers // newPkgs
       );
     in
     {
