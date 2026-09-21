@@ -1,14 +1,53 @@
 [[session]]
-name = "llmSessions"
-path = "~/llmSessions"
-
-[[session]]
 name = "sieyes shell config"
 startup_command = "nvim ~/baghdad_plane/flakes/newFrontArmToPlane/pyramidGiza/sieyes.nix"
 
 [[session]]
 name = "chat0"
+path = "~/mobSitChi/chat0"
 startup_command = "pi"
+
+[[session]]
+name = "chat1"
+path = "~/mobSitChi/chat1"
+startup_command = "pi"
+
+[[session]]
+name = "chat2"
+path = "~/mobSitChi/chat2"
+startup_command = "pi"
+
+
+[[session]]
+name = "chat3"
+path = "~/mobSitChi/chat3"
+startup_command = "pi"
+
+
+[[session]]
+name = "chat4"
+path = "~/mobSitChi/chat4"
+startup_command = "pi"
+
+
+[[session]]
+name = "chat5"
+path = "~/mobSitChi/chat5"
+startup_command = "pi"
+
+
+[[session]]
+name = "chat6"
+path = "~/mobSitChi/chat6"
+startup_command = "pi"
+
+
+[[session]]
+name = "chat7"
+path = "~/mobSitChi/chat7"
+startup_command = "pi"
+
+
 
 # Rebuild wranHearst with the build happening on soc7099@augtibcalcla, while
 # watching that host's resources with btop in a second pane.
