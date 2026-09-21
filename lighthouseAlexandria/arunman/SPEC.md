@@ -54,7 +54,7 @@ located at the URL passed in the config. The table has the following schema:
     "endTime":             datetime
     output:                nix store path of the output (see 3.5)
 
-The entry itself consists of:
+The new entry itself consists of:
 
 * a unique ID,
 * the actual nix store path of the flake that was passed as an argument,
