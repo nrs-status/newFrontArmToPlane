@@ -37,49 +37,5 @@ Once you are done:
 			{ delimiters = "<>" }
 		)
 	),
-	s("nodes_insert", {
-		t("INSERT INTO nodes (id, topic, title, body, tags, fuzzyAux, creationDate)"),
-		t({ "", "VALUES (" }),
-		i(1, "0"), -- id
-		t(", '"),
-		i(2, "topic"),
-		t("', '"),
-		i(3, "title"),
-		t("', '"),
-		i(4, "body"),
-		t("', '"),
-		i(5, "tag1,tag2"),
-		t("', '"),
-		i(6, "fuzzyAux"),
-		t("', '"),
-		f(creation_date_node, {}),
-		t("');"),
-	}),
-
-	-- Trigger: nodes_id (auto-incremented-looking next id placeholder is manual)
-	-- Convenience: just the VALUES row for one node
-	s("nodes_row", {
-		t("("),
-		i(1, "0"),
-		t(", '"),
-		i(2, "topic"),
-		t("', '"),
-		i(3, "title"),
-		t("', '"),
-		i(4, "body"),
-		t("', '"),
-		i(5, "tag1,tag2"),
-		t("', '"),
-		i(6, "fuzzyAux"),
-		t("', '"),
-		f(creation_date_node, {}),
-		t(")"),
-	}),
-
-	-- Trigger: nodes_select
-	s("nodes_select", {
-		t("SELECT id, topic, title, body, tags, fuzzyAux, creationDate FROM nodes WHERE id = "),
-		i(1, "0"),
-		t(";"),
-	}),
+	
 }
