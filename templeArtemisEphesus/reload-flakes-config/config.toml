@@ -1,0 +1,39 @@
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/newPeachRampSkateboard"
+flakeInputNames = [ ]
+push = true
+onUncommitted = "error"
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/mcEatBurg"
+flakeInputNames = [ "peachRampSkateboard" ]
+push = true
+onUncommitted = "error"
+
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/nasExitGiScorp"
+flakeInputNames = [ "peachRampSkateboard", "mcEatBurg" ]
+push = true
+onUncommitted = "error"
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/bidGestMirror"
+flakeInputNames = [ "peachRampSkateboard", "mcEatBurg" ]
+push = true
+onUncommitted = "error"
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane"
+flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "nasExitGiScorp" ]
+push = true
+onUncommitted = "error"
+
+
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/newThatWaterCharmander"
+flakeInputNames = [ "peachRampSkateboard", "frontArmToPlane" ]
+push = true
+onUncommitted = "error"
+
