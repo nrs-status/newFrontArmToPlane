@@ -75,6 +75,47 @@ $env.config.hooks.display_output = {
     result hook | if (term size).columns >= 100 { table -e } else { table }
 }
 
+# ─────────────────────────────────────────────────────────────
+# keep the right-prompt timestamp on past prompt lines
+# ─────────────────────────────────────────────────────────────
+#
+# nushell (reedline) erases the right prompt — where the starship $time
+# module draws the clock (see right_format in starship.toml) — from a prompt
+# line as soon as the command typed on it is executed, so only the
+# still-active prompt keeps its timestamp and scrollback loses it.
+#
+# This pre_execution hook re-draws the right prompt on the line about to
+# execute. When the hook fires, reedline has already wiped the right prompt
+# and left the cursor at column 1 of the row below the prompt line, so the
+# hook renders PROMPT_COMMAND_RIGHT once more, one row up and flush right,
+# then puts the cursor back before the command runs. The past line therefore
+# keeps exactly the same right-prompt timestamp the current line shows.
+
+$env.config.hooks.pre_execution = ($env.config.hooks.pre_execution? | default [] | append [{||
+    # only meaningful when a right prompt exists (starship's $time module here)
+    if ($env.PROMPT_COMMAND_RIGHT? | describe) != "closure" { return }
+
+    # re-render the right prompt exactly like reedline does while editing
+    let rp = (do $env.PROMPT_COMMAND_RIGHT)
+    let rp_width = ($rp | ansi strip | str length)
+    if $rp_width == 0 { return }
+
+    let cols = (term size).columns
+    let prompt_width = (do $env.PROMPT_COMMAND | ansi strip | str length)
+
+    # don't paint over the input when prompt + typed line reach into the
+    # right-prompt area (this also skips wrapped input lines, whose row above
+    # the cursor is not the prompt row)
+    let line_width = (commandline | ansi strip | str length)
+    if ($prompt_width + $line_width) > ($cols - $rp_width) { return }
+
+    # cursor is at the start of the row below the prompt line: up 1 row,
+    # flush right, redraw the right prompt, back down and to column 1
+    let col_seq = (ansi -e $"($cols - $rp_width + 1)G")
+    print -n $"(ansi -e '1A')($col_seq)($rp)(ansi -e '1B')(ansi -e '1G')"
+}]
+)
+
 $env.config.abbreviations = {
     g: git
     ga: "git add"
