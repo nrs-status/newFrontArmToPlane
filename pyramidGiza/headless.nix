@@ -61,7 +61,7 @@ pkgs.mkShell {
     ]);
 
   shellHook = ''
-    export RELOAD_FLAKES_CONFIG_PATH=${localPkgs.reload-flakes-config}
+    export DEFAULT_RELOAD_FLAKES_CONFIG_PATH=${localPkgs.reload-flakes-config}
     exec ${pkgsLib.getExe localPkgs.nushell}
   '';
 }
