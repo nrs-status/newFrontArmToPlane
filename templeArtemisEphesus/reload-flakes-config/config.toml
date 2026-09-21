@@ -1,3 +1,5 @@
+[all]
+afterPushDelay = 1
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newPeachRampSkateboard"
