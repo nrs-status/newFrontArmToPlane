@@ -1,4 +1,4 @@
-{ pkgs, localPkgs, pkgsLib, ... }:
+{ pkgs, localPkgs, pkgsLib, newPkgs, ... }:
 
 pkgs.mkShell {
   name = "headless";
@@ -38,24 +38,30 @@ pkgs.mkShell {
       nushell
       tmux #terminal multiplexer
       sesh #tmux session manager
-      scripts.update-twc-fatp-input
-      scripts.compare-flake-pins
-      scripts.llm-gcm
-      scripts.vipe-sql
-
-      pi-vm.run-pi-vm
-      pi-vm.run-pi-microvm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
-      honstarehand # run manager for pi microvm jobs (internalized from `run-manager.2')
-      pi-json-span-processor # aggregates `pi --mode json' event streams into spans
       broot # dir navigator
       television #testing it out, alternative to fzf
       gopass # user password manager
       gnupg # shadows current twc package with one that declares a pinentry program
+    ]) ++ ( with newPkgs; [
+      pi-vm.run-pi-vm
+      pi-vm.run-pi-microvm
+      honstarehand # run manager for pi microvm jobs       
+      pi-json-span-processor # aggregates `pi --mode json' event streams into spans
+      scripts.compare-flake-pins #compare the pinned revision of various flakerefs in use by my system
+      scripts.llm-gcm #generate message for `git commit -m`
+      scripts.vipe-sql #evaluate sql for specific databases using `vipe`
+      scripts.update-twc-fatp-input #update fatp input for twc and rebuild/push
+      scripts.scan-lan #scan hosts visible on LAN
+      scripts.pp-psql-table #pretty print one of the tables of the psql service on my machinee
+      reload-flakes
+
+
     ]);
 
   shellHook = ''
+    export RELOAD_FLAKES_CONFIG_PATH=${localPkgs.reload-flakes-config}
     exec ${pkgsLib.getExe localPkgs.nushell}
   '';
 }

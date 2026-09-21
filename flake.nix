@@ -2,8 +2,8 @@
   inputs = {
     nixvimFlake.url = "github:nix-community/nixvim";
     mcEatBurg.url = "github:nrs-status/mcEatBurg";
+    nasExitGiScorp.url = "github:nrs-status/nasExitGiScorp";
     peachRampSkateboard.url = "github:nrs-status/newPeachRampSkateboard";
-    # microvm.nix: modules to run NixOS configurations as micro-VMs
     microvm = {
       url = "github:microvm-nix/microvm.nix";
     };
@@ -13,7 +13,7 @@
     inputs:
     let
       pkgs = inputs.mcEatBurg.pkgs;
-	nixpkgs = inputs.mcEatBurg.nixpkgs;
+      nixpkgs = inputs.mcEatBurg.nixpkgs;
       pkgsLib = inputs.peachRampSkateboard.pkgsLib; # pkgsLib is distinguished from pkgs because logically they are independent: pkgsLib is used to provide glue code to make the repository work, pkgs provides actual build components
       baseLib = inputs.peachRampSkateboard.baseLib;
       localLib = import ./sandyFireworksBus {
@@ -23,6 +23,7 @@
       modulesPath = "${nixpkgs}/nixos/modules";
       microvmFlake = inputs.microvm;
       nixosSystem = nixpkgs.lib.nixosSystem;
+      newPkgs = inputs.nasExitGiScorp.packages."x86_64-linux";
       localPkgsArgs = {
         # abstracting this out is useful for debugging sessions
         inherit
@@ -33,15 +34,15 @@
           modulesPath
           nixosSystem
           microvmFlake
+          newPkgs
           ;
       };
       localPkgs = pkgs.lib.fix (
         self:
         let
           wrappers = import ./templeArtemisEphesus (localPkgsArgs // { localPkgs = self; });
-          newPkgs = import ./lighthouseAlexandria (localPkgsArgs // { localPkgs = self; });
         in
-        wrappers // newPkgs
+        wrappers
       );
     in
     {
