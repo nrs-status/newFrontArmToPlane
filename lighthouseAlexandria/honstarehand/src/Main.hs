@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
--- | arunman: a command line tool that manages runs of the pi microvm
+-- | honstarehand: a command line tool that manages runs of the pi microvm
 -- (@run-pi-microvm@ from the frontArmToPlane flake) whose configuration
 -- lives in the @runConfigs@ attribute set of a nix flake, tracking every
 -- run in a postgresql @run@ table.
@@ -20,7 +20,7 @@
 --     option takes a string of status letters (o d i t) filtering which
 --     entries are displayed. The output is a nushell-friendly table:
 --     whitespace-aligned columns with single-word headers, so a nushell
---     user can simply run @arunman list ... | detect columns@ to get a
+--     user can simply run @honstarehand list ... | detect columns@ to get a
 --     proper structured table (timestamps are ISO-8601, space-free, so
 --     they stay in one column).
 --
@@ -28,7 +28,7 @@
 --     TOML configuration file consumed by the other subcommands.
 --
 -- The TOML config file states the /path/ of a file holding the openrouter
--- API key rather than the key itself: the key is never read into arunman's
+-- API key rather than the key itself: the key is never read into honstarehand's
 -- memory, logged, or copied; only the path is ever passed on.
 module Main (main) where
 
@@ -151,7 +151,7 @@ runPiMicrovmOpt =
             (  long "run-pi-microvm"
             <> metavar "PATH"
             <> help "path of the run-pi-microvm script (default: resolved \
-                    \from $ARUNMAN_RUN_PI_MICROVM, then built from the \
+                    \from $HONSTAREHAND_RUN_PI_MICROVM, then built from the \
                     \frontArmToPlane flake)"
             )
         )
@@ -224,7 +224,7 @@ loadConfig path = do
     let mode = fileMode st
         groupOtherRead = 0o0040 .|. 0o0004 :: FileMode
     when (mode .&. groupOtherRead /= 0) $
-        hPutStrLn stderr ("arunman: warning: " ++ keyFile ++
+        hPutStrLn stderr ("honstarehand: warning: " ++ keyFile ++
             " is readable by group or others; a mode-0600 key file is " ++
             "recommended")
     -- Check that the key file is not empty, without ever echoing its
@@ -358,18 +358,18 @@ validateDirs RunConfig{..} = forM_ (rcRoDirs ++ rcRwDirs) $ \d -> do
 -- ---------------------------------------------------------------------------
 
 -- | Resolve the run-pi-microvm script: an explicit option wins, then the
--- ARUNMAN_RUN_PI_MICROVM environment variable, then the script is built
--- from the frontArmToPlane flake (whose ref the ARUNMAN_FRONT_ARM_TO_PLANE
+-- HONSTAREHAND_RUN_PI_MICROVM environment variable, then the script is built
+-- from the frontArmToPlane flake (whose ref the HONSTAREHAND_FRONT_ARM_TO_PLANE
 -- environment variable can override).
 resolveRunPiMicrovm :: Maybe FilePath -> IO FilePath
 resolveRunPiMicrovm (Just path) = checkScript path
 resolveRunPiMicrovm Nothing = do
-    mEnv <- lookupEnv "ARUNMAN_RUN_PI_MICROVM"
+    mEnv <- lookupEnv "HONSTAREHAND_RUN_PI_MICROVM"
     case mEnv of
         Just path -> checkScript path
         Nothing -> do
             flakeRef <- maybe defaultFrontArmToPlane id
-                <$> lookupEnv "ARUNMAN_FRONT_ARM_TO_PLANE"
+                <$> lookupEnv "HONSTAREHAND_FRONT_ARM_TO_PLANE"
             out <- runNix "nix"
                 [ "build", flakeRef ++ "#pi-vm.run-pi-microvm"
                 , "--no-link", "--print-out-paths" ]
@@ -387,7 +387,7 @@ checkScript path = do
 -- The frontArmToPlane flake work tree used on this machine.
 defaultFrontArmToPlane :: String
 defaultFrontArmToPlane =
-    "/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.arunman"
+    "/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.honstarehand"
 
 -- Create a fresh temporary workdir with `mktemp -d'.
 mkWorkdir :: IO FilePath
@@ -397,7 +397,7 @@ runCommand :: FilePath -> Maybe FilePath -> String -> IO ()
 runCommand configFile mScript flakeArgStr = do
     cfg <- loadConfig configFile
     (ref, name) <- splitFlakeArg flakeArgStr
-    putStrLn ("arunman: validating flake ref " ++ ref)
+    putStrLn ("honstarehand: validating flake ref " ++ ref)
     validateFlakeRef ref
     rc <- evalRunConfig ref name
     validateDirs rc
@@ -414,7 +414,7 @@ runCommand configFile mScript flakeArgStr = do
         runId <- case inserted of
             [Only i] -> pure i
             _        -> fail "could not read back the id of the inserted run entry"
-        putStrLn ("arunman: run entry " ++ show runId ++
+        putStrLn ("honstarehand: run entry " ++ show runId ++
                   " created (workdir " ++ workdir ++ ")")
         result <- try (runJob conn runId script workdir rc
                               (cfgOpenRouterApiKeyFile cfg))
@@ -425,7 +425,7 @@ runCommand configFile mScript flakeArgStr = do
                 void (execute conn
                     "UPDATE run SET status = ?, \"endTime\" = ? WHERE id = ?"
                     (statusName Terminated, now, runId))
-                hPutStrLn stderr ("arunman: run failed: " ++ show e)
+                hPutStrLn stderr ("honstarehand: run failed: " ++ show e)
                 exitWith (ExitFailure 1)
 
 -- Spawn run-pi-microvm for the entry, monitor it while it runs (updating
@@ -485,7 +485,7 @@ finishRun conn runId workdir exitCode = do
             void (execute conn
                 "UPDATE run SET status = ?, \"endTime\" = ? WHERE id = ?"
                 (statusName Terminated, now, runId))
-            hPutStrLn stderr ("arunman: run-pi-microvm exited with status " ++
+            hPutStrLn stderr ("honstarehand: run-pi-microvm exited with status " ++
                               show code ++ "; run " ++ show runId ++
                               " marked terminated")
             exitWith (ExitFailure code)
@@ -501,7 +501,7 @@ configGuideCommand = TIO.putStr configGuideText
 
 configGuideText :: Text
 configGuideText = T.unlines
-    [ "arunman configuration guide"
+    [ "honstarehand configuration guide"
     , "==========================="
     , ""
     , "The `run' and `list' subcommands both take a required --config (-c)"
@@ -522,14 +522,14 @@ configGuideText = T.unlines
     , "  openrouterApiKeyFile"
     , "      The path of a file holding the OpenRouter API key; the file is"
     , "      handed to run-pi-microvm with --api-key-file. The key itself is"
-    , "      never copied, logged, or printed by arunman: only the path is"
+    , "      never copied, logged, or printed by honstarehand: only the path is"
     , "      passed on. The file must exist, be non-empty, and ideally have"
     , "      mode 0600 (a warning is printed otherwise)."
     , ""
     , "A minimal, complete example config file:"
     , ""
     , "  databaseUrl = \"postgres:///runs\""
-    , "  openrouterApiKeyFile = \"/etc/arunman/openrouter-key\""
+    , "  openrouterApiKeyFile = \"/etc/honstarehand/openrouter-key\""
     , ""
     , "Notes:"
     , ""

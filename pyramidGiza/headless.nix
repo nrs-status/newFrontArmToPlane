@@ -47,7 +47,7 @@ pkgs.mkShell {
       pi-vm.run-pi-microvm
       weechat #irc and matrix client
       git #overrides wranHeart's `git`
-      arunman # run manager for pi microvm jobs (internalized from `run-manager.2')
+      honstarehand # run manager for pi microvm jobs (internalized from `run-manager.2')
       pi-json-span-processor # aggregates `pi --mode json' event streams into spans
       broot # dir navigator
       television #testing it out, alternative to fzf

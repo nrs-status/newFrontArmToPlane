@@ -1,8 +1,8 @@
-# arunman — specification
+# honstarehand — specification
 
 ## 1. Overview
 
-`arunman` is a command line tool (written in Haskell) that manages runs of the
+`honstarehand` is a command line tool (written in Haskell) that manages runs of the
 pi microvm runner `run-pi-microvm` (from the `frontArmToPlane` flake) whose
 configuration lives in the `runConfigs` attribute set of a nix flake. Every
 run is tracked in a postgresql `run` table, from creation to completion.
@@ -18,13 +18,13 @@ TOML configuration file. The config contains:
   connection syntax; URIs and keyword strings both work), holding the `run`
   table,
 * `openrouterApiKeyFile` — the path of a file containing the OpenRouter API
-  key handed to the VM. The key itself is never read into arunman's memory
+  key handed to the VM. The key itself is never read into honstarehand's memory
   or copied anywhere: only the path is passed on. The file must exist and
   be non-empty (and ideally have mode 0600).
 
 ## 3. The `run` subcommand
 
-    arunman run -c CONFIG <flakeref>#<runConfig>
+    honstarehand run -c CONFIG <flakeref>#<runConfig>
 
 The argument has the form `<flakeref>#<config>`, where the left-hand side of
 the hash sign is a flake ref of the same sort seen in the usual nix commands,
@@ -81,9 +81,9 @@ the selected `runConfigs` element as its configuration:
 * the prompt from `prompt` is passed on stdin.
 
 The `run-pi-microvm` script is resolved from, in order of precedence: the
-`--run-pi-microvm` option, the `ARUNMAN_RUN_PI_MICROVM` environment variable,
+`--run-pi-microvm` option, the `HONSTAREHAND_RUN_PI_MICROVM` environment variable,
 then by building `pi-vm.run-pi-microvm` from the `frontArmToPlane` flake (its
-ref can be overridden with `ARUNMAN_FRONT_ARM_TO_PLANE`).
+ref can be overridden with `HONSTAREHAND_FRONT_ARM_TO_PLANE`).
 
 ### 3.4 Monitoring
 
@@ -103,7 +103,7 @@ of the result on stdout.
 
 ## 4. The `list` subcommand
 
-    arunman list -c CONFIG [-s STATUS]
+    honstarehand list -c CONFIG [-s STATUS]
 
 By default it only lists the entries of the `run` table whose status is
 either `ongoing` or `initializing`. Otherwise the `--status` (`-s`) option
@@ -120,5 +120,5 @@ The output is a nushell-friendly table: whitespace-aligned columns whose
 first line holds single-word headers (ID, STATUS, START, END, CONFIG,
 OUTPUT, WORKDIR), with space-free ISO-8601 timestamps and no decoration
 rows, so that piping it into nushell's `detect columns` yields a proper
-structured table (e.g. `arunman list -c CONFIG | detect columns | where
+structured table (e.g. `honstarehand list -c CONFIG | detect columns | where
 STATUS == done`).

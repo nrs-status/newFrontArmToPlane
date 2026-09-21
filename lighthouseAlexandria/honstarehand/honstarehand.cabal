@@ -1,10 +1,10 @@
 cabal-version:      2.4
-name:               arunman
+name:               honstarehand
 version:            0.1.0.0
 synopsis:           Nix-powered run manager for pi microvm jobs
 build-type:         Simple
 
-executable arunman
+executable honstarehand
     main-is:          Main.hs
     hs-source-dirs:   src
     build-depends:
