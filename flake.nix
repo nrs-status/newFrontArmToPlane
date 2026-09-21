@@ -55,5 +55,11 @@
           pkgsLib
           ;
       };
+      templates = {
+        init = {
+          path = ./russellShaveBasketball/init;
+          description = "init";
+        };
+      };
     };
 }
