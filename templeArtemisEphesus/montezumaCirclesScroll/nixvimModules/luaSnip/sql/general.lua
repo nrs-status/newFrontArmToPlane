@@ -22,7 +22,7 @@ end
 
 return {
 	s("nodes_insert", {
-		t("INSERT INTO nodes (id, title, body, tags, fuzzyaux, creationDate)"),
+		t("INSERT INTO nodes (id, title, body, tags, fuzzyaux, creationDate, lastmodifieddate)"),
 		t({ "", "VALUES (" }),
 		t(next_id_sql), -- let the database pick the next available id
 		t(", '"),
@@ -34,7 +34,9 @@ return {
 		t("', '"),
 		i(4, "fuzzyaux"),
 		t("', '"),
-		f(creation_date_node, {}),
+		f(creation_date_node, {}), -- creationdate
+		t("', '"),
+		f(creation_date_node, {}), -- lastmodifieddate: same value as creationdate
 		t("');"),
 	}),
 }
