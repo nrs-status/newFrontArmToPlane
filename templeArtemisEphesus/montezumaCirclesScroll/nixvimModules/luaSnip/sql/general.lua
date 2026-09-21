@@ -4,6 +4,10 @@ local t = ls.text_node
 local i = ls.insert_node
 local fmt = require("luasnip.extras.fmt").fmt
 
+-- Subquery letting the database assign the next available id:
+-- the nodes table has no default on id, so pick MAX(id) + 1.
+local next_id_sql = "(SELECT COALESCE(MAX(id), 0) + 1 FROM nodes)"
+
 -- Current UTC time in ISO 8601 (e.g. 2026-09-06T06:40:12Z)
 local function iso8601_now()
 	return { os.date("!%Y-%m-%dT%H:%M:%SZ") }
@@ -18,48 +22,19 @@ end
 
 return {
 	s("nodes_insert", {
-		t("INSERT INTO nodes (id, topic, title, body, tags, fuzzyAux, creationDate)"),
+		t("INSERT INTO nodes (id, title, body, tags, fuzzyaux, creationDate)"),
 		t({ "", "VALUES (" }),
-		i(1, "0"), -- id
+		t(next_id_sql), -- let the database pick the next available id
 		t(", '"),
-		i(2, "topic"),
+		i(1, "title"),
 		t("', '"),
-		i(3, "title"),
+		i(2, "body"),
 		t("', '"),
-		i(4, "body"),
+		i(3, "tag1,tag2"),
 		t("', '"),
-		i(5, "tag1,tag2"),
-		t("', '"),
-		i(6, "fuzzyAux"),
+		i(4, "fuzzyaux"),
 		t("', '"),
 		f(creation_date_node, {}),
 		t("');"),
-	}),
-
-	-- Trigger: nodes_id (auto-incremented-looking next id placeholder is manual)
-	-- Convenience: just the VALUES row for one node
-	s("nodes_row", {
-		t("("),
-		i(1, "0"),
-		t(", '"),
-		i(2, "topic"),
-		t("', '"),
-		i(3, "title"),
-		t("', '"),
-		i(4, "body"),
-		t("', '"),
-		i(5, "tag1,tag2"),
-		t("', '"),
-		i(6, "fuzzyAux"),
-		t("', '"),
-		f(creation_date_node, {}),
-		t(")"),
-	}),
-
-	-- Trigger: nodes_select
-	s("nodes_select", {
-		t("SELECT id, topic, title, body, tags, fuzzyAux, creationDate FROM nodes WHERE id = "),
-		i(1, "0"),
-		t(";"),
 	}),
 }
