@@ -57,7 +57,7 @@
       };
       templates = {
         init = {
-          path = ./russellShaveBasketball/init;
+          path = ./colossusRhodes/init;
           description = "init";
         };
       };
