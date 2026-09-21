@@ -41,6 +41,7 @@ pkgs.mkShell {
       scripts.update-twc-fatp-input
       scripts.compare-flake-pins
       scripts.llm-gcm
+      scripts.vipe-sql
 
       pi-vm.run-pi-vm
       pi-vm.run-pi-microvm
