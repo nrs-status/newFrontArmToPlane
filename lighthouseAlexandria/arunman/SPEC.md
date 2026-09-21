@@ -115,3 +115,10 @@ filters which entries are displayed, using a string of status letters:
     --status t      # only terminated
     --status i      # only initializing
     --status it     # only initializing and terminated
+
+The output is a nushell-friendly table: whitespace-aligned columns whose
+first line holds single-word headers (ID, STATUS, START, END, CONFIG,
+OUTPUT, WORKDIR), with space-free ISO-8601 timestamps and no decoration
+rows, so that piping it into nushell's `detect columns` yields a proper
+structured table (e.g. `arunman list -c CONFIG | detect columns | where
+STATUS == done`).

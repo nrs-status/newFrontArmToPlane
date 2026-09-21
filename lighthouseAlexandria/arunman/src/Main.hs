@@ -18,7 +18,11 @@
 --   * @list --config FILE [-s STATUS]@: list @run@ table entries, by
 --     default only the ones still ongoing or initializing; the @--status@
 --     option takes a string of status letters (o d i t) filtering which
---     entries are displayed.
+--     entries are displayed. The output is a nushell-friendly table:
+--     whitespace-aligned columns with single-word headers, so a nushell
+--     user can simply run @arunman list ... | detect columns@ to get a
+--     proper structured table (timestamps are ISO-8601, space-free, so
+--     they stay in one column).
 --
 --   * @config-guide@: print a description of how to properly write the
 --     TOML configuration file consumed by the other subcommands.
@@ -572,6 +576,16 @@ listCommand configFile mStatusChars = do
                     Maybe Text)]
         printRows rows
 
+-- Print the rows as a nushell-friendly table: whitespace-aligned
+-- columns whose first line holds single-word headers, so that piping the
+-- output into nushell's @detect columns@ yields a proper structured
+-- table. Constraints honored here:
+--
+--   * headers must be single words (they become the column names),
+--   * no cell may contain whitespace (nix store paths and @mktemp -d@
+--     workdirs never do; timestamps are rendered space-free ISO-8601),
+--   * no decoration rows (e.g. a dash separator), which would be parsed
+--     as data by nushell.
 printRows :: [(Int, Text, Text, Text, Maybe UTCTime, Maybe UTCTime, Maybe Text)]
           -> IO ()
 printRows rows = do
@@ -579,7 +593,7 @@ printRows rows = do
         then putStrLn "(no entries)"
         else mapM_ putStrLn (table header (map rowCells rows))
   where
-    header = ["ID", "STATUS", "START", "END", "CONFIG PATH", "OUTPUT",
+    header = ["ID", "STATUS", "START", "END", "CONFIG", "OUTPUT",
               "WORKDIR"]
     rowCells (i, cfgPath, workdir, status, start, end, output) =
         [ show i
@@ -590,7 +604,9 @@ printRows rows = do
         , maybe "-" T.unpack output
         , T.unpack workdir
         ]
-    fmtTime = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S"
+    -- Space-free ISO-8601 (UTC) so each timestamp stays a single column
+    -- for nushell's `detect columns'.
+    fmtTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S%QZ"
     table hdr cells =
         let cols = length hdr
             widths = [ maximum ((length (hdr !! c)) : map length (column c))
@@ -598,5 +614,5 @@ printRows rows = do
             column c = [ r !! c | r <- cells ]
             render row = unwords [ pad (row !! c) (widths !! c)
                                  | c <- [0 .. cols - 1] ]
-        in [render hdr, render (map (const "-") hdr)] ++ map render cells
+        in render hdr : map render cells
     pad s w = s ++ replicate (max 1 (w - length s + 2)) ' '
