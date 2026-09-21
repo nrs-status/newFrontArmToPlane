@@ -17,7 +17,10 @@ TOML configuration file. The config contains:
 * `databaseUrl` — a URL to a Postgres SQL server (postgresql-simple
   connection syntax; URIs and keyword strings both work), holding the `run`
   table,
-* `openrouterApiKey` — an OpenRouter API key string handed to the VM.
+* `openrouterApiKeyFile` — the path of a file containing the OpenRouter API
+  key handed to the VM. The key itself is never read into arunman's memory
+  or copied anywhere: only the path is passed on. The file must exist and
+  be non-empty (and ideally have mode 0600).
 
 ## 3. The `run` subcommand
 
@@ -72,7 +75,9 @@ the selected `runConfigs` element as its configuration:
 * `--disk-size`, `--ram`, `--read-only`, `--read-write` come from the
   `runConfig`'s `disk`, `ram`, `roDirs`, `rwDirs`,
 * `--model` comes from `model`,
-* `--api-key-file` receives the openrouter API key from the TOML config,
+* `--api-key-file` receives the path of the openrouter API key file from
+  the TOML config (the key itself is never copied, logged, or printed; only
+  the path is handed to the script),
 * the prompt from `prompt` is passed on stdin.
 
 The `run-pi-microvm` script is resolved from, in order of precedence: the

@@ -22,6 +22,10 @@
 --
 --   * @config-guide@: print a description of how to properly write the
 --     TOML configuration file consumed by the other subcommands.
+--
+-- The TOML config file states the /path/ of a file holding the openrouter
+-- API key rather than the key itself: the key is never read into arunman's
+-- memory, logged, or copied; only the path is ever passed on.
 module Main (main) where
 
 import           Control.Concurrent          (threadDelay)
@@ -47,15 +51,15 @@ import           Database.PostgreSQL.Simple  (Connection, Only (..), close,
 import           Database.PostgreSQL.Simple.Types (Query (..))
 import           Options.Applicative
 import           System.Directory            (doesDirectoryExist,
-                                              doesFileExist, removeFile)
+                                              doesFileExist)
 import           System.Environment          (lookupEnv)
 import           System.Exit                 (ExitCode (..), exitWith)
 import           System.FilePath             ((</>))
 import           System.IO                   (IOMode (WriteMode), hClose,
-                                              hPutStr, hPutStrLn,
-                                              openTempFile, stderr, withFile)
-import           System.Posix.Files          (ownerReadMode, ownerWriteMode,
-                                              setFileMode, unionFileModes)
+                                              hPutStrLn, stderr, withFile)
+import           System.Posix.Files          (fileMode, getFileStatus)
+import           System.Posix.Types          (FileMode)
+import           Data.Bits                   ((.&.), (.|.))
 import           System.Process              (CreateProcess (..),
                                               StdStream (CreatePipe,
                                               UseHandle), createProcess,
@@ -87,17 +91,17 @@ statusFromChar 't' = Just Terminated
 statusFromChar _   = Nothing
 
 -- | The parsed TOML config file: a URL to the postgresql server and the
--- openrouter API key handed to the VM.
+-- path of a file holding the openrouter API key handed to the VM.
 data Config = Config
-    { cfgDatabaseUrl      :: String
-    , cfgOpenRouterApiKey :: String
+    { cfgDatabaseUrl         :: String
+    , cfgOpenRouterApiKeyFile :: FilePath
     }
 
 configCodec :: Toml.TomlCodec Config
 configCodec =
     Config
         <$> (Toml.string "databaseUrl" .= cfgDatabaseUrl)
-        <*> (Toml.string "openrouterApiKey" .= cfgOpenRouterApiKey)
+        <*> (Toml.string "openrouterApiKeyFile" .= cfgOpenRouterApiKeyFile)
 
 -- | A validated @runConfigs.<name>@ element of the flake.
 data RunConfig = RunConfig
@@ -132,7 +136,8 @@ configOpt =
         (  long "config"
         <> short 'c'
         <> metavar "FILE"
-        <> help "path of the TOML config file (database URL + openrouter API key)"
+        <> help "path of the TOML config file (database URL + path of the \
+                \openrouter API key file)"
         )
 
 runPiMicrovmOpt :: Parser (Maybe FilePath)
@@ -203,8 +208,26 @@ loadConfig path = do
     exists <- doesFileExist path
     unless exists $ fail ("config file not found: " ++ path)
     cfg <- Toml.decodeFile configCodec path
-    when (null (cfgOpenRouterApiKey cfg)) $
-        hPutStrLn stderr "arunman: warning: empty openrouterApiKey in the config"
+    let keyFile = cfgOpenRouterApiKeyFile cfg
+    when (null keyFile) $
+        fail "empty openrouterApiKeyFile in the config"
+    keyExists <- doesFileExist keyFile
+    unless keyExists $
+        fail ("openrouterApiKeyFile does not exist: " ++ keyFile)
+    -- The key file must be readable by the current user only: warn loudly
+    -- about any other bit, and never print the key itself.
+    st <- getFileStatus keyFile
+    let mode = fileMode st
+        groupOtherRead = 0o0040 .|. 0o0004 :: FileMode
+    when (mode .&. groupOtherRead /= 0) $
+        hPutStrLn stderr ("arunman: warning: " ++ keyFile ++
+            " is readable by group or others; a mode-0600 key file is " ++
+            "recommended")
+    -- Check that the key file is not empty, without ever echoing its
+    -- contents.
+    key <- TIO.readFile keyFile
+    when (T.null (T.strip key)) $
+        fail ("openrouterApiKeyFile is empty: " ++ keyFile)
     pure cfg
 
 withDb :: Config -> (Connection -> IO a) -> IO a
@@ -366,18 +389,6 @@ defaultFrontArmToPlane =
 mkWorkdir :: IO FilePath
 mkWorkdir = trim <$> readProcess "mktemp" ["-d"] ""
 
--- Write the openrouter API key from the config to a mode-0600 temp file
--- handed to run-pi-microvm with --api-key-file.
-writeApiKeyFile :: String -> IO (Maybe FilePath)
-writeApiKeyFile key
-    | null key = pure Nothing
-    | otherwise = do
-        (path, h) <- openTempFile "/tmp" "arunman-api-key"
-        hPutStr h key
-        hClose h
-        setFileMode path (ownerReadMode `unionFileModes` ownerWriteMode)
-        pure (Just path)
-
 runCommand :: FilePath -> Maybe FilePath -> String -> IO ()
 runCommand configFile mScript flakeArgStr = do
     cfg <- loadConfig configFile
@@ -391,7 +402,6 @@ runCommand configFile mScript flakeArgStr = do
     withDb cfg $ \conn -> do
         ensureSchema conn
         workdir <- mkWorkdir
-        apiKeyFile <- writeApiKeyFile (cfgOpenRouterApiKey cfg)
         startTime <- getCurrentTime
         inserted <- query conn
             "INSERT INTO run (config, workdir, status, \"startTime\") \
@@ -402,7 +412,8 @@ runCommand configFile mScript flakeArgStr = do
             _        -> fail "could not read back the id of the inserted run entry"
         putStrLn ("arunman: run entry " ++ show runId ++
                   " created (workdir " ++ workdir ++ ")")
-        result <- try (runJob conn runId script workdir rc apiKeyFile)
+        result <- try (runJob conn runId script workdir rc
+                              (cfgOpenRouterApiKeyFile cfg))
         case result of
             Right exitCode  -> finishRun conn runId workdir exitCode
             Left (e :: SomeException) -> do
@@ -410,7 +421,6 @@ runCommand configFile mScript flakeArgStr = do
                 void (execute conn
                     "UPDATE run SET status = ?, \"endTime\" = ? WHERE id = ?"
                     (statusName Terminated, now, runId))
-                forM_ apiKeyFile removeFile
                 hPutStrLn stderr ("arunman: run failed: " ++ show e)
                 exitWith (ExitFailure 1)
 
@@ -418,7 +428,7 @@ runCommand configFile mScript flakeArgStr = do
 -- the entry's status from initializing to ongoing once it is confirmed
 -- running), and return its exit code.
 runJob :: Connection -> Int -> FilePath -> FilePath -> RunConfig
-       -> Maybe FilePath -> IO ExitCode
+       -> FilePath -> IO ExitCode
 runJob conn runId script workdir RunConfig{..} apiKeyFile =
     withFile (workdir </> "run-pi-microvm.log") WriteMode $ \logH -> do
         let args = concat
@@ -429,7 +439,7 @@ runJob conn runId script workdir RunConfig{..} apiKeyFile =
                 , concatMap (\d -> ["--read-write", d]) rcRwDirs
                 , if T.null rcModel
                       then [] else ["--model", T.unpack rcModel]
-                , maybe [] (\k -> ["--api-key-file", k]) apiKeyFile
+                , ["--api-key-file", apiKeyFile]
                 ]
         (Just stdinH, _, _, processH) <- createProcess (proc script args)
             { std_in  = CreatePipe
@@ -505,22 +515,25 @@ configGuideText = T.unlines
     , ""
     , "          databaseUrl = \"host=localhost dbname=runs user=user\""
     , ""
-    , "  openrouterApiKey"
-    , "      An OpenRouter API key string handed to the VM; it is written to a"
-    , "      mode-0600 temporary file and passed to run-pi-microvm with"
-    , "      --api-key-file. It may be an empty string (a warning is printed),"
-    , "      in which case no key file is passed."
+    , "  openrouterApiKeyFile"
+    , "      The path of a file holding the OpenRouter API key; the file is"
+    , "      handed to run-pi-microvm with --api-key-file. The key itself is"
+    , "      never copied, logged, or printed by arunman: only the path is"
+    , "      passed on. The file must exist, be non-empty, and ideally have"
+    , "      mode 0600 (a warning is printed otherwise)."
     , ""
     , "A minimal, complete example config file:"
     , ""
     , "  databaseUrl = \"postgres:///runs\""
-    , "  openrouterApiKey = \"sk-or-v1-...\""
+    , "  openrouterApiKeyFile = \"/etc/arunman/openrouter-key\""
     , ""
     , "Notes:"
     , ""
     , "  * The file must be valid TOML and both keys must be plain strings."
-    , "  * The path is checked for existence before it is decoded; a missing"
-    , "    file is a hard error."
+    , "  * The config path is checked for existence before it is decoded; a"
+    , "    missing file is a hard error. The API key file is checked too: a"
+    , "    missing or empty key file is a hard error, and a key file with"
+    , "    group- or world-read permission enabled produces a warning."
     , "  * The postgresql server does not need to exist yet for `run' to"
     , "    validate the flake, but the connection is opened before anything is"
     , "    inserted, so it must be reachable when a run starts."
