@@ -1,4 +1,4 @@
-{
+inputs@{
   pkgs,
   localPkgs,
   pkgsLib,
@@ -6,9 +6,7 @@
 }:
 
 let
-  headless = import ./headless.nix {
-    inherit pkgs localPkgs pkgsLib;
-  };
+  headless = import ./headless.nix inputs;
 in
 headless.overrideAttrs (old: {
   name = "sieyesShell";

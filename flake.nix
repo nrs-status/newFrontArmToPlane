@@ -50,7 +50,7 @@
       packages."x86_64-linux" = localPkgs;
       devShells."x86_64-linux" = import ./pyramidGiza {
         inherit
-        newPkgs
+          newPkgs
           baseLib
           pkgs
           localPkgs
