@@ -2,32 +2,37 @@ inputs@{
   pkgs,
   localPkgs,
   pkgsLib,
+  localLib,
   ...
 }:
 
 let
-  headless = import ./headless.nix inputs;
+  devShell = (import ./headless.nix inputs).passthru.tmuxless.overrideAttrs (old: {
+    name = "sieyesShell";
+
+    buildInputs =
+      old.buildInputs
+      ++ (with pkgs; [
+        kdePackages.okular # ebook/pdf/djvu/etc. reader
+        bottles # games launcher
+        google-chrome
+        qimgv # image viewer
+        vlc
+        bitwarden-cli
+
+        #testing these for a workflow for querying the psql server
+        visidata
+        harlequin
+      ])
+      ++ (with localPkgs; [
+        firefox
+        kitty # terminal emulator
+      ]);
+
+  });
 in
-headless.overrideAttrs (old: {
-  name = "sieyesShell";
-
-  buildInputs =
-    old.buildInputs
-    ++ (with pkgs; [
-      kdePackages.okular # ebook/pdf/djvu/etc. reader
-      bottles # games launcher
-      google-chrome
-      qimgv # image viewer
-      vlc
-      bitwarden-cli
-
-      #testing these for a workflow for querying the psql server
-      visidata
-      harlequin
-    ])
-    ++ (with localPkgs; [
-      firefox
-      kitty #terminal emulator
-    ]);
-
-})
+localLib.tmuxifyDevShell {
+  inherit localPkgs devShell;
+  name = "sieyesShell-tmuxed";
+  shell = localPkgs.nushell;
+}

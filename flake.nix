@@ -55,6 +55,7 @@
           pkgs
           localPkgs
           pkgsLib
+          localLib
           ;
       };
       templates = {
