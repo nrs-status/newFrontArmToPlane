@@ -25,7 +25,7 @@ return {
 			name = "agent basic prompt",
 		},
 		fmt(
-			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a banchmark, this is a real issue on a real machine.
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them.
 
 <>
 
