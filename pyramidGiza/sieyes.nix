@@ -30,7 +30,4 @@ headless.overrideAttrs (old: {
       kitty #terminal emulator
     ]);
 
-  shellHook = ''
-    exec ${pkgsLib.getExe localPkgs.nushell}
-  '';
 })
