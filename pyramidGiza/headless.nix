@@ -71,5 +71,5 @@ in
 localLib.tmuxifyDevShell {
   inherit localPkgs devShell;
   name = "headless-tmuxed";
-  shell = localPkgs.nushell;
+  postShellHookInteractiveShell = localPkgs.nushell;
 }

@@ -34,5 +34,5 @@ in
 localLib.tmuxifyDevShell {
   inherit localPkgs devShell;
   name = "sieyesShell-tmuxed";
-  shell = localPkgs.nushell;
+  postShellHookInteractiveShell = localPkgs.nushell;
 }

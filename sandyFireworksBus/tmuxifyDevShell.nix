@@ -3,7 +3,7 @@ inputs@{ pkgsLib, ... }:
   localPkgs,
   name,
   devShell,
-  shell,
+  postShellHookInteractiveShell,
   shellArgs ? [ ], #extra args passed to `shell` (e.g. [ "-l" ])
   extraEnv ? { }, #extra env vars to export
 }:
@@ -11,7 +11,7 @@ let
   shellAsScript = import ./shellScriptOfDevshell.nix inputs {
     inherit name shellArgs extraEnv;
     devshell = devShell;
-    shell = shell;
+    shell = postShellHookInteractiveShell;
   };
   tmux = localPkgs.tmux.override { defaultShell = pkgsLib.getExe shellAsScript; };
   sesh = localPkgs.sesh.override { inherit tmux; };
