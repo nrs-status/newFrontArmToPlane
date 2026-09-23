@@ -43,6 +43,15 @@ let
         # key-string parser only knows F1-F12), so the sequence is mapped to a
         # User0 key via the user-keys option and User0 is bound instead.
         #
+        # NB: the console only emits \E[25~ if its keymap maps evdev keycode
+        # 183 (KEY_F13) to the F13 function key.  keyd's remap reaches the
+        # virtual console as keycode 183, and the stock `us` console keymap
+        # leaves that keycode as VoidSymbol, so it must be bound explicitly;
+        # otherwise this binding silently never fires in a console (it works
+        # under sway because sway reads the raw keycode).  That mapping lives
+        # in the host config:
+        # newThatWaterCharmander/zeusOlympia/console.nix.
+        #
         # Under sway, rightalt is
         # already handled by the sway-level bindcode 191 bindings (press =
         # voice-input start, release = voice-input finish; see
