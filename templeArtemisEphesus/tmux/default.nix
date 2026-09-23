@@ -101,6 +101,20 @@ let
         # 15s later.
         set -ga status-right "#[fg=red,bold]#(pgrep -F /tmp/voice-input-recording.pid >/dev/null 2>&1 && echo ' REC')#[default]"
 
+        # prefix-key indicator in the status bar
+        # --------------------------------------------------------------
+        # Shows a yellow "PREFIX" marker while a prefix key (C-a, see
+        # inheritedConf.conf) is held: the `client_prefix` format returns 1
+        # when the invoking client is currently in prefix mode, so the marker
+        # appears the moment the prefix is pressed and disappears on the next
+        # keypress.  tmux redraws the status line as soon as the client's
+        # prefix flag changes, so no polling/refresh is needed.
+        #
+        # This is appended (set -ga) *after* the voice-input "REC" marker
+        # above rather than replacing status-right, so both indicators coexist:
+        # pressing the prefix while a recording is in progress still shows REC.
+        set -ga status-right "#[fg=yellow,bold]#{?client_prefix,PREFIX,}#[default]"
+
         # NB: this heredoc is *unquoted*, so literal dollar signs must be
         # escaped (\$WAYLAND_DISPLAY) to survive the installPhase shell while
         # still being expanded by sh at tmux-config load time.
