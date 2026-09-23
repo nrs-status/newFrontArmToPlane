@@ -62,6 +62,7 @@ let
         scripts.scan-lan # scan hosts visible on LAN
         scripts.pp-psql-table # pretty print one of the tables of the psql service on my machinee
         scripts.create-pi-session # automates some steps to start a pi session in tmux
+        scripts.taskmux # give tmux sessions a state variable indicating starting/ending a task
         reload-flakes
 
       ]);
