@@ -58,12 +58,35 @@ let
         # recording and transcribe/insert (voice-input itself tracks the
         # in-progress recording via its pid file).
         #
+        # voice-input recording indicator in the status bar
+        # --------------------------------------------------------------
+        # voice-input tracks an in-progress recording via its pid file
+        # (/tmp/voice-input-recording.pid holds the pid of the pw-record
+        # process it spawned).  The status-right appended below shows a red
+        # "REC" marker whenever that pid is alive, i.e. whenever a voice
+        # recording is running -- regardless of whether it was started from
+        # the tmux User0/F13 toggle below or from the sway push-to-talk
+        # binding.  It must be set *after* the gruvbox run-shell above,
+        # because the gruvbox plugin overwrites status-right with its own
+        # value; set -ga appends our marker to whatever gruvbox left in
+        # place.  pgrep -F avoids nested parentheses inside the #( ) shell
+        # fragment (tmux's format parser terminates #( ) at the first
+        # unmatched ')', so \$( ) command substitution cannot be used
+        # there).
+        #
+        # tmux re-evaluates #( ) fragments on every status-line redraw (at
+        # most once per status-interval, 15s by default), so the User0
+        # binding below additionally runs "tmux refresh-client -S" to make
+        # the marker appear/disappear immediately on toggle instead of up to
+        # 15s later.
+        set -ga status-right "#[fg=red,bold]#(pgrep -F /tmp/voice-input-recording.pid >/dev/null 2>&1 && echo ' REC')#[default]"
+
         # NB: this heredoc is *unquoted*, so literal dollar signs must be
         # escaped (\$WAYLAND_DISPLAY) to survive the installPhase shell while
         # still being expanded by sh at tmux-config load time.
         if-shell '[ -n "\$WAYLAND_DISPLAY" ] || [ -n "\$DISPLAY" ]' \
           'set -g @voice-input-graphical-session on' \
-          'set -s user-keys[0] "\033[25~"; bind-key -n User0 run-shell -b "if [ -f /tmp/voice-input-recording.pid ]; then ${voiceInput} finish; else ${voiceInput} start; fi"'
+          'set -s user-keys[0] "\033[25~"; bind-key -n User0 run-shell -b "if [ -f /tmp/voice-input-recording.pid ]; then ${voiceInput} finish; else ${voiceInput} start; fi & sleep 0.5; tmux refresh-client -S"'
         EOF
 
         makeWrapper ${pkgsLib.getExe pkgs.tmux} $out/bin/tmux \
