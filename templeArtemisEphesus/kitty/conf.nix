@@ -83,4 +83,15 @@ map --when-focus-on var:IS_NVIM alt+j
 map --when-focus-on var:IS_NVIM alt+k
 map --when-focus-on var:IS_NVIM alt+h
 map --when-focus-on var:IS_NVIM alt+l
+
+
+#-------------- Shift+Enter pass-through for tmux
+# tmux's extended-keys support cannot make kitty report Shift+Enter as a
+# distinct key: kitty ignores xterm's modifyOtherKeys request, and pushing
+# kitty's "disambiguate" keyboard mode makes tmux emit sequences that its
+# input parser cannot understand (see templeArtemisEphesus/tmux/basic.conf).
+# Send the CSI-u sequence for Shift+Enter instead; tmux and pi both understand
+# it, so Shift+Enter inserts a newline inside tmux.  This is harmless outside
+# tmux too, because pi parses the same sequence in kitty-protocol mode.
+map shift+enter send_text all \x1b[13;2u
 ''
