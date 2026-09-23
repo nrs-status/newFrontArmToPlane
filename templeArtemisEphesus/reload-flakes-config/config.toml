@@ -22,7 +22,7 @@ onUncommitted = "error"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/bidGestMirror"
-flakeInputNames = [ "peachRampSkateboard", "mcEatBurg" ]
+flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "frontArmToPlane" ]
 push = true
 onUncommitted = "error"
 
