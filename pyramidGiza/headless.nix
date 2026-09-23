@@ -31,6 +31,7 @@ let
         moreutils # because it contains `vipe`, which allows piping in and out of $EDITOR
         atuin # terminal history manager
         jless # interactive json navigator
+        glances # modular btop alternative
 
         gum # testing it out to make quick TUIs
         tree-sitter # testing out whether I can use it to extract substrings
