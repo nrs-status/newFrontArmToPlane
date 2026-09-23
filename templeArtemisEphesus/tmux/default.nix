@@ -36,6 +36,17 @@ let
 
         # voice-input on F13, console only
         # --------------------------------------------------------------
+        # The run-shell command below passes --console to voice-input: this
+        # binding is only installed when there is no graphical session, and
+        # on the bare console neither notify-send (D-Bus notifications) nor
+        # wtype (wayland) can work, so voice-input must run in its console
+        # mode (stderr / tmux display-message reporting, transcription typed
+        # into the tmux pane with send-keys).  TMUX_PANE is pinned to the
+        # invoking pane via #{pane_id} (run-shell expands formats, see the
+        # scrollback binding in basic.conf) so the transcription is typed into
+        # the pane F13 was pressed in even when tmux does not export
+        # TMUX_PANE to the run-shell job.
+        #
         # keyd remaps rightalt to evdev F13 system-wide (see
         # newThatWaterCharmander/empTriageCan/louSelfHit-sofa/keyRemappings.nix);
         # the Linux console (TERM=linux) delivers F13 as \E[25~ (its terminfo
@@ -95,7 +106,7 @@ let
         # still being expanded by sh at tmux-config load time.
         if-shell '[ -n "\$WAYLAND_DISPLAY" ] || [ -n "\$DISPLAY" ]' \
           'set -g @voice-input-graphical-session on' \
-          'set -s user-keys[0] "\033[25~"; bind-key -n User0 run-shell -b "if [ -f /tmp/voice-input-recording.pid ]; then ${voiceInput} finish; else ${voiceInput} start; fi & sleep 0.5; tmux refresh-client -S"'
+          'set -s user-keys[0] "\033[25~"; bind-key -n User0 run-shell -b "if [ -f /tmp/voice-input-recording.pid ]; then TMUX_PANE=#{pane_id} ${voiceInput} --console finish; else TMUX_PANE=#{pane_id} ${voiceInput} --console start; fi & sleep 0.5; tmux refresh-client -S"'
         EOF
 
         makeWrapper ${pkgsLib.getExe pkgs.tmux} $out/bin/tmux \
