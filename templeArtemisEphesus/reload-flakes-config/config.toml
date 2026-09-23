@@ -35,7 +35,7 @@ onUncommitted = "error"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newThatWaterCharmander"
-flakeInputNames = [ "peachRampSkateboard", "frontArmToPlane", "nasExitGiScorp", "mcEatBurg", "mcEatBurg" ]
+flakeInputNames = [ "peachRampSkateboard", "frontArmToPlane", "nasExitGiScorp", "mcEatBurg" ]
 push = true
 onUncommitted = "error"
 
