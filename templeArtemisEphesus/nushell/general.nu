@@ -195,6 +195,10 @@ $env.config.abbreviations = {
     l: "lines"
     w: "where"
     o: "open"
+
+    #taskmux
+    tkml: "taskmux list"
+    tkmc: "taskmux clear"
 }
 
 # ─────────────────────────────────────────────────────────────
