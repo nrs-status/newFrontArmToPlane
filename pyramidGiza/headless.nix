@@ -60,6 +60,7 @@ let
         scripts.update-twc-fatp-input # update fatp input for twc and rebuild/push
         scripts.scan-lan # scan hosts visible on LAN
         scripts.pp-psql-table # pretty print one of the tables of the psql service on my machinee
+        scripts.create-pi-session # automates some steps to start a pi session in tmux
         reload-flakes
 
       ]);
