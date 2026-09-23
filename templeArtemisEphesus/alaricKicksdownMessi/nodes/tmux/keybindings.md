@@ -21,3 +21,7 @@ body: rename window
 title: <prefix>[
 creationDate: Wed Sep 23 11:42:41 AM UTC 2026
 body: enter copy-mode (scrollback)
+--
+title: <prefix>L
+creationDate: Wed Sep 23 08:15:30 PM UTC 2026
+body: go to previous tmux session
