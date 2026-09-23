@@ -25,7 +25,7 @@ return {
 			name = "agent basic prompt",
 		},
 		fmt(
-			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them.
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts.
 
 <>
 
@@ -43,7 +43,7 @@ Once you are done:
 			name = "agent basic prompt",
 		},
 		fmt(
-			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them.
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts.
 
 You are running within a tmux server; if your tests involve tmux, make sure to run them on a separate tmux server because otherwise, you might kill yourself by accident.
 
@@ -64,7 +64,7 @@ Once you are done:
 			name = "agent basic prompt",
 		},
 		fmt(
-			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them.
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts.
 
 You are not in a terminal emulator, you are running in a tmux session within the console. If your tests involve tmux, make sure to run them on a separate tmux server because otherwise, you might kill yourself by accident.
 
