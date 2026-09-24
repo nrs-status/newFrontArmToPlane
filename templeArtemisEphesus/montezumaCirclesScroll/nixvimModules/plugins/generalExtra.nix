@@ -26,8 +26,7 @@
     #helps avoiding repeated keypresses
     hardtime.enable = true;
 
-    #enabled but I need to take the time to actually figure out how to use it properly
-    multicursors.enable = true;
+    # configured in ./multicursors.nix
 
     #markdown, Typst, latex, etc. previewer
     markview.enable = true;
