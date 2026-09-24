@@ -53,7 +53,7 @@ let
       ++ (with newPkgs; [
         pi-vm.run-pi-vm
         pi-vm.run-pi-microvm
-        honstarehand # run manager for pi microvm jobs
+        #honstarehand # run manager for pi microvm jobs
         pi-json-span-processor # aggregates `pi --mode json' event streams into spans
         scripts.compare-flake-pins # compare the pinned revision of various flakerefs in use by my system
         scripts.llm-gcm # generate message for `git commit -m`
