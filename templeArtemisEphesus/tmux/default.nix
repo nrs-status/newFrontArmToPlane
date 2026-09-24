@@ -3,6 +3,15 @@ let
   # gruvbox theme plugin for the tmux status line / pane colors
   themePlugin = pkgs.tmuxPlugins.gruvbox;
 
+  # status-bar system-stats segment (total CPU %, total RAM %, average CPU
+  # temperature).  Runs entirely off /proc and /sys, so bash + coreutils are
+  # enough; the script is copied into the package so the status bar does not
+  # depend on anything in $PATH of the invoking session.
+  statusStatsScript = pkgs.runCommand "tmux-status-stats.sh" { } ''
+    install -Dm755 ${./status-stats.sh} $out
+    patchShebangs $out
+  '';
+
   # the voice-input push-to-talk script, the same package the sway
   # configuration binds F13 to (see
   # newThatWaterCharmander/zeusOlympia/sway/swayDecl.nix).  It comes from the
@@ -114,6 +123,22 @@ let
         # above rather than replacing status-right, so both indicators coexist:
         # pressing the prefix while a recording is in progress still shows REC.
         set -ga status-right "#[fg=yellow,bold]#{?client_prefix,PREFIX,}#[default]"
+
+        # extreme-right segment: total CPU %, total RAM %, average CPU temp
+        # --------------------------------------------------------------
+        # Appended *after* the PREFIX marker above (so it is the last /
+        # rightmost element of status-right).  tmux's #( ) fragment spawns the
+        # script; it prints one line, e.g. "CPU 12% | RAM 41% | 54°C".
+        #
+        # The script samples /proc/stat twice around a sleep whose length is
+        # the `interval` env var, so the sleep doubles as the CPU-usage
+        # measurement window; 5s matches the gruvbox plugin's own status
+        # refresh cadence (status-interval 5, set by gruvbox-tpm.tmux), so the
+        # segment updates on every status-line redraw without adding load.
+        # Note: #( ) is re-evaluated at most once per status-interval, so each
+        # redraw costs exactly one 5s-background-job per tmux client; tmux
+        # caches the output between redraws and never blocks the UI on it.
+        set -ga status-right "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default]"
 
         # NB: this heredoc is *unquoted*, so literal dollar signs must be
         # escaped (\$WAYLAND_DISPLAY) to survive the installPhase shell while
