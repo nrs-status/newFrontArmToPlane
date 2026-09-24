@@ -41,6 +41,43 @@ let
           set -g default-shell ${defaultShell}
           source-file $out/config/basic.conf
           source-file $out/config/inheritedConf.conf
+
+          # CPU / RAM / temperature stats immediately left of the date
+          # --------------------------------------------------------------
+          # The gruvbox plugin assembles status-right from three user
+          # options: @tmux-gruvbox-right-status-x (date, "%Y-%m-%d"), -y
+          # (time, "%H:%M") and -z (hostname).  Setting -x to "<stats
+          # fragment> %Y-%m-%d" makes the plugin emit the stats *inside* the
+          # date segment, i.e. rendered immediately to the left of the date
+          # -- which is exactly where these indicators belong now (they used
+          # to be appended to the far right of status-right, after the
+          # hostname).
+          #
+          # Doing it this way (instead of appending yet another status-right
+          # fragment after the PREFIX marker further down) also keeps the
+          # stats in front of the date regardless of how the trailing
+          # segments (REC / PREFIX / hostname) evolve.
+          #
+          # tmux's #( ) fragment spawns the script; it prints one line, e.g.
+          # "CPU 12% | RAM 41% | 54°C".  The script samples /proc/stat twice
+          # around a sleep whose length is the interval environment variable
+          # (passed inside the fragment below), so the sleep doubles as the
+          # CPU-usage measurement window; 5s matches the gruvbox plugin's own
+          # status refresh cadence (status-interval 5, set by
+          # gruvbox-tpm.tmux), so the segment updates on every
+          # status-line redraw without adding load.  Note: #( ) is
+          # re-evaluated at most once per status-interval, so each redraw
+          # costs exactly one 5s-background-job per tmux client; tmux caches
+          # the output between redraws and never blocks the UI on it.  The
+          # fragment is prepended to the date inside the -x value so it
+          # shares the segment's colour239 background; a #[default] style
+          # afterwards restores the date's own fg=colour246 styling.
+          #
+          # This must be set *before* the gruvbox run-shell below: the
+          # plugin reads the option when it runs, so setting it afterwards
+          # would only take effect on the next tmux-server start.
+          set -g @tmux-gruvbox-right-status-x "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
+
           run-shell $out/config/gruvbox/gruvbox-tpm.tmux
 
         # voice-input on F13, console only
@@ -123,22 +160,6 @@ let
         # above rather than replacing status-right, so both indicators coexist:
         # pressing the prefix while a recording is in progress still shows REC.
         set -ga status-right "#[fg=yellow,bold]#{?client_prefix,PREFIX,}#[default]"
-
-        # extreme-right segment: total CPU %, total RAM %, average CPU temp
-        # --------------------------------------------------------------
-        # Appended *after* the PREFIX marker above (so it is the last /
-        # rightmost element of status-right).  tmux's #( ) fragment spawns the
-        # script; it prints one line, e.g. "CPU 12% | RAM 41% | 54°C".
-        #
-        # The script samples /proc/stat twice around a sleep whose length is
-        # the `interval` env var, so the sleep doubles as the CPU-usage
-        # measurement window; 5s matches the gruvbox plugin's own status
-        # refresh cadence (status-interval 5, set by gruvbox-tpm.tmux), so the
-        # segment updates on every status-line redraw without adding load.
-        # Note: #( ) is re-evaluated at most once per status-interval, so each
-        # redraw costs exactly one 5s-background-job per tmux client; tmux
-        # caches the output between redraws and never blocks the UI on it.
-        set -ga status-right "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default]"
 
         # NB: this heredoc is *unquoted*, so literal dollar signs must be
         # escaped (\$WAYLAND_DISPLAY) to survive the installPhase shell while
