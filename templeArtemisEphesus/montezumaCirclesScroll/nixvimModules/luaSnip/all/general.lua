@@ -17,11 +17,28 @@ local function creation_date_node(args)
 end
 
 return {
-	-- "top": top line is static text, middle waits for user input (insert node),
-	-- bottom line is static text.
 	s(
 		{
 			trig = "agentBasic-tmux",
+			name = "agent basic prompt",
+		},
+		fmt(
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts. You are running within a tmux server.
+
+<>
+
+Once you are done: 
+- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
+- Run `taskmux done`
+      ]],
+			{ i(1) },
+			{ delimiters = "<>" }
+		)
+	),
+	s(
+		{
+			trig = "agentBasic-tmuxrelated",
 			name = "agent basic prompt",
 		},
 		fmt(
@@ -43,6 +60,24 @@ Once you are done:
 	s(
 		{
 			trig = "agentBasic-tmux-console",
+			name = "agent basic prompt",
+		},
+		fmt(
+			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts. You are not in a terminal emulator, you are running in a tmux session within the console. 
+
+<>
+
+Once you are done: 
+- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- Run `taskmux done`
+      ]],
+			{ i(1) },
+			{ delimiters = "<>" }
+		)
+	),
+	s(
+		{
+			trig = "agentBasic-tmuxrelated-console",
 			name = "agent basic prompt",
 		},
 		fmt(

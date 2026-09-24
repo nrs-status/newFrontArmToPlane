@@ -46,4 +46,7 @@ body:
 ```
 tmux new-window -n <window name> -d
 ```
-
+--
+title: select all lines that begin with `#` and display them with their line number
+creationDate: 2026-09-24 13:57
+body: `:g/^#/#`
