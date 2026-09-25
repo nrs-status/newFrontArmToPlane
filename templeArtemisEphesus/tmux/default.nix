@@ -12,6 +12,25 @@ let
     patchShebangs $out
   '';
 
+  # status-bar taskmux-done indicator segment: a green " DONE" marker that
+  # appears only while at least one tmux session has its task marked done
+  # (i.e. while `taskmux list' would display at least one "done" task).
+  # Same self-contained /proc-free design as status-stats.sh above: pure
+  # bash, the tmux client path is passed in by the #( ) fragment at config
+  # load time (see the comment at the -x option below).
+  statusTaskmuxDoneScript = pkgs.runCommand "tmux-status-taskmux-done.sh" { } ''
+    install -Dm755 ${./status-taskmux-done.sh} $out
+    patchShebangs $out
+  '';
+
+  # the *unwrapped* tmux client binary of the underlying tmux package:
+  # passed to the taskmux-done indicator fragment (and available to other
+  # status fragments) so they can query the server without depending on
+  # PATH.  (The wrapper $out/bin/tmux adds -f main.conf, which a plain
+  # client command would ignore anyway, but pinning the raw client keeps
+  # status-bar jobs independent of this wrapper's own config handling.)
+  rawTmuxBin = pkgsLib.getExe pkgs.tmux;
+
   # tmux-palette (eduwass/tmux-palette): a Raycast-style command palette
   # (filterable command list in a tmux popup), bound to C-Space below.  The
   # plugin runs on bun; its package.json has no runtime `dependencies` (the
@@ -162,10 +181,30 @@ let
           # shares the segment's colour239 background; a #[default] style
           # afterwards restores the date's own fg=colour246 styling.
           #
+          # Taskmux-done indicator immediately left of the stats
+          # --------------------------------------------------------------
+          # Prepended to the -x value above the stats fragment, so it is
+          # rendered immediately to the LEFT of the CPU/RAM/temperature
+          # module (inside the same date segment): when at least one tmux
+          # session has its task marked done (`taskmux done'), the segment
+          # shows a green "DONE" in front of the stats; when nothing is
+          # done the indicator script prints nothing and the segment
+          # contains only the stats.  The separating space between "DONE"
+          # and "CPU" is the literal space after the fragment: tmux trims
+          # leading/trailing whitespace off #( ) output, so the script
+          # cannot carry the space itself (when the indicator is empty the
+          # stray space is just background in front of the stats).  The
+          # tmux client used by the indicator is pinned via the `tmux'
+          # environment variable (see status-taskmux-done.sh): run-shell
+          # jobs only inherit the invoking client's environment, which may
+          # not have tmux on PATH.  tmux re-evaluates each #( ) fragment at
+          # most once per status-interval, so the marker appears/disappears
+          # within at most ~5s of a `taskmux done' / `taskmux clear'.
+          #
           # This must be set *before* the gruvbox run-shell below: the
           # plugin reads the option when it runs, so setting it afterwards
           # would only take effect on the next tmux-server start.
-          set -g @tmux-gruvbox-right-status-x "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
+          set -g @tmux-gruvbox-right-status-x "#[fg=green,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
 
           run-shell $out/config/gruvbox/gruvbox-tpm.tmux
 
