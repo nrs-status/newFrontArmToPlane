@@ -28,7 +28,7 @@ let
     patchShebangs $out
   '';
 
-  # status-bar taskmux-done indicator segment: a green " DONE" marker that
+  # status-bar taskmux-done indicator segment: a bright-green " DONE" marker that
   # appears only while at least one tmux session has its task marked done
   # (i.e. while `taskmux list' would display at least one "done" task).
   # Same self-contained /proc-free design as status-stats.sh above: pure
@@ -203,7 +203,7 @@ let
           # rendered immediately to the LEFT of the CPU/RAM/temperature
           # module (inside the same date segment): when at least one tmux
           # session has its task marked done (`taskmux done'), the segment
-          # shows a green "DONE" in front of the stats; when nothing is
+          # shows a bright-green "DONE" in front of the stats; when nothing is
           # done the indicator script prints nothing and the segment
           # contains only the stats.  The separating space between "DONE"
           # and "CPU" is the literal space after the fragment: tmux trims
@@ -224,7 +224,10 @@ let
           # the four-digit %Y: the year only ever needs its last two digits
           # on the status bar, so "25-09-25" is displayed instead of
           # "2025-09-25".
-          set -g @tmux-gruvbox-right-status-x "#[fg=green,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %y-%m-%d"
+          # "brightgreen" is tmux's named bright variant of green (mapped
+          # to the terminal's bright-green / colour10 entry, not just
+          # bold green), so the DONE marker reads as bright green.
+          set -g @tmux-gruvbox-right-status-x "#[fg=brightgreen,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %y-%m-%d"
 
           # user@hostname in the top bar's rightmost segment
           # --------------------------------------------------------------

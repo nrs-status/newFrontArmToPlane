@@ -9,8 +9,8 @@
 #
 # usage: nix build --impure -f ./provideScript.nix vm-script -o result-done-vm
 rec {
-  fatp = builtins.getFlake "path:/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.tmux-taskmux-done-indicator";
-  taskmuxFlake = builtins.getFlake "path:/home/sieyes/baghdadPlane/flakes/nasExitGiScorp.taskmux-for-tmux";
+  fatp = builtins.getFlake "path:/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.done-indicator-bright-green";
+  taskmuxFlake = builtins.getFlake "path:/home/sieyes/baghdadPlane/flakes/nasExitGiScorp";
   taskmuxPkg = taskmuxFlake.packages.x86_64-linux.scripts.taskmux;
   nixos = import ./vm-taskmux-done.nix (
     fatp.outputs.localPkgsArgs
