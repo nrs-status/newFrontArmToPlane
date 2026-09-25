@@ -44,3 +44,7 @@ body:
     ```
 4. `:g/hello/normal @a`
 --
+title: Write a replacement command that affects only the contents of a visual selection.
+creationDate: 2026-09-25 16:28
+body: do the selection, then, e.g., if you want to replace `a`s with `b`s, press `:` and write `s/\%Va/b/g`
+the important part is the `\%V` prefix
