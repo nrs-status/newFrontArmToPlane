@@ -199,6 +199,7 @@ $env.config.abbreviations = {
     #taskmux
     tkml: "taskmux list"
     tkmc: "taskmux clear"
+    tkms: "taskmux start"
 }
 
 # ─────────────────────────────────────────────────────────────
