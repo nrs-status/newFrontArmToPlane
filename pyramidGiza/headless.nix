@@ -68,6 +68,7 @@ let
       ]);
     DEFAULT_RELOAD_FLAKES_CONFIG_PATH = localPkgs.reload-flakes-config;
     DEFAULT_PI_MODEL = "openrouter/z-ai/glm-5.3-flash";
+    DEFAULT_LLMGCM_MODEL = "openrouter/z-ai/glm-5.3-flashx";
     FRONTARMTOPLANE_PATH = "~/baghdadPlane/flakes/newFrontArmToPlane";
     THATWATERCHARMANDER_PATH = "~/baghdadPlane/flakes/newThatWaterCharmander";
   };
