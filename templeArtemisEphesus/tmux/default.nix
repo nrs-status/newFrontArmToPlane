@@ -222,6 +222,23 @@ let
           # would only take effect on the next tmux-server start.
           set -g @tmux-gruvbox-right-status-x "#[fg=green,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
 
+          # user@hostname in the top bar's rightmost segment
+          # --------------------------------------------------------------
+          # The gruvbox plugin's status-right ends with the -z segment, whose
+          # default is the (short) hostname '#h' -- the rightmost piece of
+          # text on the topmost status line.  Overriding it with the format
+          # string below keeps the hostname exactly where it was but shows
+          # the current user's name in front of it, e.g. 'sieyes@tmux-vm'.
+          # The user is obtained with id -un rather than \$USER because the
+          # #( ) fragment runs in the tmux server's environment, which is
+          # not guaranteed to have USER set (e.g. when the server is started
+          # by a systemd service); id comes from coreutils, which the
+          # tmux server's PATH always has (see the tmux-console VM's service
+          # path and the gruvbox-tpm run-shell's own requirements).
+          # Like the -x override above this must be set *before* the gruvbox
+          # run-shell below: the plugin reads the option when it runs.
+          set -g @tmux-gruvbox-right-status-z "#(id -un)@#h"
+
           run-shell $out/config/gruvbox/gruvbox-tpm.tmux
 
           # tmux-grimoire: summonable popup shells ("shpells"), bound after
