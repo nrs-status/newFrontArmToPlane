@@ -21,3 +21,26 @@ title: send visual selection to command line without overwriting selection
 creationDate: 2026-09-06 21:37
 body: visual selection with `w !` e.g.:
 `:'<,'>w !md5sum > /tmp/out && cat /tmp/out `
+--
+title: Record a macro and apply it on all lines matching a certain string.
+creationDate: 2026-09-25 10:30
+body: 
+
+1. Start recording into register a:
+    ```
+      qa
+    ```
+2. Do the actions on the current line. For example, to delete the line and replace it with foo:
+    ```
+      ddifoo<Esc>
+    ```
+    or equivalently, use cc (change line) which deletes and enters insert mode in one step:
+    ```
+      ccfoo<Esc>
+    ```
+3. Stop recording:
+    ```
+      q
+    ```
+4. `:g/hello/normal @a`
+--

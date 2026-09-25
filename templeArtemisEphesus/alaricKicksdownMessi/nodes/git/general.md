@@ -63,6 +63,7 @@ body: `git commit --allow-empty -m <msg>`
 --
 title: edit last the last `git commit`'s message
 creationDate: 2026-09-03 01:42
+fuzzyAux: modify commit, change commit
 body: `git commit --amend`
 --
 title: merge target deleted a file we want the branch merging to keep
