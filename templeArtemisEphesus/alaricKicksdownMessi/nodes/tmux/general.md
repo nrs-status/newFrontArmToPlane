@@ -50,3 +50,11 @@ tmux new-window -n <window name> -d
 title: select all lines that begin with `#` and display them with their line number
 creationDate: 2026-09-24 13:57
 body: `:g/^#/#`
+--
+title: attach to a specific session
+creationDate: 2026-09-25 13:58
+body: `tmux attach -t <session name>`
+--
+title: list sessions
+creationDate: 2026-09-25 13:58
+body: `tmux ls`
