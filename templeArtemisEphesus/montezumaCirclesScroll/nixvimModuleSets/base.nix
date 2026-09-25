@@ -10,5 +10,6 @@
   "./plugins/lspCore.nix"
   "./plugins/harpoon.nix"
   "./plugins/vimHighlighter.nix"
+  "./plugins/quicker.nix"
   "./luaSnip"
 ]
