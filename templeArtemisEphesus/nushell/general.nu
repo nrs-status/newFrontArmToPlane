@@ -201,9 +201,6 @@ $env.config.abbreviations = {
     tkmc: "taskmux clear"
     tkms: "taskmux start"
     tkmd: "taskmux done"
-
-    #other
-    tllmgcm: "taskmux start llm-gcm; llm-gcm; taskmux done"
 }
 
 # ─────────────────────────────────────────────────────────────
