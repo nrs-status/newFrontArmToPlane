@@ -27,6 +27,18 @@ let
 
   bunExe = pkgsLib.getExe pkgs.bun;
 
+  # tmux-grimoire (navahas/tmux-grimoire): summonable floating shells
+  # ("shpells", tmux display-popup based sessions).  Like tmux-palette
+  # above it is a plain bash-script plugin with no build step and no
+  # external deps beyond bash + tmux itself, so shipping the repo tree
+  # and patching it is enough.
+  tmuxGrimoireSrc = pkgs.fetchFromGitHub {
+    owner = "navahas";
+    repo = "tmux-grimoire";
+    rev = "c5597c628d452bea3312e25b9db2ea30f3c64287";
+    hash = "sha256-IKkF8xa3G8dALTB2hC/4uG1dpzTRvM1g7s0Gy9XnyaI=";
+  };
+
   # the voice-input push-to-talk script, the same package the sway
   # configuration binds F13 to (see
   # newThatWaterCharmander/zeusOlympia/sway/swayDecl.nix).  It comes from the
@@ -74,6 +86,44 @@ let
           perl -pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/g' "$f"
         patchShebangs "$f"
 
+        # tmux-grimoire: copy the plugin tree under config/ (its entrypoint
+        # resolves its own directory with `dirname`/BASH_SOURCE, so the tree
+        # must be self-contained; the path is persisted via the
+        # @grimoire-* options it sets globally).  Every script -- the
+        # entrypoint, scripts/*.sh and the bin/ helpers -- invokes the bare
+        # `tmux` client from $PATH, but run-shell jobs only get the
+        # invoking client's environment, which may not contain *this* wrapped
+        # tmux at all (or, during config load, any tmux whatsoever).
+        # Rewrite the word `tmux' to this wrapper's absolute path in all of
+        # them (word-boundary match, so `tmux_cmd' / `TMUX_PANE' are left
+        # alone), then fix up the shebangs to point at the store bash.
+        cp -r ${tmuxGrimoireSrc} $out/config/tmux-grimoire
+        chmod -R u+w $out/config/tmux-grimoire
+        for f in grimoire.tmux scripts/cast_shpell.sh scripts/shpell.sh \
+                 scripts/ephemeral_shpell.sh bin/custom_shpell bin/logo \
+                 bin/osc52-copy; do
+          # shellcheck disable=SC2016
+          OLD='tmux' NEW="$out/bin/tmux" \
+            perl -pi -e 's/\btmux\b/$ENV{NEW}/g' "$out/config/tmux-grimoire/$f"
+        done
+
+        # The entrypoint pushes its bin/ dir plus the *entire* invoking
+        # environment's PATH into the server global environment with
+        # `set-environment -g PATH "$new_path"`.  On a real shell that
+        # argument alone routinely exceeds tmux's command-length limit, and
+        # tmux then rejects the whole chained command ("command too long") --
+        # taking every bind-key of the entrypoint down with it, so the
+        # plugin silently installs nothing.  Nothing else in the plugin
+        # actually needs the plugin bin/ dir on PATH (all internal calls use
+        # absolute paths, and the custom-shpell/logo helpers are passed as
+        # absolute-path arguments), so drop the mutation entirely; users can
+        # still run the helpers via their absolute paths under
+        # /.../config/tmux-grimoire/bin/.
+        # shellcheck disable=SC2016
+        perl -ni -e 'print unless /set-environment -g PATH/' "$out/config/tmux-grimoire/grimoire.tmux"
+
+        patchShebangs $out/config/tmux-grimoire
+
         cat > $out/config/main.conf <<EOF
           set -g default-shell ${defaultShell}
           source-file $out/config/basic.conf
@@ -118,6 +168,29 @@ let
           set -g @tmux-gruvbox-right-status-x "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
 
           run-shell $out/config/gruvbox/gruvbox-tpm.tmux
+
+          # tmux-grimoire: summonable popup shells ("shpells"), bound after
+          # plugin load to prefix+f (open/toggle the main shpell), prefix+F
+          # (fresh ephemeral shpell), prefix+X (close & dismiss the current
+          # shpell) and prefix+H (the Grimoire welcome banner, itself an
+          # ephemeral shpell).  The option overrides must be set *before* the
+          # run-shell below: grimoire.tmux reads them once when it runs, and
+          # rebinding only happens on the next tmux-server start.
+          #
+          # @grimoire-kill-key: the upstream default is prefix+C, which would
+          # clobber the "prefix C" new-session binding in basic.conf (grimoire
+          # loads after it and unconditionally rebinds its kill key).  X is
+          # unused anywhere in basic.conf / inheritedConf.conf / gruvbox.
+          #
+          # @grimoire-osc52: with the default (on), grimoire replaces the
+          # copy-mode-vi `y` (copy-selection-and-cancel, from basic.conf) and
+          # `Enter` bindings with OSC52-emitting ones -- changing the
+          # configured copy-mode behaviour.  Turn it off so basic.conf keeps
+          # full ownership of copy-mode-vi; re-enable (value "on") to regain
+          # terminal-escape yanking (useful over ssh).
+          set -g @grimoire-kill-key X
+          set -g @grimoire-osc52 off
+          run-shell $out/config/tmux-grimoire/grimoire.tmux
 
         # tmux-palette: open the command palette with Ctrl+Space (no
         # prefix, matching the plugin's Raycast-style default).  Bound
