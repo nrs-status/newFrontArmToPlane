@@ -46,6 +46,7 @@ body: `git branch -d <branch name>` (this is the expected workflow when merging)
 --
 title: delete untracked files and directories
 creationDate: 2026-08-31 05:15
+fuzzyAux: clear
 body: `git clean -fd`
 --
 title: undo commits while keeping them in git history
