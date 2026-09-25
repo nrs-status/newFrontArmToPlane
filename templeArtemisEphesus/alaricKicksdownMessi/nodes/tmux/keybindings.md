@@ -29,3 +29,7 @@ body: go to previous tmux session
 title: <prefix>$
 creationDate: 2026-09-25 18:29
 body: rename session
+--
+title: <Ctrl+t>
+creationDate: 2026-09-25 22:09
+body: opens a tmux-grimoire popup (shpell `taskmux-list`) running `taskmux list`; press again to re-open/re-run it

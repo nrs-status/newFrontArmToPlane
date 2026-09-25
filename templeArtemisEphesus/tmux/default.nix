@@ -80,6 +80,15 @@ let
   # same flake input the rest of the system packages use (nasExitGiScorp), so
   # tmux and sway always agree on *what* voice-input does.
   voiceInput = pkgsLib.getExe newPkgs.voice-input;
+
+  # the taskmux executable, used by the Ctrl+t grimoire popup below.  It
+  # comes from the same flake input as voice-input above (and as the
+  # status-bar taskmux-done indicator), so tmux and the rest of the system
+  # always agree on *what* taskmux is.  The popup command is pinned to its
+  # store path because it runs in a freshly-created grimoire session whose
+  # $PATH is not guaranteed to contain taskmux (the tmux server inherits
+  # its environment from whoever started it).
+  taskmuxExe = pkgsLib.getExe newPkgs.scripts.taskmux;
   mkTmux =
     { defaultShell }:
     pkgs.stdenv.mkDerivation {
@@ -279,6 +288,42 @@ let
           set -g @grimoire-kill-key X
           set -g @grimoire-osc52 off
           run-shell $out/config/tmux-grimoire/grimoire.tmux
+
+          # taskmux task list in a grimoire popup (Ctrl+t)
+          # --------------------------------------------------------------
+          # Ctrl+t summons 'taskmux list' -- the list of every tmux
+          # session that carries a task state, which it renders as an
+          # interactive menu -- inside a tmux-grimoire popup instead of
+          # in the current pane.  The list is therefore a regular
+          # grimoire "shpell": the first Ctrl+t creates (or reuses) a
+          # window named taskmux-list in the current session and opens
+          # it in a floating popup, and later presses bring that same
+          # popup back rather than spawning a new one.
+          #
+          # The popup is invoked through grimoire's own custom-shpell
+          # helper (bin/custom_shpell, see the plugin's
+          # docs/CUSTOM_SHPELLS.md), using the 'standard' (persistent)
+          # flavour: taskmux list is itself a long-running, interactive
+          # menu, so it must not be launched as an ephemeral shpell that
+          # would close after the first command returns.  '--replay'
+          # makes a later summon re-run the list if the shpell shell is
+          # idle (the plugin's recommendation for status-style
+          # commands), so the popup shows fresh session state.
+          #
+          # taskmux is passed by absolute store path (taskmuxExe) rather
+          # than by name: run-shell jobs and grimoire popups only inherit
+          # the invoking client's environment, which need not have
+          # taskmux on PATH.  The command is single-quoted so the space
+          # in "list'" survives tmux's own argument parsing and reaches
+          # the helper as one argument.
+          #
+          # Bound without a prefix (-n) and *after* the grimoire
+          # run-shell above, so a plugin cannot unbind it on reload.
+          # C-t does not collide with anything in basic.conf /
+          # inheritedConf.conf (which use C-a, C-h/j/k/l, M-h/j/k/l and
+          # prefix-based keys) nor with the C-Space palette binding
+          # below.
+          bind-key -n C-t run-shell "$out/config/tmux-grimoire/bin/custom_shpell standard taskmux-list '${taskmuxExe} list' --replay"
 
         # tmux-palette: open the command palette with Ctrl+Space (no
         # prefix, matching the plugin's Raycast-style default).  Bound
