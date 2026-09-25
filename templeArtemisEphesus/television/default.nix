@@ -13,7 +13,7 @@ let
   '';
 in
 localLib.mkWrapperScript {
-  name = "television";
+  name = "tv";
   pkgToWrap = pkgs.television;
   runtimeInputs = [ ];
   opts = [
