@@ -16,3 +16,13 @@ body: change currently focused buffer
 title: delete something without it affecting the contents of the clipboard.
 creationDate: 2026-09-25 14:18
 body: prefix the keybinding with `"_`, e.g., `"_dd`
+--
+title: toggle `quicker` quickfix list
+creationDate: 2026-09-25 15:30
+fuzzyAux: plugin
+body: `<leader>cq`
+--
+title: toggle `quicker` location list
+creationDate: 2026-09-25 15:30
+fuzzyAux: plugin
+body: `<leader>cl`
