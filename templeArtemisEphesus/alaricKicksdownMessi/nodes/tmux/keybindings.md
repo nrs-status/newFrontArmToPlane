@@ -25,3 +25,7 @@ body: enter copy-mode (scrollback)
 title: <prefix>L
 creationDate: Wed Sep 23 08:15:30 PM UTC 2026
 body: go to previous tmux session
+--
+title: <prefix>$
+creationDate: 2026-09-25 18:29
+body: rename session
