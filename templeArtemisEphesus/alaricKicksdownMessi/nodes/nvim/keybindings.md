@@ -12,3 +12,7 @@ body: Opens a buffer with the command history
 title: <C-w><movement key>
 creationDate: 2026-08-31 05:24
 body: change currently focused buffer
+--
+title: delete something without it affecting the contents of the clipboard.
+creationDate: 2026-09-25 14:18
+body: prefix the keybinding with `"_`, e.g., `"_dd`
