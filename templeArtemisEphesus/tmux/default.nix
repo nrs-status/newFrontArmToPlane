@@ -167,9 +167,9 @@ let
           # CPU / RAM / temperature stats immediately left of the date
           # --------------------------------------------------------------
           # The gruvbox plugin assembles status-right from three user
-          # options: @tmux-gruvbox-right-status-x (date, "%Y-%m-%d"), -y
+          # options: @tmux-gruvbox-right-status-x (date, "%y-%m-%d"), -y
           # (time, "%H:%M") and -z (hostname).  Setting -x to "<stats
-          # fragment> %Y-%m-%d" makes the plugin emit the stats *inside* the
+          # fragment> %y-%m-%d" makes the plugin emit the stats *inside* the
           # date segment, i.e. rendered immediately to the left of the date
           # -- which is exactly where these indicators belong now (they used
           # to be appended to the far right of status-right, after the
@@ -220,7 +220,11 @@ let
           # This must be set *before* the gruvbox run-shell below: the
           # plugin reads the option when it runs, so setting it afterwards
           # would only take effect on the next tmux-server start.
-          set -g @tmux-gruvbox-right-status-x "#[fg=green,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
+          # The date is shown with a two-digit year (strftime %y) instead of
+          # the four-digit %Y: the year only ever needs its last two digits
+          # on the status bar, so "25-09-25" is displayed instead of
+          # "2025-09-25".
+          set -g @tmux-gruvbox-right-status-x "#[fg=green,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %y-%m-%d"
 
           # user@hostname in the top bar's rightmost segment
           # --------------------------------------------------------------

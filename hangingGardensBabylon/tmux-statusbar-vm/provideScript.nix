@@ -1,5 +1,5 @@
-# builds the VM system for testing the tmux status bar change (bottom-most
-# status bar without the session name).
+# builds the VM system for testing the tmux status bar change (two-digit
+# year in the date segment).
 #
 # Mirrors hangingGardensBabylon/tmux-console-vm/provideScript.nix but points
 # at *this* worktree's flake (so the locally modified tmux package is used).
@@ -9,7 +9,7 @@
 #
 # usage: nix build --impure -f ./provideScript.nix vm-script -o result-vm
 rec {
-  fatp = builtins.getFlake "git+file:///home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.tmux-add-user-to-statusbar";
+  fatp = builtins.getFlake "git+file:///home/sieyes/baghdadPlane/flakes/newFrontArmToPlane.tmux-remove-4-digit-year";
   nixos = import ../tmux-console-vm/vm.nix (
     fatp.outputs.localPkgsArgs // { localPkgs = fatp.outputs.packages.x86_64-linux; }
   );
