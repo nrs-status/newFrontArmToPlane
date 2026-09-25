@@ -12,6 +12,21 @@ let
     patchShebangs $out
   '';
 
+  # tmux-palette (eduwass/tmux-palette): a Raycast-style command palette
+  # (filterable command list in a tmux popup), bound to C-Space below.  The
+  # plugin runs on bun; its package.json has no runtime `dependencies` (the
+  # devDependencies are CI-only), so shipping the repo tree as-is and
+  # pinning a store bun path is enough -- no `bun install` is needed at
+  # build or run time.
+  tmuxPaletteSrc = pkgs.fetchFromGitHub {
+    owner = "eduwass";
+    repo = "tmux-palette";
+    rev = "7caa11e845e0aa0515d013158df85613f3ec507f";
+    hash = "sha256-Wrfo6G9Uuko0FYM9azwGNmyEYszSi/Tnwb71XY89QxI=";
+  };
+
+  bunExe = pkgsLib.getExe pkgs.bun;
+
   # the voice-input push-to-talk script, the same package the sway
   # configuration binds F13 to (see
   # newThatWaterCharmander/zeusOlympia/sway/swayDecl.nix).  It comes from the
@@ -23,7 +38,7 @@ let
     pkgs.stdenv.mkDerivation {
       name = "tmux";
       src = ./.;
-      nativeBuildInputs = [ pkgs.makeWrapper ];
+      nativeBuildInputs = [ pkgs.makeWrapper pkgs.perl ];
       buildInputs = [ pkgs.tmux ];
       installPhase = ''
         runHook preInstall
@@ -36,6 +51,28 @@ let
         # theme: copy the gruvbox plugin tree (its entrypoint sources files
         # relative to its own directory) and reference it from main.conf
         cp -r ${themePlugin}/share/tmux-plugins/gruvbox $out/config/gruvbox
+
+        # tmux-palette: copy the plugin tree under config/ (its launcher
+        # resolves its own directory with `dirname "$0"`, so the tree must
+        # be self-contained) and rewrite the paths it resolves from $PATH
+        # at run time.  Both the measure pass and the display-popup command
+        # spawn `bun` from $PATH, but run-shell jobs and popups only get
+        # the invoking client's environment, which may not contain bun at
+        # all; TMUX_BIN is likewise resolved with `command -v tmux`, which
+        # could find some other tmux binary than *this* wrapped one.  Pin
+        # both to the store.
+        cp -r ${tmuxPaletteSrc} $out/config/tmux-palette
+        chmod -R u+w $out/config/tmux-palette
+        f=$out/config/tmux-palette/bin/tmux-palette.sh
+        # shellcheck disable=SC2016
+        OLD='"$(command -v tmux)"' NEW="\"$out/bin/tmux\"" \
+          perl -pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/g' "$f"
+        # shellcheck disable=SC2016
+        OLD='$(bun "' NEW="\$(${bunExe} \"" \
+          perl -pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/g' "$f"
+        OLD="exec bun '" NEW="exec ${bunExe} '" \
+          perl -pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/g' "$f"
+        patchShebangs "$f"
 
         cat > $out/config/main.conf <<EOF
           set -g default-shell ${defaultShell}
@@ -81,6 +118,18 @@ let
           set -g @tmux-gruvbox-right-status-x "#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %Y-%m-%d"
 
           run-shell $out/config/gruvbox/gruvbox-tpm.tmux
+
+        # tmux-palette: open the command palette with Ctrl+Space (no
+        # prefix, matching the plugin's Raycast-style default).  Bound
+        # *after* the gruvbox run-shell so a plugin cannot unbind it on
+        # reload (gruvbox only touches status options, so this is purely
+        # defensive).  C-Space does not collide with anything in
+        # basic.conf / inheritedConf.conf (those use C-a, C-h/j/k/l,
+        # M-h/j/k/l and prefix-based keys).  The popup needs tmux >= 3.4
+        # for `display-popup -E`; the launcher pins TMUX_BIN to this
+        # wrapper, so the palette always queries the server it was
+        # started from.
+        bind-key -n C-Space run-shell "$out/config/tmux-palette/bin/tmux-palette.sh"
 
         # voice-input on F13, console only
         # --------------------------------------------------------------
