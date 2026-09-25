@@ -3,6 +3,22 @@ let
   # gruvbox theme plugin for the tmux status line / pane colors
   themePlugin = pkgs.tmuxPlugins.gruvbox;
 
+  # the four plugins referenced from the generated inheritedConf (see below)
+  # via `run-shell' lines.  Because the conf is produced by string
+  # interpolation of these derivations, the store paths in it are always the
+  # ones of *this* build's nixpkgs -- and the references themselves put the
+  # plugins in the package's runtime closure.
+  sensiblePlugin  = pkgs.tmuxPlugins.sensible;
+  resurrectPlugin = pkgs.tmuxPlugins.resurrect;
+  continuumPlugin = pkgs.tmuxPlugins.continuum;
+  sysstatPlugin   = pkgs.tmuxPlugins.sysstat;
+
+  # the tmux config that used to be the checked-in inheritedConf.conf; see
+  # the header of inheritedConf.nix for why it is generated instead.
+  inheritedConf = import ./inheritedConf.nix {
+    inherit pkgs sensiblePlugin resurrectPlugin continuumPlugin sysstatPlugin;
+  };
+
   # status-bar system-stats segment (total CPU %, total RAM %, average CPU
   # temperature, battery level %).  Runs entirely off /proc and /sys, so bash +
   # coreutils are enough; the script is copied into the package so the status
@@ -76,7 +92,7 @@ let
 
         mkdir -p $out/bin $out/config
 
-        install -Dm644 inheritedConf.conf $out/config
+        install -Dm644 ${inheritedConf} $out/config/inheritedConf.conf
         install -Dm644 basic.conf $out/config
 
         # theme: copy the gruvbox plugin tree (its entrypoint sources files
