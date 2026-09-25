@@ -1,41 +1,41 @@
 [all]
-afterPushDelay = 1
+pollingTimeout = 10
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newPeachRampSkateboard"
 flakeInputNames = [ ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/mcEatBurg"
 flakeInputNames = [ "peachRampSkateboard" ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/nasExitGiScorp"
 flakeInputNames = [ "peachRampSkateboard", "mcEatBurg" ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/bidGestMirror"
 flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "frontArmToPlane" ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newFrontArmToPlane"
 flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "nasExitGiScorp" ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newThatWaterCharmander"
 flakeInputNames = [ "peachRampSkateboard", "frontArmToPlane", "nasExitGiScorp", "mcEatBurg", "bidGestMirror" ]
 push = true
-onUncommitted = "error"
+branch = "main"
 
