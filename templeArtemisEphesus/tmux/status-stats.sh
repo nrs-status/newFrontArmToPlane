@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
-# status-stats.sh -- rightmost status-bar segment: total CPU %, total RAM %
-# and the average CPU temperature.
+# status-stats.sh -- rightmost status-bar segment: total CPU %, total RAM %,
+# the average CPU temperature and the battery level (%).
+
+# battery: first battery in /sys/class/power_supply, if any.
+# capacity is already in whole percent; status tells charging ("Charging",
+# "Full", ...) from discharging ("Discharging").  No battery (desktop /
+# server / VM) -> empty variables, the segment is simply omitted below.
+battery_dev=""
+for dev in /sys/class/power_supply/BAT*; do
+    [ -d "$dev" ] && battery_dev="$dev" && break
+done 2>/dev/null
+if [ -n "$battery_dev" ]; then
+    bat_pct=$(cat "$battery_dev/capacity" 2>/dev/null)
+    bat_status=$(cat "$battery_dev/status" 2>/dev/null)
+    # discharging -> plain number; charging or full -> "+" prefix so a
+    # glance at the bar distinguishes plugged-in from on-battery
+    if [ "$bat_status" = "Discharging" ]; then
+        bat_disp="$bat_pct%"
+    else
+        bat_disp="+$bat_pct%"
+    fi
+fi
 #
 # Invoked through tmux's #(...) status-right mechanism, so it must print a
 # single line.  tmux re-runs it at most once per status-interval (see
@@ -74,4 +94,8 @@ else
     temp_c=0
 fi
 
-printf 'CPU %d%% | RAM %d%% | %d°C\n' "$cpu_pct" "$mem_pct" "$temp_c"
+if [ -n "$bat_disp" ]; then
+    printf 'CPU %d%% | RAM %d%% | %d°C | BAT %s\n' "$cpu_pct" "$mem_pct" "$temp_c" "$bat_disp"
+else
+    printf 'CPU %d%% | RAM %d%% | %d°C\n' "$cpu_pct" "$mem_pct" "$temp_c"
+fi

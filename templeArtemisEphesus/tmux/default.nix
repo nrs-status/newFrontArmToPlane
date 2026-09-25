@@ -4,9 +4,9 @@ let
   themePlugin = pkgs.tmuxPlugins.gruvbox;
 
   # status-bar system-stats segment (total CPU %, total RAM %, average CPU
-  # temperature).  Runs entirely off /proc and /sys, so bash + coreutils are
-  # enough; the script is copied into the package so the status bar does not
-  # depend on anything in $PATH of the invoking session.
+  # temperature, battery level %).  Runs entirely off /proc and /sys, so bash +
+  # coreutils are enough; the script is copied into the package so the status
+  # bar does not depend on anything in $PATH of the invoking session.
   statusStatsScript = pkgs.runCommand "tmux-status-stats.sh" { } ''
     install -Dm755 ${./status-stats.sh} $out
     patchShebangs $out
@@ -59,7 +59,9 @@ let
           # segments (REC / PREFIX / hostname) evolve.
           #
           # tmux's #( ) fragment spawns the script; it prints one line, e.g.
-          # "CPU 12% | RAM 41% | 54°C".  The script samples /proc/stat twice
+          # "CPU 12% | RAM 41% | 54°C | BAT +82%" (the "+" marks a battery
+          # that is charging/full; on machines without a battery the BAT
+          # segment is omitted).  The script samples /proc/stat twice
           # around a sleep whose length is the interval environment variable
           # (passed inside the fragment below), so the sleep doubles as the
           # CPU-usage measurement window; 5s matches the gruvbox plugin's own
