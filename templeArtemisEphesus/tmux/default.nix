@@ -349,8 +349,8 @@ let
         # `status 2` makes tmux render both status-format[0] and
         # status-format[1]; we split the bar across the two lines:
         #
-        #   line 0: gruvbox status-left ... status-right (no window list)
-        #   line 1: session name ... window list
+        #   line 0: gruvbox status-left (incl. the session name) ... status-right
+        #   line 1: window list only (no session name)
         #
         # Both formats are derived from tmux's own default status-format
         # (`tmux show -gv status-format[0|1]`), so all the range/list
@@ -362,10 +362,15 @@ let
         # `#[list=on ...]#{W:...}` block between the left and right
         # segments), so it keeps exactly the gruvbox bar we had before.
         # Line 1 replaces tmux's default pane list with the window list
-        # (copied verbatim from the default line-0 window section) preceded
-        # by the session name on the left; gruvbox's status-justify (left)
-        # decides where the window list starts, and its
-        # window-status-separator is used between windows as usual.
+        # (copied verbatim from the default line-0 window section) and
+        # nothing else: the session name is deliberately NOT repeated here
+        # (gruvbox's status-left on line 0 already shows it), so the
+        # bottom-most bar contains only the window names and their numbers.
+        # The left segment's range markup is kept (with an empty body) so
+        # mouse-click targeting and style resolution keep working;
+        # gruvbox's status-justify (left) decides where the window list
+        # starts, and its window-status-separator is used between windows
+        # as usual.
         #
         # `status 2` must be set *after* the gruvbox run-shell above: the
         # plugin sets `status on` (i.e. 1) when it runs.
@@ -373,7 +378,7 @@ let
 
         set -g status-format[0] "#[align=left range=left #{E:status-left-style}]#[push-default]#{T;=/#{status-left-length}:status-left}#[pop-default]#[norange default]#[nolist align=right range=right #{E:status-right-style}]#[push-default]#{T;=/#{status-right-length}:status-right}#[pop-default]#[norange default]"
 
-        set -g status-format[1] "#[align=left range=left #{E:status-left-style}]#[push-default]#S#[pop-default]#[norange default]#[list=on align=#{status-justify}]#[list=left-marker]<#[list=right-marker]>#[list=on]#{W:#[range=window|#{window_index} #{E:window-status-style}#{?#{&&:#{window_last_flag},#{!=:#{E:window-status-last-style},default}}, #{E:window-status-last-style},}#{?#{&&:#{window_bell_flag},#{!=:#{E:window-status-bell-style},default}}, #{E:window-status-bell-style},#{?#{&&:#{||:#{window_activity_flag},#{window_silence_flag}},#{!=:#{E:window-status-activity-style},default}}, #{E:window-status-activity-style},}}]#[push-default]#{T:window-status-format}#[pop-default]#[norange default]#{?loop_last_flag,,#{E:window-status-separator}},#[range=window|#{window_index} list=focus #{?#{!=:#{E:window-status-current-style},default},#{E:window-status-current-style},#{E:window-status-style}}#{?#{&&:#{window_last_flag},#{!=:#{E:window-status-last-style},default}}, #{E:window-status-last-style},}#{?#{&&:#{window_bell_flag},#{!=:#{E:window-status-bell-style},default}}, #{E:window-status-bell-style},#{?#{&&:#{||:#{window_activity_flag},#{window_silence_flag}},#{!=:#{E:window-status-activity-style},default}}, #{E:window-status-activity-style},}}]#[push-default]#{T:window-status-current-format}#[pop-default]#[norange list=on default]#{?loop_last_flag,,#{E:window-status-separator}}}#[norange default]"
+        set -g status-format[1] "#[align=left range=left #{E:status-left-style}]#[push-default]#[pop-default]#[norange default]#[list=on align=#{status-justify}]#[list=left-marker]<#[list=right-marker]>#[list=on]#{W:#[range=window|#{window_index} #{E:window-status-style}#{?#{&&:#{window_last_flag},#{!=:#{E:window-status-last-style},default}}, #{E:window-status-last-style},}#{?#{&&:#{window_bell_flag},#{!=:#{E:window-status-bell-style},default}}, #{E:window-status-bell-style},#{?#{&&:#{||:#{window_activity_flag},#{window_silence_flag}},#{!=:#{E:window-status-activity-style},default}}, #{E:window-status-activity-style},}}]#[push-default]#{T:window-status-format}#[pop-default]#[norange default]#{?loop_last_flag,,#{E:window-status-separator}},#[range=window|#{window_index} list=focus #{?#{!=:#{E:window-status-current-style},default},#{E:window-status-current-style},#{E:window-status-style}}#{?#{&&:#{window_last_flag},#{!=:#{E:window-status-last-style},default}}, #{E:window-status-last-style},}#{?#{&&:#{window_bell_flag},#{!=:#{E:window-status-bell-style},default}}, #{E:window-status-bell-style},#{?#{&&:#{||:#{window_activity_flag},#{window_silence_flag}},#{!=:#{E:window-status-activity-style},default}}, #{E:window-status-activity-style},}}]#[push-default]#{T:window-status-current-format}#[pop-default]#[norange list=on default]#{?loop_last_flag,,#{E:window-status-separator}}}#[norange default]"
 
         # NB: this heredoc is *unquoted*, so literal dollar signs must be
         # escaped (\$WAYLAND_DISPLAY) to survive the installPhase shell while
