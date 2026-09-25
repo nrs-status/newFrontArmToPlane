@@ -194,8 +194,14 @@ let
           # costs exactly one 5s-background-job per tmux client; tmux caches
           # the output between redraws and never blocks the UI on it.  The
           # fragment is prepended to the date inside the -x value so it
-          # shares the segment's colour239 background; a #[default] style
-          # afterwards restores the date's own fg=colour246 styling.
+          # shares the segment's colour239 background.  Its style is set
+          # explicitly (fg=colour109, the plugin's own gruvbox blue2) and
+          # the date's style (fg=colour246, the gruvbox fg4 the plugin
+          # already applied to this segment) is restored afterwards.
+          # Using #[default] here instead would fall back to the *status
+          # bar's* default background (colour237) and flatten the whole
+          # date segment, pulling the date/clock off the colour239 block
+          # the plugin deliberately draws around them.
           #
           # Taskmux-done indicator immediately left of the stats
           # --------------------------------------------------------------
@@ -224,10 +230,13 @@ let
           # the four-digit %Y: the year only ever needs its last two digits
           # on the status bar, so "25-09-25" is displayed instead of
           # "2025-09-25".
-          # "brightgreen" is tmux's named bright variant of green (mapped
-          # to the terminal's bright-green / colour10 entry, not just
-          # bold green), so the DONE marker reads as bright green.
-          set -g @tmux-gruvbox-right-status-x "#[fg=brightgreen,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[default]#[fg=colour109,bold]#(interval=5 ${statusStatsScript})#[default] %y-%m-%d"
+          # The DONE marker deliberately stays bright green (brightgreen,
+          # the plugin's gruvbox green2) and bold: it is the one status
+          # indicator that is *meant* to stand out.  Every other colour on
+          # this segment is a gruvbox dark256 palette entry taken from the
+          # plugin itself (blue2 for the stats, fg4 for the date), so the
+          # segment as a whole stays part of the gruvbox bar.
+          set -g @tmux-gruvbox-right-status-x "#[fg=brightgreen,bold]#(tmux=${rawTmuxBin} ${statusTaskmuxDoneScript}) #[fg=colour109]#(interval=5 ${statusStatsScript}) #[fg=colour246]%y-%m-%d"
 
           # user@hostname in the top bar's rightmost segment
           # --------------------------------------------------------------
@@ -348,7 +357,18 @@ let
         # binding below additionally runs "tmux refresh-client -S" to make
         # the marker appear/disappear immediately on toggle instead of up to
         # 15s later.
-        set -ga status-right "#[fg=red,bold]#(pgrep -F /tmp/voice-input-recording.pid >/dev/null 2>&1 && echo ' REC')#[default]"
+        #
+        # The marker itself is a self-contained gruvbox "chip": a
+        # powerline separator off the light hostname segment (bg colour248)
+        # into a red block (bg colour124, the plugin's gruvbox red) with
+        # light fg1 text, then a separator back to the hostname style.
+        # tmux parses style directives in #( ) output, so the whole chip is
+        # emitted by the fragment and an inactive recording leaves the
+        # status line completely untouched (no stray separator).  Neither
+        # #[default] nor a named ANSI colour is used: the previous form
+        # rendered a bare "REC" in the terminal's default colours on a
+        # background borrowed from whatever segment happened to precede it.
+        set -ga status-right "#(pgrep -F /tmp/voice-input-recording.pid >/dev/null 2>&1 && echo '#[bg=colour124,fg=colour248]#[bg=colour124,fg=colour223,bold] REC #[bg=colour248,fg=colour124]#[bg=colour248,fg=colour237]')"
 
         # prefix-key indicator in the status bar
         # --------------------------------------------------------------
@@ -362,7 +382,20 @@ let
         # This is appended (set -ga) *after* the voice-input "REC" marker
         # above rather than replacing status-right, so both indicators coexist:
         # pressing the prefix while a recording is in progress still shows REC.
-        set -ga status-right "#[fg=yellow,bold]#{?client_prefix,PREFIX,}#[default]"
+        #
+        # Same self-contained gruvbox chip as the REC marker: a separator
+        # off the hostname segment into a yellow block (bg colour214, the
+        # plugin's gruvbox yellow2) with dark bg1 text, then a separator
+        # back.  The chip body lives in its own user option and is pulled
+        # in with #{@tmux-prefix-indicator} rather than inlined into the
+        # conditional: a literal #[bg=...,fg=...] style inside a #{?} branch
+        # breaks the format parser, because it splits the branch list on
+        # every comma, including the ones *inside* the style directive.  Via
+        # the option the branch is comma-free and the style is parsed only
+        # after expansion.  When the prefix is not active the branch is empty
+        # and the marker leaves no trace.
+        set -g @tmux-prefix-indicator "#[bg=colour214,fg=colour248]#[bg=colour214,fg=colour237,bold] PREFIX #[bg=colour248,fg=colour214]#[bg=colour248,fg=colour237]"
+        set -ga status-right "#{?client_prefix,#{@tmux-prefix-indicator},}"
 
         # two-line status bar
         # --------------------------------------------------------------
@@ -399,6 +432,15 @@ let
         # `status 2` must be set *after* the gruvbox run-shell above: the
         # plugin sets `status on` (i.e. 1) when it runs.
         set -g status 2
+
+        # line 0's right-hand side carries the stats, date, time, hostname
+        # and the REC / PREFIX chips.  The plugin's default of 80 columns
+        # is not enough for all of them on a wide terminal and clips the
+        # rightmost chip; the window list now lives on line 1, so line 0
+        # can afford to give the right side more room.  (The limit counts
+        # the rendered characters, so style directives in the chip markup
+        # do not eat into it.)
+        set -g status-right-length 120
 
         set -g status-format[0] "#[align=left range=left #{E:status-left-style}]#[push-default]#{T;=/#{status-left-length}:status-left}#[pop-default]#[norange default]#[nolist align=right range=right #{E:status-right-style}]#[push-default]#{T;=/#{status-right-length}:status-right}#[pop-default]#[norange default]"
 
