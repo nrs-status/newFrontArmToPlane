@@ -11,6 +11,7 @@ pkgs.lib.makeOverridable
     localLib.mkWrapperScript {
       name = "kitty";
       pkgToWrap = pkgs.kitty;
+      runtimeInputs = [ pkgs.iosevka pkgs.nerd-fonts.iosevka ];
       opts = [
         {
           dash = "--";
