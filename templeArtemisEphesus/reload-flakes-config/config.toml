@@ -13,16 +13,9 @@ flakeInputNames = [ "peachRampSkateboard" ]
 push = true
 branch = "main"
 
-
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/nasExitGiScorp"
 flakeInputNames = [ "peachRampSkateboard", "mcEatBurg" ]
-push = true
-branch = "main"
-
-[[repositories]]
-path = "/home/sieyes/baghdadPlane/flakes/bidGestMirror"
-flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "frontArmToPlane" ]
 push = true
 branch = "main"
 
@@ -32,6 +25,11 @@ flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "nasExitGiScorp" ]
 push = true
 branch = "main"
 
+[[repositories]]
+path = "/home/sieyes/baghdadPlane/flakes/bidGestMirror"
+flakeInputNames = [ "peachRampSkateboard", "mcEatBurg", "frontArmToPlane" ]
+push = true
+branch = "main"
 
 [[repositories]]
 path = "/home/sieyes/baghdadPlane/flakes/newThatWaterCharmander"
