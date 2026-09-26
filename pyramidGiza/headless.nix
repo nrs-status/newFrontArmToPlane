@@ -23,6 +23,7 @@ let
         navi # personal commandline cheatsheet manager
         zk # note-taking
         nb # note-taking (I am leaning towards zk but I should test this one too)
+        khal # calendar CLI
 
         nix-index # provides nix-locate, which can find which package provides a given command
         nix-output-monitor # monitor nix builds
