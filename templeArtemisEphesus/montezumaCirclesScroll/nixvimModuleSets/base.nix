@@ -11,5 +11,6 @@
   "./plugins/harpoon.nix"
   "./plugins/vimHighlighter.nix"
   "./plugins/quicker.nix"
+  "./plugins/zk.nix"
   "./luaSnip"
 ]
