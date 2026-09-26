@@ -12,5 +12,7 @@
   "./plugins/vimHighlighter.nix"
   "./plugins/quicker.nix"
   "./plugins/zk.nix"
+  "./plugins/comment.nix"
+  "./plugins/todo-comments.nix"
   "./luaSnip"
 ]
