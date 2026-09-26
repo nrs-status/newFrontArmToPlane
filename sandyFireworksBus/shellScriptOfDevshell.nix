@@ -104,6 +104,20 @@ pkgs.stdenv.mkDerivation {
       eval "$shellHook"
     fi
 
+    # POSIX one-shot command invocation: tmux runs the `default-shell' as
+    # `<shell> -c <command>' when it executes a shell command in a popup
+    # (display-popup uses the default-shell for the popup's command job),
+    # and other tools follow the same convention.  The interactive shell
+    # configured below may be nushell, which cannot execute POSIX sh
+    # command strings (e.g. tmux-grimoire's
+    # `tmux select-window ... \; attach-session ...' popup command), so
+    # every tmux popup closed immediately after opening.  Delegate `-c'
+    # invocations to bash, which implements the POSIX semantics these
+    # callers expect; interactive sessions still get the configured shell.
+    if [ "''${1-}" = "-c" ]; then
+      exec '@posixShell@' -c "''$2"
+    fi
+
     # Hand control over to the requested shell.  If the hook used `exec`
     # (as the headless devshell does to start nushell), this is never reached.
     exec '@shell@' @shellArgs@ "$@"
@@ -113,7 +127,8 @@ pkgs.stdenv.mkDerivation {
       --replace-fail '@devshellEnv@' "$out/share/devshell-env" \
       --replace-fail '@shell@' "${pkgsLib.getExe shell}" \
       --replace-fail '@shellArgs@' "${renderedShellArgs}" \
-      --replace-fail '@extraEnv@' "${renderedExtraEnv}"
+      --replace-fail '@extraEnv@' "${renderedExtraEnv}" \
+      --replace-fail '@posixShell@' "${pkgsLib.getExe pkgs.bashInteractive}"
 
     chmod +x $out/bin/${name}
 
