@@ -1,0 +1,46 @@
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+
+-- Non-interactive: only text nodes, no insert nodes, so expanding it just
+-- inserts the full example request without any jumping/editing.
+return {
+	s("exampleJevRequest", {
+		t({
+			"{",
+			'    "state": {',
+			'      "customer_tier": "enterprise",',
+			'      "ticket": "My checkout page shows a blank screen after I click Pay. I have tried two browsers."',
+			"    },",
+			'    "questions": {',
+			'      "is_bug": {',
+			'        "type": "noul",',
+			'        "instructions": "Is the customer reporting a software defect?",',
+			'        "criteria": {',
+			'          "true": "The customer describes broken or unexpected product behavior.",',
+			'          "false": "The customer is asking a question or requesting a feature."',
+			"        }",
+			"      },",
+			'      "team": {',
+			'        "type": "choice",',
+			'        "instructions": "Which team should own this ticket?",',
+			'        "criteria": {',
+			'          "payments": "Checkout, billing, or payment processing issues.",',
+			'          "frontend": "Rendering, layout, or browser compatibility issues.",',
+			'          "account": "Login, permissions, or profile issues."',
+			"        }",
+			"      },",
+			'      "urgency": {',
+			'        "type": "score",',
+			'        "instructions": "How urgent is this ticket?",',
+			'        "criteria": [',
+			'          "Can wait for the next release",',
+			'          "Should be fixed this week",',
+			'          "Blocking revenue right now"',
+			"        ]",
+			"      }",
+			"    }",
+			"}",
+		}),
+	}),
+}
