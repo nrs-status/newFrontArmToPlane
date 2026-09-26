@@ -36,6 +36,9 @@
   __depPackages.taplo.default = "taplo";
   dependencies.taplo.enable = true;
 
+  __depPackages.fixjson.default = "fixjson";
+  dependencies.fixjson.enable = true;
+
   __depPackages.nufmt.default = "nufmt";
   dependencies.nufmt.enable = true;
 
