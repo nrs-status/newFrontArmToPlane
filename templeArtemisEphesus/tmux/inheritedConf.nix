@@ -106,6 +106,25 @@ pkgs.writeText "inheritedConf.conf" ''
   # resize keys either into the running nvim instance (where smart-splits
   # handles them, crossing the multiplexer boundary at nvim split edges) or to
   # tmux pane selection / resizing.
+  #
+  # This tmux integration only sees keys that reach tmux in the first place.
+  # The packaged kitty (templeArtemisEphesus/kitty/conf.nix) consumes
+  # C-hjkl / M-hjkl for its own window navigation unless the focused window's
+  # `IS_NVIM' user var is set -- but smart-splits.nvim only sets `IS_NVIM'
+  # when nvim runs *directly* in kitty (its kitty integration sends the OSC
+  # 1337 `SetUserVar' escape, which tmux also swallows). When nvim runs
+  # inside tmux, kitty therefore ate those keys before tmux could route them,
+  # which broke nvim-cmp completion-menu navigation with ctrl+j/ctrl+k.
+  # Fix: announce tmux to kitty by setting the `IS_TMUX' kitty window user
+  # var on the attached client's tty (raw escape written directly to the tty,
+  # no passthrough wrapping needed); kitty passes the keys through to tmux,
+  # whose bindings below then route them per pane. Clear the var again when
+  # the client exits so the window falls back to kitty-window navigation.
+  # This lives in the tmux wrapper script (see ./default.nix), not here in
+  # `set-hook' lines: the client-attached hook does not fire for the very
+  # first client that starts the server (so the var would be missing exactly
+  # when it is needed most), and the `;' separators inside the escape
+  # sequence cannot be quoted reliably through tmux's own command parser.
 
   # Smart pane switching with awareness of Neovim splits.
   bind-key -n C-h if -F "#{@pane-is-vim}" 'send-keys C-h'  'select-pane -L'

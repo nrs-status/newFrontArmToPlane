@@ -47,6 +47,71 @@ let
   # status-bar jobs independent of this wrapper's own config handling.)
   rawTmuxBin = pkgsLib.getExe pkgs.tmux;
 
+  # Write a kitty OSC 1337 `SetUserVar' escape to a tty:
+  #   kitty-set-user-var KEY [VALUE] TTY
+  # With no VALUE the variable is cleared.  Kept as a separate script (not
+  # an inline `printf' in the wrapper / in tmux config) so the quoting of
+  # the `;' separators inside the escape sequence does not have to survive
+  # tmux's own command parser.
+  setUserVarScript = pkgs.writeShellApplication {
+    name = "kitty-set-user-var";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      key="''${1:?missing key}"
+      tty="''${3:?missing tty}"
+      if [ -n "''${2:-}" ]; then
+        b64="$(printf %s "''${2}" | base64 -w0)"
+        printf '\033]1337;SetUserVar=%s=%s\007' "$key" "$b64" > "$tty"
+      else
+        printf '\033]1337;SetUserVar=%s\007' "$key" > "$tty"
+      fi
+    '';
+  };
+
+  # The tmux client wrapper.  In addition to adding -f main.conf it announces
+  # every attached client to kitty: smart-splits.nvim only sets kitty's
+  # `IS_NVIM' window var when nvim runs directly in kitty, so when nvim runs
+  # inside tmux, kitty (templeArtemisEphesus/kitty/conf.nix) would otherwise
+  # consume C-hjkl / M-hjkl for kitty-window navigation before tmux could
+  # route them (which broke nvim-cmp completion-menu navigation with
+  # ctrl+j/ctrl+k).  See the matching `IS_TMUX' pass-through mappings and the
+  # explanatory comment in inheritedConf.nix.
+  #
+  # The var is written raw to the client's own controlling terminal (the
+  # kitty pty), which needs neither a running server nor tmux passthrough;
+  # an EXIT trap clears it again when the client detaches/exits, so the
+  # window falls back to kitty-window navigation.  Non-attaching one-shot
+  # commands (`tmux ls', status-bar scripts via @rawTmuxBin@, ...) exec
+  # straight through without touching the var.
+  # (See templeArtemisEphesus/tmux/inheritedConf.nix for why this is not done
+  # with `client-attached' / `client-detached' hooks.)
+  wrapperSrc = pkgs.writeText "tmux-wrapper.in" ''
+    #!@bashBin@
+    # tmux's subcommand may be preceded by flags (e.g. -f, -S), so scan for it
+    # anywhere in the argument list; with no arguments at all tmux behaves
+    # like `attach'.
+    has_client_cmd=0
+    [ "$#" -gt 0 ] || has_client_cmd=1
+    for arg in "$@"; do
+      case "$arg" in
+        new | new-session | attach | attach-session | a | n)
+          has_client_cmd=1
+          break
+          ;;
+      esac
+    done
+    if [ "$has_client_cmd" = 0 ]; then
+      exec @tmuxBin@ -f @out@/config/main.conf "$@"
+    fi
+
+    client_tty="$(tty 2>/dev/null)"
+    if [ -n "$client_tty" ]; then
+      @setUserVarScript@ IS_TMUX 1 "$client_tty" >/dev/null 2>&1 &
+      trap '@setUserVarScript@ IS_TMUX "$client_tty" >/dev/null 2>&1' EXIT
+    fi
+    exec @tmuxBin@ -f @out@/config/main.conf "$@"
+  '';
+
   # tmux-palette (eduwass/tmux-palette): a Raycast-style command palette
   # (filterable command list in a tmux popup), bound to C-Space below.  The
   # plugin runs on bun; its package.json has no runtime `dependencies` (the
@@ -182,8 +247,14 @@ let
           --replace '@voiceInput@' '${voiceInput}' \
           --replace '@out@' "$out"
 
-        makeWrapper ${pkgsLib.getExe pkgs.tmux} $out/bin/tmux \
-        --add-flags "-f $out/config/main.conf"
+        # client wrapper announcing tmux to kitty (see wrapperSrc)
+        install -Dm644 ${wrapperSrc} $out/bin/tmux
+        substituteInPlace $out/bin/tmux \
+          --replace '@bashBin@' '${pkgsLib.getExe pkgs.bash}' \
+          --replace '@setUserVarScript@' '${setUserVarScript}/bin/kitty-set-user-var' \
+          --replace '@tmuxBin@' '${rawTmuxBin}' \
+          --replace '@out@' "$out"
+        chmod +x $out/bin/tmux
 
         runHook postInstall'';
     };

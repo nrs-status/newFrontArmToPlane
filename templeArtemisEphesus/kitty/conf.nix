@@ -58,6 +58,25 @@ mouse_map ctrl+shift+right press ungrabbed combine : mouse_select_command_output
 # (`allow_remote_control yes` + `listen_on unix:/tmp/kitty`).
 #
 # NOTE: smart-splits' `at_edge = "wrap"` is unsupported under kitty.
+#
+# NOTE: the `IS_NVIM` pass-throughs below only work when nvim runs directly in
+# kitty: that is the only case in which smart-splits.nvim sets the `IS_NVIM`
+# window var (its kitty integration sends the OSC 1337 `SetUserVar` escape).
+# When nvim runs inside a tmux client hosted by this window, smart-splits
+# auto-detects the tmux multiplexer instead (`TERM_PROGRAM=tmux`), never sets
+# `IS_NVIM`, and tmux would swallow the escape anyway. Without compensation,
+# the unconditional `neighboring_window` mappings below then consumed
+# ctrl+j/k (etc.) before tmux ever saw them, so they could never reach nvim --
+# which broke nvim-cmp completion-menu navigation with ctrl+j/ctrl+k (see
+# templeArtemisEphesus/montezumaCirclesScroll/nixvimModules/luaSnip/default.nix).
+# tmux therefore announces itself by setting the `IS_TMUX` window var on the
+# kitty window it is attached in (the tmux package's client wrapper in
+# templeArtemisEphesus/tmux/default.nix; see also the comment in
+# templeArtemisEphesus/tmux/inheritedConf.nix), and the conditional pass-
+# throughs further below hand the same keys to tmux, whose `@pane-is-vim`
+# bindings route them per pane (nvim when a nvim pane is focused, tmux pane
+# selection/resizing otherwise). Kitty-window navigation keeps working in
+# windows that host no tmux client.
 
 # navigation between kitty OS windows
 map ctrl+j neighboring_window down
@@ -70,6 +89,17 @@ map --when-focus-on var:IS_NVIM ctrl+j
 map --when-focus-on var:IS_NVIM ctrl+k
 map --when-focus-on var:IS_NVIM ctrl+h
 map --when-focus-on var:IS_NVIM ctrl+l
+
+# pass the same keys through to tmux when this window hosts a tmux client
+# (tmux decides per pane: forward into nvim or navigate/resize its own panes)
+map --when-focus-on var:IS_TMUX ctrl+j
+map --when-focus-on var:IS_TMUX ctrl+k
+map --when-focus-on var:IS_TMUX ctrl+h
+map --when-focus-on var:IS_TMUX ctrl+l
+map --when-focus-on var:IS_TMUX alt+j
+map --when-focus-on var:IS_TMUX alt+k
+map --when-focus-on var:IS_TMUX alt+h
+map --when-focus-on var:IS_TMUX alt+l
 
 # resize kitty OS windows via the plugin's relative_resize.py kitten (3 =
 # resize amount, matching smart-splits' default step size)
