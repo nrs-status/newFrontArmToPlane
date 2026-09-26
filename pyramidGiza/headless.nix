@@ -21,6 +21,7 @@ let
         rgx # explain what a regex pattern does
         tldr # community cheatsheet for commands
         navi # personal commandline cheatsheet manager
+        zk # note-taking
 
         nix-index # provides nix-locate, which can find which package provides a given command
         nix-output-monitor # monitor nix builds
