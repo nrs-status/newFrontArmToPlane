@@ -20,7 +20,7 @@ return {
 	s(
 		{
 			trig = "agentBasic-tmux",
-			name = "agent basic prompt",
+			name = "basic agent in tmux prompt",
 		},
 		fmt(
 			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts. You are running within a tmux server.
@@ -39,7 +39,7 @@ Once you are done:
 	s(
 		{
 			trig = "agentBasic-tmuxrelated",
-			name = "agent basic prompt",
+			name = "basic agent in tmux prompt, about a tmux-related task",
 		},
 		fmt(
 			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts.
@@ -60,7 +60,7 @@ Once you are done:
 	s(
 		{
 			trig = "agentBasic-tmux-console",
-			name = "agent basic prompt",
+			name = "basic agent in tmux prompt, for console env",
 		},
 		fmt(
 			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts. You are not in a terminal emulator, you are running in a tmux session within the console. 
@@ -78,7 +78,7 @@ Once you are done:
 	s(
 		{
 			trig = "agentBasic-tmuxrelated-console",
-			name = "agent basic prompt",
+			name = "basic agent in tmux prompt about a tmux-related task, for console env",
 		},
 		fmt(
 			[[You are on a NixOS system. If you need tools, write a flake.nix file and run a shell from it. You do not have root privileges. This is not a benchmark, this is a real issue on a real machine. If you make changes, do not commit them. All your tool calls must have timeouts.
