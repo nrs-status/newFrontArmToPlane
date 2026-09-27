@@ -19,6 +19,16 @@ let
     inherit pkgs sensiblePlugin resurrectPlugin continuumPlugin sysstatPlugin;
   };
 
+  # M+ scratchpad toggle (see main.conf.in): opens/closes a large centered
+  # popup attached to a persistent "scratchpad" session.  Console-only, so
+  # like the status scripts above it is copied into the package and needs
+  # nothing from $PATH (the tmux binary it must talk to is passed in as an
+  # argument by the binding itself).
+  scratchpadToggleScript = pkgs.runCommand "tmux-scratchpad-toggle.sh" { } ''
+    install -Dm755 ${./scratchpad-toggle.sh} $out
+    patchShebangs $out
+  '';
+
   # status-bar system-stats segment (total CPU %, total RAM %, average CPU
   # temperature, battery level %).  Runs entirely off /proc and /sys, so bash +
   # coreutils are enough; the script is copied into the package so the status
@@ -241,6 +251,7 @@ let
         substituteInPlace $out/config/main.conf \
           --replace '@defaultShell@' '${defaultShell}' \
           --replace '@rawTmuxBin@' '${rawTmuxBin}' \
+          --replace '@scratchpadToggleScript@' '${scratchpadToggleScript}' \
           --replace '@statusTaskmuxDoneScript@' '${statusTaskmuxDoneScript}' \
           --replace '@statusStatsScript@' '${statusStatsScript}' \
           --replace '@taskmuxExe@' '${taskmuxExe}' \

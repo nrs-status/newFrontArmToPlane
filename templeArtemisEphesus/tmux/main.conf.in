@@ -165,6 +165,53 @@
   # below.
   bind-key -n C-t run-shell "@out@/config/tmux-grimoire/bin/custom_shpell standard taskmux-list '@taskmuxExe@ list' --replay"
 
+  # scratchpad shell on M+ (Meta+Shift+Equal), console only
+  # --------------------------------------------------------------
+  # M+ summons (or dismisses) a scratchpad: a large centered floating
+  # popup running a persistent, shared tmux session named "scratchpad"
+  # (created on first use), i.e. a dropdown terminal like Guake/Yakuake.
+  # One keypress opens the popup, the next one closes it again; the
+  # underlying pane keeps focus and input afterwards.
+  #
+  # The popup is deliberately NOT a throwaway `bash' popup but attaches
+  # to the scratchpad session, so its state survives toggling: working
+  # directory, shell history, scrollback and anything running in it (a
+  # long build, an editor, ...) are still there when the popup is
+  # summoned again.  The session carries no status bar of its own
+  # (status off, set by the toggle script on creation), so the popup
+  # shows only the shell, and it never appears in the status bar's
+  # window list either (that only ever shows the attached session).
+  #
+  # The toggle works through *two* invocations of the script, because of
+  # how tmux delivers keys while a popup is open: the summoning client's
+  # key bindings do not fire while its popup is up -- keypresses go into
+  # the popup pane instead.  The popup runs a tmux client (an `attach'
+  # of the scratchpad session), so that client parses the same M+ and
+  # runs the script a second time, now from inside the popup: the script
+  # recognises it by the invoking client's session (the attach client is
+  # attached to "scratchpad") and detaches it, which closes the popup
+  # (opened with -E, it closes when its command exits) while the
+  # scratchpad session itself stays alive on the server, detached, ready
+  # to be re-attached.  Both the scratchpad script and the tmux binary
+  # are passed by absolute store path: run-shell jobs only inherit the
+  # invoking client's environment, which need not have either on PATH
+  # (and must not find some *other* server's tmux than the one M+ was
+  # pressed in).  #{client_name} is expanded by tmux (run-shell expands
+  # formats) so the popup is opened on exactly the client that pressed
+  # the key, even with several clients attached to the server.
+  #
+  # Console only: like the F13/voice-input binding at the bottom of
+  # this file, the binding is installed only when there is no graphical
+  # session (no Wayland/X display) -- on the bare Linux console it is
+  # the only "window manager" a user has, so a dropdown shell is most
+  # useful there, while under sway a user summons shells with the
+  # compositor's own launcher instead.  The else branch just records
+  # the "disabled" state in a user option (a no-op), so the config
+  # stays parseable in both cases.
+  if-shell '[ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]' \
+    'bind-key -n M-+ run-shell -b "@scratchpadToggleScript@ #{client_name} @rawTmuxBin@"' \
+    'set -g @scratchpad-disabled on'
+
 # tmux-palette: open the command palette with Ctrl+Space (no
 # prefix, matching the plugin's Raycast-style default).  Bound
 # *after* the gruvbox run-shell so a plugin cannot unbind it on
