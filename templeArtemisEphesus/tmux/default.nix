@@ -194,6 +194,53 @@ let
         # both to the store.
         cp -r ${tmuxPaletteSrc} $out/config/tmux-palette
         chmod -R u+w $out/config/tmux-palette
+
+        # Name every *default* palette command's key binding in its title
+        # (e.g. "Zoom / Unzoom (prefix z)"), so the bindings are visible at a
+        # glance in the palette -- and searchable alongside the command names,
+        # since the fuzzy filter matches titles too.  The prefix table is
+        # reached with C-a (inheritedConf.conf sets `prefix C-a'); the list
+        # below was derived from `list-keys -T prefix' on a server running
+        # the built package, so it reflects the *effective* bindings: tmux's
+        # own defaults plus the overrides from basic.conf /
+        # inheritedConf.conf / the plugins (sensible's `R', the scrollback
+        # `{', grimoire's `f'/`F'/`X'/`H', resurrect's `C-s'/`C-r').  Where
+        # the config deliberately rebinds a command, the config binding is
+        # listed (Split Horizontal/Vertical also keep their stock %/"
+        # bindings, Swap Pane Up/Down lost their stock {/} to the scrollback
+        # binding and are reached via the config's arrow-key swap binds).
+        # Commands with no key binding anywhere are left untouched, per "if
+        # it exists": Find Pane / Move Pane to... / Switch Theme... are
+        # sub-palettes, and Close Other Panes, Rename Pane and Kill Session
+        # have no binding in tmux defaults or in this configuration.
+        f=$out/config/tmux-palette/src/palettes/commands.ts
+        substituteInPlace "$f" \
+          --replace 'title: "Split Horizontal"' 'title: "Split Horizontal (prefix % / |)"' \
+          --replace 'title: "Split Vertical"' 'title: "Split Vertical (prefix \" / _)"' \
+          --replace 'title: "Close Pane"' 'title: "Close Pane (prefix x)"' \
+          --replace 'title: "Next Pane"' 'title: "Next Pane (prefix o)"' \
+          --replace 'title: "Previous Pane"' 'title: "Previous Pane (prefix C-o)"' \
+          --replace 'title: "Display Pane Numbers"' 'title: "Display Pane Numbers (prefix q)"' \
+          --replace 'title: "Cycle Pane Layout"' 'title: "Cycle Pane Layout (prefix Space)"' \
+          --replace 'title: "Swap Pane Up"' 'title: "Swap Pane Up (prefix C-Up)"' \
+          --replace 'title: "Swap Pane Down"' 'title: "Swap Pane Down (prefix C-Down)"' \
+          --replace 'title: "Zoom / Unzoom"' 'title: "Zoom / Unzoom (prefix z)"' \
+          --replace 'title: "Enter Copy Mode"' 'title: "Enter Copy Mode (prefix [)"' \
+          --replace 'title: "Break to New Window"' 'title: "Break to New Window (prefix !)"' \
+          --replace 'title: "New Window"' 'title: "New Window (prefix c)"' \
+          --replace 'title: "Next Window"' 'title: "Next Window (prefix n)"' \
+          --replace 'title: "Previous Window"' 'title: "Previous Window (prefix p)"' \
+          --replace 'title: "Last Window"' 'title: "Last Window (prefix l)"' \
+          --replace 'title: "Rename Window"' 'title: "Rename Window (prefix ,)"' \
+          --replace 'title: "Close Window"' 'title: "Close Window (prefix &)"' \
+          --replace 'title: "Choose Session"' 'title: "Choose Session (prefix s)"' \
+          --replace 'title: "New Session"' 'title: "New Session (prefix C)"' \
+          --replace 'title: "Rename Session"' 'title: "Rename Session (prefix $)"' \
+          --replace 'title: "Next Session"' 'title: "Next Session (prefix )"' \
+          --replace 'title: "Previous Session"' 'title: "Previous Session (prefix ("' \
+          --replace 'title: "Detach"' 'title: "Detach (prefix d)"' \
+          --replace 'title: "Reload Config"' 'title: "Reload Config (prefix R)"'
+
         f=$out/config/tmux-palette/bin/tmux-palette.sh
         # shellcheck disable=SC2016
         OLD='"$(command -v tmux)"' NEW="\"$out/bin/tmux\"" \
