@@ -18,7 +18,8 @@ let
         google-chrome
         qimgv # image viewer
         vlc
-        bitwarden-cli
+        bitwarden-cli #testing this password manager against `gopass`
+        anki
 
         #testing these for a workflow for querying the psql server
         visidata
