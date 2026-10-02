@@ -19,7 +19,6 @@ let
         qimgv # image viewer
         vlc
         bitwarden-cli #testing this password manager against `gopass`
-        anki
 
         #testing these for a workflow for querying the psql server
         visidata
