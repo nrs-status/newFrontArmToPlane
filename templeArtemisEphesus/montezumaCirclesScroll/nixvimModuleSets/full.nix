@@ -6,4 +6,5 @@
   "./plugins/snacks.nix"
   "./plugins/neoclip.nix"
   "./plugins/image.nix"
+  "./plugins/imgClip.nix"
 ]
