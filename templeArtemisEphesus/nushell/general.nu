@@ -176,7 +176,7 @@ $env.config.abbreviations = {
     nR: "nvim -R"
 
     # pi
-    pir: 'pi "Read and execute ./instructions.txt"'
+    pir: 'pi "Read and execute ./instructions.txt" --session ./session.jsonl'
 
     #wt
     wts: "wt switch"
