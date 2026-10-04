@@ -48,6 +48,10 @@
       key = "<leader>ww";
     }
     {
+      action = ":Telescope<cr>";
+      key = "<Leader><Leader>";
+    }
+    {
       action = ":Telescope live_grep<cr>";
       key = "<leader>lg";
     }
