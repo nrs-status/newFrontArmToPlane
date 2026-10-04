@@ -1,5 +1,8 @@
-inputs: inputs.baseLib.importPairsOfDirPath {
-  pred = filePath: (builtins.elem (baseNameOf filePath) [ "default.nix" "INFO" ]) == false;
-  dirPath = ./.; 
-  inputsForImportPairs = inputs ;
+inputs:
+inputs.baseLib.importPairsOfDirPath {
+  dirPath = ./.;
+  pred = x:
+    (dirOf x == ./.) && baseNameOf x != "default.nix" && baseNameOf x != "INFO";
+  inputsForImportPairs = inputs;
+  excludeDirectories = false;
 }

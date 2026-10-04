@@ -1,0 +1,24 @@
+newtype HASet (A : Type)
+    a homogeneous attribute set, i.e., an attribute set whose entries all have type A
+
+newtype filesASetEntry.check
+    a string consisting of a bash script that takes one argument, which must be a valid filepath
+    this script must return either 0 or 1
+
+aset filesASetEntry where
+    path: path to a file, as a string
+    inherit .check
+
+filespec ./default.nix
+    nixfn 
+        envVars: a list of strings consisting of valid names for environment variables
+        files: HASet filesASetEntry
+        rest: a string consisting of the rest of the shellHook
+    :=
+    function to be used in the `shellHook` field of `pkgs.mkShell`. it appends to the beginning of the shell hook a program that immediately executes and behaves as follows:
+    - it checks that all environment variables declared in `envVars` are set
+    - for each entry in `files`, it runs the program in the value of the `check` field by passing it as an argument the path in the `path` field.
+    if an environment variable in `envVars` is not set, or if any script ran in the previous step returns a nonzero value, the shell exits early with an error.
+    otherwise, the rest of the contents of `rest` is executed.
+
+            
