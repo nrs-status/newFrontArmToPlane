@@ -308,6 +308,34 @@ def broot-source [] {
     view source $broot_closure | lines | skip | drop | to text
 }
 
+# ─────────────────────────────────────────────────────────────
+# send the entire command buffer (multiline included) to neovim
+# ─────────────────────────────────────────────────────────────
+
+# Dump the current reedline command buffer to a temp file, edit it in
+# nvim, and put the edited text back on the command line when nvim
+# exits. Bound to Alt+Q below; invoked via `executehostcommand` so that
+# nvim runs as a regular (interactive) command outside of reedline.
+def edit-buffer-in-nvim [] {
+    let buffer = (commandline)
+    let tmp = (mktemp --tmpdir nu-buffer-XXXXXXXXXX.nu)
+    $buffer | save --force $tmp
+    ^nvim $tmp
+    # `--raw`: a .nu file would otherwise be parsed as nushell data
+    commandline edit --replace (open --raw $tmp)
+    rm $tmp
+}
+
+$env.config.keybindings ++= [
+    {
+        name: edit_buffer_in_nvim
+        modifier: alt
+        keycode: char_q
+        mode: [emacs, vi_normal, vi_insert]
+        event: {send: ExecuteHostCommand cmd: "edit-buffer-in-nvim"}
+    }
+]
+
 $env.config.keybindings ++= [
     {
          name: broot_path_completion
