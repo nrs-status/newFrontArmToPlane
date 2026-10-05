@@ -32,7 +32,10 @@
     markview.enable = true;
 
     #vscode-like code diff
-    codediff.enable = true;
+    codediff = {
+      enable = true;
+      settings.keymaps.view.quit = false; # don't bind q to close diff tab
+    };
 
     #help remember key bindings
     which-key.enable = true;
