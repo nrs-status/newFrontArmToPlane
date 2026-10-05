@@ -44,6 +44,10 @@
       key = "<leader>q!";
     }
     {
+      key = "<leader>qa!";
+      action = "<Esc>:qa!<cr>";
+    }
+    {
       action = ":w<cr>";
       key = "<leader>ww";
     }
