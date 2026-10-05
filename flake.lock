@@ -105,11 +105,11 @@
         "peachRampSkateboard": "peachRampSkateboard_3"
       },
       "locked": {
-        "lastModified": 1790706635,
-        "narHash": "sha256-cyZHrPQLYz3S5tASLQdLofzblIYeBQQ94LJDpqCv98Y=",
+        "lastModified": 1791188078,
+        "narHash": "sha256-uiWhepLoo/ETSfRazeeNKkYwOef+vK0OKL8w0jPv7GU=",
         "owner": "nrs-status",
         "repo": "nasExitGiScorp",
-        "rev": "93179d14002eb98f4db6f88163b2f11ff0fa1585",
+        "rev": "e9d371d1126a53e0e2b827228e592efc6c657c70",
         "type": "github"
       },
       "original": {
