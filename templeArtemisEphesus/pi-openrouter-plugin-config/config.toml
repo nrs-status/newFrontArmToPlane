@@ -2,4 +2,4 @@
 blacklist = ["wafer", "open-inference"]
 
 [models."z-ai/glm-5.3-flash"]
-preferred = ["z-ai"]
+preferred = ["z-ai", "novita", "streamlake", "gmicloud", "near-ai", "phala", "baseten", "atlas-cloud", "siliconflow"]
