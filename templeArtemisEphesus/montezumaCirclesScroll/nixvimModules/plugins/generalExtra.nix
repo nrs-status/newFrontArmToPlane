@@ -6,6 +6,9 @@
     telescope = {
       enable = true;
       extensions.fzf-native.enable = true;
+      # extra pickers with argument support, e.g. `:Telescope live_grep_args`
+      # (quoted multi-word patterns, quoted paths, `--glob` filters, ...)
+      extensions.live-grep-args.enable = true;
     };
 
     #pre-existing snippets collection
