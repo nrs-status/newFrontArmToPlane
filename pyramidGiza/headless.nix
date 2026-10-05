@@ -75,6 +75,7 @@ let
         reload-flakes
 
       ]);
+    PI_OPENROUTER_EXTENSION_CONFIG_FILE = localPkgs.pi-openrouter-plugin-config;
     DEFAULT_RELOAD_FLAKES_CONFIG_PATH = localPkgs.reload-flakes-config;
     DEFAULT_PI_MODEL = "openrouter/z-ai/glm-5.3-flash";
     DEFAULT_LLMGCM_MODEL = "openrouter/z-ai/glm-5.3-flashx";

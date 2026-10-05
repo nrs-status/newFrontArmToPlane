@@ -28,7 +28,7 @@ return {
 <>
 
 Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- Create a file ./metadata/SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
 - As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
 - Run `taskmux done`
       ]],
@@ -49,7 +49,7 @@ You are running within a tmux server; if your tests involve tmux, make sure to r
 <>
 
 Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- Create a file ./metadata/SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
 - As the last thing you do, send a `notify-send` notification containing an extremely short description of your task, notifying the user that you've completed your task. The message must include the `git` branch you are located in.
 - Run `taskmux done`
       ]],
@@ -68,7 +68,7 @@ Once you are done:
 <>
 
 Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- Create a file ./metadata/SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
 - Run `taskmux done`
       ]],
 			{ i(1) },
@@ -88,7 +88,7 @@ You are not in a terminal emulator, you are running in a tmux session within the
 <>
 
 Once you are done: 
-- Create a file called SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
+- Create a file ./metadata/SUMMARY.md containing a step-by-step summary of all steps you have undertaken.
 - Run `taskmux done`
       ]],
 			{ i(1) },
