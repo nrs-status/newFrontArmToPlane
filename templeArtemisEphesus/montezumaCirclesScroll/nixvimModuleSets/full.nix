@@ -7,4 +7,5 @@
   "./plugins/neoclip.nix"
   "./plugins/image.nix"
   "./plugins/imgClip.nix"
+  "./plugins/iron.nix"
 ]
