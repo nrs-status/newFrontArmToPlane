@@ -3,4 +3,3 @@ blacklist = ["wafer", "openinference"]
 
 [models."z-ai/glm-5.3-flash"]
 preferred = ["z-ai"]
-blacklist = []
