@@ -1,5 +1,5 @@
 [global]
-blacklist = ["wafer", "open-inference"]
+blacklist = ["wafer", "open-inference", "decart", "parasail"]
 
 [models."z-ai/glm-5.3-flash"]
 preferred = ["z-ai", "novita", "streamlake", "gmicloud", "near-ai", "phala", "baseten", "atlas-cloud", "siliconflow"]
