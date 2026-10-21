@@ -201,6 +201,13 @@ $env.config.abbreviations = {
     tkmc: "taskmux clear"
     tkms: "taskmux start"
     tkmd: "taskmux done"
+
+    #brightnessctl
+    bs50: "brightnessctl set 50%"
+    bs1: "brightnessctl set 1"
+    bsp5: "brightnessctl set +5%"
+    bsm5: "brightnessctl set 5%-"
+
 }
 
 # ─────────────────────────────────────────────────────────────
